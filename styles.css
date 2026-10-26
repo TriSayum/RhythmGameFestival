@@ -126,3 +126,58 @@ a {
     scroll-behavior: auto;
   }
 }
+
+/* 01简介：活动介绍、主题阐释与独立的主题邀请。 */
+.intro-content {
+  max-width: 850px;
+  margin-top: 40px;
+  font-size: 16px;
+  line-height: 1.95;
+}
+
+.intro-content p {
+  margin: 0 0 16px;
+}
+
+.theme-content {
+  margin-top: 56px;
+}
+
+.theme-heading {
+  margin: 0 0 22px;
+  font-size: clamp(24px, 2.8vw, 32px);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.theme-heading [lang="en"] {
+  margin-left: 8px;
+  font-size: 0.65em;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.theme-conclusion {
+  margin-top: 22px !important;
+  font-weight: 600;
+}
+
+.theme-invitation {
+  margin-top: 48px !important;
+}
+
+@media (max-width: 680px) {
+  .intro-content {
+    margin-top: 28px;
+    font-size: 15px;
+    line-height: 1.85;
+  }
+
+  .theme-content {
+    margin-top: 44px;
+  }
+
+  .theme-invitation {
+    margin-top: 36px !important;
+  }
+}
