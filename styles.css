@@ -181,3 +181,106 @@ a {
     margin-top: 36px !important;
   }
 }
+
+
+/* 02 日程：主会场一级时间轴与嵌套二级节点。 */
+.schedule-content { margin-top: 42px; }
+.schedule-block + .schedule-block { margin-top: 72px; }
+.schedule-block-heading { margin: 0 0 30px; font-size: 20px; line-height: 1.4; font-weight: 600; }
+.timeline {
+  --time-column: 86px;
+  --node-column: 44px;
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--time-column) + var(--node-column) / 2);
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: #c5c5c5;
+  transform: translateX(-50%);
+}
+.timeline-item {
+  display: grid;
+  grid-template-columns: var(--time-column) var(--node-column) minmax(0, 1fr);
+  position: relative;
+  padding-bottom: 36px;
+}
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-time { font-size: 15px; font-weight: 600; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.timeline-marker {
+  justify-self: center;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 7px;
+  background: #fff;
+  border: 2px solid #171717;
+  border-radius: 50%;
+}
+.timeline-detail { min-width: 0; }
+.timeline-title { margin: 0; font-size: 19px; line-height: 1.45; font-weight: 600; }
+.timeline-children {
+  list-style: none;
+  margin: 20px 0 0 4px;
+  padding: 0 0 0 20px;
+  border-left: 1px solid #ddd;
+}
+.timeline-child {
+  display: grid;
+  grid-template-columns: minmax(112px, max-content) minmax(0, 1fr);
+  gap: 14px;
+  position: relative;
+  padding: 9px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.timeline-child::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  top: 18px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #888;
+  border-radius: 50%;
+  background: #fff;
+}
+.timeline-child-time { font-size: 13px; color: #666; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.timeline-child-detail { display: flex; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
+.timeline-speaker { font-weight: 600; }
+.timeline-child-title { overflow-wrap: anywhere; }
+
+/* 常驻展出：与主会场时间轴独立。 */
+.ongoing-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+}
+.ongoing-item { border-top: 1px solid #ddd; padding-top: 20px; min-width: 0; }
+.ongoing-time { font-size: 13px; line-height: 1.5; color: #666; font-variant-numeric: tabular-nums; }
+.ongoing-title { margin: 9px 0 0; font-size: 19px; line-height: 1.45; font-weight: 600; }
+
+@media (max-width: 680px) {
+  .schedule-content { margin-top: 30px; }
+  .schedule-block + .schedule-block { margin-top: 56px; }
+  .timeline { --time-column: 55px; --node-column: 28px; }
+  .timeline-item { padding-bottom: 30px; }
+  .timeline-time { font-size: 13px; }
+  .timeline-title { font-size: 17px; }
+  .timeline-children { margin-top: 12px; padding-left: 16px; }
+  .timeline-child { display: block; font-size: 14px; padding: 8px 0 10px; }
+  .timeline-child::before { left: -20px; }
+  .timeline-child-time { display: block; padding-bottom: 3px; }
+  .timeline-child-detail { display: block; }
+  .timeline-speaker { margin-right: 8px; }
+  .ongoing-list { grid-template-columns: 1fr; }
+}
