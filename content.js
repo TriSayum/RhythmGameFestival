@@ -97,7 +97,7 @@ window.FESTIVAL_CONTENT = {
   },
   "schedule": {
     "mainTitle": "主会场",
-    "ongoingTitle": "常驻展出",
+    "ongoingTitle": "同期开放",
     "main": [
       {
         "id": "opening",
@@ -112,17 +112,17 @@ window.FESTIVAL_CONTENT = {
           {
             "start": "10:10",
             "end": "10:20",
-            "title": "赛事预热"
+            "title": "赛前预热"
           },
           {
             "start": "10:20",
             "end": "11:50",
-            "title": "赛事"
+            "title": "正式比赛"
           },
           {
             "start": "11:50",
             "end": "12:10",
-            "title": "赛事颁奖"
+            "title": "颁奖典礼"
           }
         ]
       },
@@ -134,7 +134,7 @@ window.FESTIVAL_CONTENT = {
           {
             "start": "13:30",
             "end": "13:40",
-            "title": "茶欢预热"
+            "title": "会前预热"
           },
           {
             "start": "13:40",
@@ -153,17 +153,17 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "focused-experience",
         "time": "16:20",
-        "title": "集中体验"
+        "title": "作品集中体验"
       },
       {
         "id": "awards-and-closing",
         "time": "17:00",
-        "title": "创作作品颁奖、闭幕"
+        "title": "创作作品颁奖典礼、闭幕"
       },
       {
         "id": "free-experience",
         "time": "17:20",
-        "title": "自由体验"
+        "title": "自由交流与参观"
       },
       {
         "id": "end",
@@ -176,7 +176,7 @@ window.FESTIVAL_CONTENT = {
         "id": "works-exhibition",
         "start": "10:00",
         "end": "20:00",
-        "title": "创作作品展"
+        "title": "创作作品展览"
       },
       {
         "id": "hands-on",
