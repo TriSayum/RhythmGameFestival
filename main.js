@@ -157,27 +157,34 @@
 
     function addTextBlock(heading, paragraphs, extraClass) {
       const block = make("div", "tournament-block" + (extraClass ? " " + extraClass : ""));
-      block.appendChild(make("h3", "tournament-block-heading", heading));
+      if (heading) block.appendChild(make("h3", "tournament-block-heading", heading));
       const body = make("div", "tournament-block-body");
       addParagraphs(body, paragraphs);
       block.appendChild(body);
       root.appendChild(block);
     }
 
-    addTextBlock(content.introduction.heading, content.introduction.paragraphs, "tournament-introduction");
+    addTextBlock(null, content.introduction.paragraphs, "tournament-introduction");
     addTextBlock(content.details.heading, content.details.paragraphs, "tournament-common-details");
 
     const cards = make("div", "tournament-groups");
     content.groups.forEach(function (group) {
-      const card = make("article", "tournament-group-card");
+      const card = make("article", "tournament-group-card tournament-group-card--" + group.id);
       card.id = "tournament-" + group.id;
 
       card.appendChild(make("h3", "tournament-group-heading", group.heading));
-      const meta = make("div", "tournament-group-meta");
-      const date = make("p", "tournament-group-date", group.date);
-      if (group.period) date.appendChild(document.createTextNode(" " + group.period));
-      meta.appendChild(date);
-      meta.appendChild(make("p", "tournament-group-venue", group.venue || group.venuePending || ""));
+      // 时间和地点保持完全一致的信息层级，便于两组卡片横向比较。
+      const meta = make("dl", "tournament-group-meta");
+      const dateEntry = make("div", "tournament-group-meta-item");
+      dateEntry.appendChild(make("dt", "tournament-group-meta-label", "时间"));
+      const dateValue = make("dd", "tournament-group-meta-value", group.date);
+      if (group.period) dateValue.appendChild(document.createTextNode(" " + group.period));
+      dateEntry.appendChild(dateValue);
+
+      const venueEntry = make("div", "tournament-group-meta-item");
+      venueEntry.appendChild(make("dt", "tournament-group-meta-label", "地点"));
+      venueEntry.appendChild(make("dd", "tournament-group-meta-value", group.venue || group.venuePending || ""));
+      meta.append(dateEntry, venueEntry);
       card.appendChild(meta);
 
       const gameList = make("ul", "tournament-game-list");
@@ -220,16 +227,10 @@
     const regBlock = make("div", "tournament-block tournament-registration");
     regBlock.appendChild(make("h3", "tournament-block-heading", registration.heading));
 
-    function appendRegistrationCopy(title, lines) {
-      const part = make("div", "tournament-registration-copy");
-      part.appendChild(make("h4", "tournament-registration-subheading", title));
-      const contentBody = make("div", "tournament-registration-body");
-      addParagraphs(contentBody, lines);
-      part.appendChild(contentBody);
-      regBlock.appendChild(part);
+    // 报名条件和注意事项统一在一段正文中说明，不再设置二级小标题。
+    if (registration.description) {
+      regBlock.appendChild(make("p", "tournament-registration-description", registration.description));
     }
-    appendRegistrationCopy(registration.conditionsHeading, registration.conditions);
-    appendRegistrationCopy(registration.noticesHeading, registration.notices);
 
     const actions = make("div", "tournament-registration-actions");
     registration.groups.forEach(function (group) {

@@ -4,11 +4,12 @@
  * 含speaker的节目可填写title作为演讲题目；未定时留空即可。
  * schedule.ongoing：常驻展出；site.sections：章节标题；site.navigation：页首导航。
  */
-/* 03赛事：tournament.introduction为介绍，details为通用详情。
- * tournament.groups分别存两组的时间地点、游戏图标路径及折叠赛制。
- * tournament.registration.conditions/notices填写通用报名说明。
- * registration.groups分别填写腾讯文档问卷完整URL并将enabled设为true。
- * 游戏图标文件应放在assets/games目录，路径见groups.games.logo。
+/* 03赛事：
+ * tournament.introduction.paragraphs：赛事介绍（不显示小标题）。
+ * tournament.details.paragraphs：两组通用赛事详情。
+ * tournament.groups：组别、时间、地点、Logo路径及可折叠的赛制。
+ * tournament.registration.description：报名说明（一个正文段落）。
+ * tournament.registration.groups：分别填写腾讯文档问卷URL并设置enabled为true。
  */
 window.FESTIVAL_CONTENT = {
   "site": {
@@ -194,7 +195,6 @@ window.FESTIVAL_CONTENT = {
   },
   "tournament": {
     "introduction": {
-      "heading": "赛事介绍",
       "paragraphs": [
         "音游赛事是TRY动漫社·音游部长期开展的常规活动。本届音游秋季赛将作为西柚音游节的组成部分，继续由TRY动漫社·音游部主办，并分设街机组与移动组两个组别。"
       ]
@@ -252,10 +252,7 @@ window.FESTIVAL_CONTENT = {
     ],
     "registration": {
       "heading": "赛事报名",
-      "conditionsHeading": "报名条件",
-      "conditions": [],
-      "noticesHeading": "报名须知",
-      "notices": [],
+      "description": "",
       "groups": [
         {
           "id": "arcade",

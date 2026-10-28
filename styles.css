@@ -323,9 +323,22 @@ a {
   background: #fff;
 }
 .tournament-group-heading { font-size: 23px; font-weight: 600; margin: 0 0 16px; }
-.tournament-group-meta { line-height: 1.65; }
-.tournament-group-date { margin: 0 0 2px; font-size: 16px; font-weight: 600; }
-.tournament-group-venue { margin: 0; font-size: 15px; color: #555; }
+.tournament-group-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+.tournament-group-meta-item { min-width: 0; }
+.tournament-group-meta-label { margin: 0 0 6px; font-size: 13px; line-height: 1.4; color: #666; }
+.tournament-group-meta-value {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.65;
+  color: #171717;
+  overflow-wrap: anywhere;
+}
 .tournament-game-list {
   display: grid;
   grid-template-columns: repeat(2,minmax(0,1fr));
@@ -351,7 +364,21 @@ a {
   object-fit: contain;
 }
 .tournament-game-image[hidden] { display: none; }
-.tournament-game-name { display: block; margin-top: 8px; font-size: 13px; }
+/* 横向Logo继续使用宽幅展示；方形图标则真正使用1:1区域，避免大面积留白。 */
+.tournament-group-card--mobile .tournament-game-artwork {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  background: transparent;
+}
+.tournament-game-name {
+  display: block;
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #171717;
+}
 .tournament-group-rules { border-top: 1px solid #ddd; }
 .tournament-rules-summary {
   position: relative;
@@ -376,11 +403,12 @@ a {
 .tournament-rules-body p { margin: 0 0 10px; }
 .tournament-pending { color: #777; }
 .tournament-registration { margin-top: 58px; }
-.tournament-registration-copy + .tournament-registration-copy { margin-top: 24px; }
-.tournament-registration-subheading { margin: 0 0 9px; font-size: 16px; font-weight: 600; }
-.tournament-registration-body { font-size: 15px; line-height: 1.85; }
-.tournament-registration-body:not(:empty) { margin-top: 8px; }
-.tournament-registration-body p { margin: 0 0 10px; }
+.tournament-registration-description {
+  margin: 0;
+  max-width: 850px;
+  font-size: 16px;
+  line-height: 1.95;
+}
 .tournament-registration-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
 .tournament-registration-link {
   display: inline-flex;
@@ -414,4 +442,5 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .tournament-group-heading { font-size: 21px; }
   .tournament-game-artwork { height: 104px; }
   .tournament-registration { margin-top: 46px; }
+  .tournament-registration-description { font-size: 15px; line-height: 1.85; }
 }
