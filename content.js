@@ -113,7 +113,7 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "tournament",
         "time": "10:10",
-        "title": "音游赛事",
+        "title": "移动组赛事",
         "children": [
           {
             "start": "10:10",
