@@ -3,7 +3,12 @@
  * time表示主环节开始时间，start/end表示子环节的时间范围。
  * 含speaker的节目可填写title作为演讲题目；未定时留空即可。
  * schedule.ongoing：常驻展出；site.sections：章节标题；site.navigation：页首导航。
- * tournament：03赛事介绍、报名与详情。报名填写腾讯文档问卷URL并启用enabled。
+ */
+/* 03赛事：tournament.introduction为介绍，details为通用详情。
+ * tournament.groups分别存两组的时间地点、游戏图标路径及折叠赛制。
+ * tournament.registration.conditions/notices填写通用报名说明。
+ * registration.groups分别填写腾讯文档问卷完整URL并将enabled设为true。
+ * 游戏图标文件应放在assets/games目录，路径见groups.games.logo。
  */
 window.FESTIVAL_CONTENT = {
   "site": {
@@ -190,19 +195,83 @@ window.FESTIVAL_CONTENT = {
   "tournament": {
     "introduction": {
       "heading": "赛事介绍",
-      "paragraphs": []
-    },
-    "registration": {
-      "heading": "赛事报名",
-      "description": "",
-      "label": "填写报名问卷",
-      "url": "",
-      "enabled": false,
-      "unavailableLabel": "报名即将开放"
+      "paragraphs": [
+        "音游赛事是TRY动漫社·音游部长期开展的常规活动。本届音游秋季赛将作为西柚音游节的组成部分，继续由TRY动漫社·音游部主办，分设街机组与移动组两个组别。"
+      ]
     },
     "details": {
       "heading": "赛事详情",
       "paragraphs": []
+    },
+    "groups": [
+      {
+        "id": "arcade",
+        "heading": "街机组",
+        "date": "11月21日（周六）",
+        "period": "下午",
+        "venue": "米莱音游研究所",
+        "games": [
+          {
+            "id": "maimai_dx",
+            "name": "舞萌DX",
+            "logo": "./assets/games/maimai_dx_logo.webp"
+          },
+          {
+            "id": "chunithm",
+            "name": "中二节奏",
+            "logo": "./assets/games/chunithm_logo.webp"
+          }
+        ],
+        "rulesSummary": "查看街机组赛制",
+        "rules": [],
+        "pendingLabel": "赛制详情待公布"
+      },
+      {
+        "id": "mobile",
+        "heading": "移动组",
+        "date": "11月22日（周日）",
+        "period": "上午",
+        "venue": "",
+        "venuePending": "具体教室待定",
+        "games": [
+          {
+            "id": "phigros",
+            "name": "Phigros",
+            "logo": "./assets/games/phigros_icon.webp"
+          },
+          {
+            "id": "arcaea",
+            "name": "Arcaea",
+            "logo": "./assets/games/arcaea_icon.webp"
+          }
+        ],
+        "rulesSummary": "查看移动组赛制",
+        "rules": [],
+        "pendingLabel": "赛制详情待公布"
+      }
+    ],
+    "registration": {
+      "heading": "赛事报名",
+      "conditionsHeading": "报名条件",
+      "conditions": [],
+      "noticesHeading": "报名须知",
+      "notices": [],
+      "groups": [
+        {
+          "id": "arcade",
+          "label": "街机组报名",
+          "url": "",
+          "enabled": false,
+          "unavailableLabel": "街机组报名未开放"
+        },
+        {
+          "id": "mobile",
+          "label": "移动组报名",
+          "url": "",
+          "enabled": false,
+          "unavailableLabel": "移动组报名未开放"
+        }
+      ]
     }
   }
 };

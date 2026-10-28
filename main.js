@@ -149,59 +149,115 @@
 
 
 
-  /* 03赛事：无正文时保持空白，有效问卷链接启用后才提供外部跳转。 */
+  /* 03赛事：两组数据化卡片、独立赛制折叠和独立报名入口。 */
   function renderTournament() {
     const content = data.tournament;
     const root = document.getElementById("tournament-content");
-    if (!content || !root) return;
+    if (!root || !content) return;
 
-    const intro = make("div", "tournament-block");
-    intro.appendChild(make("h3", "tournament-block-heading", content.introduction.heading));
-    const introBody = make("div", "tournament-block-body");
-    addParagraphs(introBody, content.introduction.paragraphs);
-    intro.appendChild(introBody);
-    root.appendChild(intro);
+    function addTextBlock(heading, paragraphs, extraClass) {
+      const block = make("div", "tournament-block" + (extraClass ? " " + extraClass : ""));
+      block.appendChild(make("h3", "tournament-block-heading", heading));
+      const body = make("div", "tournament-block-body");
+      addParagraphs(body, paragraphs);
+      block.appendChild(body);
+      root.appendChild(block);
+    }
+
+    addTextBlock(content.introduction.heading, content.introduction.paragraphs, "tournament-introduction");
+    addTextBlock(content.details.heading, content.details.paragraphs, "tournament-common-details");
+
+    const cards = make("div", "tournament-groups");
+    content.groups.forEach(function (group) {
+      const card = make("article", "tournament-group-card");
+      card.id = "tournament-" + group.id;
+
+      card.appendChild(make("h3", "tournament-group-heading", group.heading));
+      const meta = make("div", "tournament-group-meta");
+      const date = make("p", "tournament-group-date", group.date);
+      if (group.period) date.appendChild(document.createTextNode(" " + group.period));
+      meta.appendChild(date);
+      meta.appendChild(make("p", "tournament-group-venue", group.venue || group.venuePending || ""));
+      card.appendChild(meta);
+
+      const gameList = make("ul", "tournament-game-list");
+      (group.games || []).forEach(function (game) {
+        const item = make("li", "tournament-game");
+        const artwork = make("div", "tournament-game-artwork");
+        if (game.logo) {
+          const img = make("img", "tournament-game-image");
+          img.src = game.logo;
+          img.alt = game.name + "标识";
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.addEventListener("error", function () {
+            img.hidden = true; // 资源未提交时保留游戏文字，避免展示浏览器破图标识
+          });
+          artwork.appendChild(img);
+        }
+        item.appendChild(artwork);
+        item.appendChild(make("span", "tournament-game-name", game.name));
+        gameList.appendChild(item);
+      });
+      card.appendChild(gameList);
+
+      const rules = make("details", "tournament-group-rules");
+      const summary = make("summary", "tournament-rules-summary", group.rulesSummary);
+      rules.appendChild(summary);
+      const contentBody = make("div", "tournament-rules-body");
+      if (group.rules && group.rules.length) {
+        addParagraphs(contentBody, group.rules);
+      } else {
+        contentBody.appendChild(make("p", "tournament-pending", group.pendingLabel));
+      }
+      rules.appendChild(contentBody);
+      card.appendChild(rules);
+      cards.appendChild(card);
+    });
+    root.appendChild(cards);
 
     const registration = content.registration;
-    const regBlock = make("div", "tournament-block");
+    const regBlock = make("div", "tournament-block tournament-registration");
     regBlock.appendChild(make("h3", "tournament-block-heading", registration.heading));
-    const regBody = make("div", "tournament-block-body");
-    if (registration.description) {
-      regBody.appendChild(make("p", "", registration.description));
-    }
 
-    let destination = "";
-    if (registration.enabled && typeof registration.url === "string") {
-      try {
-        const url = new URL(registration.url);
-        if (url.protocol === "https:" || url.protocol === "http:") {
-          destination = url.href;
+    function appendRegistrationCopy(title, lines) {
+      const part = make("div", "tournament-registration-copy");
+      part.appendChild(make("h4", "tournament-registration-subheading", title));
+      const contentBody = make("div", "tournament-registration-body");
+      addParagraphs(contentBody, lines);
+      part.appendChild(contentBody);
+      regBlock.appendChild(part);
+    }
+    appendRegistrationCopy(registration.conditionsHeading, registration.conditions);
+    appendRegistrationCopy(registration.noticesHeading, registration.notices);
+
+    const actions = make("div", "tournament-registration-actions");
+    registration.groups.forEach(function (group) {
+      let destination = "";
+      if (group.enabled && typeof group.url === "string") {
+        try {
+          const url = new URL(group.url);
+          if (url.protocol === "https:" || url.protocol === "http:") {
+            destination = url.href;
+          }
+        } catch (_) {
+          // 空链接或非法网址保持关闭状态。
         }
-      } catch (_) {
-        // 无效或未填写的URL不生成链接。
       }
-    }
-
-    if (destination) {
-      const link = make("a", "tournament-registration-link", registration.label);
-      link.href = destination;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      regBody.appendChild(link);
-    } else {
-      const closed = make("span", "tournament-registration-link is-disabled", registration.unavailableLabel);
-      closed.setAttribute("aria-disabled", "true");
-      regBody.appendChild(closed);
-    }
-    regBlock.appendChild(regBody);
+      if (destination) {
+        const link = make("a", "tournament-registration-link", group.label + " ↗");
+        link.href = destination;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        actions.appendChild(link);
+      } else {
+        const disabled = make("span", "tournament-registration-link is-disabled", group.unavailableLabel);
+        disabled.setAttribute("aria-disabled", "true");
+        actions.appendChild(disabled);
+      }
+    });
+    regBlock.appendChild(actions);
     root.appendChild(regBlock);
-
-    const details = make("div", "tournament-block");
-    details.appendChild(make("h3", "tournament-block-heading", content.details.heading));
-    const detailBody = make("div", "tournament-block-body");
-    addParagraphs(detailBody, content.details.paragraphs);
-    details.appendChild(detailBody);
-    root.appendChild(details);
   }
 
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */

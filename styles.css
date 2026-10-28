@@ -294,44 +294,124 @@ a {
   scroll-margin-top: calc(var(--site-header-height, 96px) + 20px);
 }
 
-/* 03音游赛事：赛事简介、外部报名入口及赛制详情，均由content.js填写。 */
-.tournament-content { max-width: 850px; margin-top: 42px; }
-.tournament-block + .tournament-block { margin-top: 48px; }
+
+/* 03音游赛事：共通文字、两张组别卡片、展开赛制和报名说明。 */
+.tournament-content { margin-top: 42px; }
+.tournament-block { max-width: 850px; }
+.tournament-block + .tournament-block { margin-top: 42px; }
 .tournament-block-heading {
   margin: 0 0 16px;
   font-size: 20px;
   line-height: 1.5;
   font-weight: 600;
 }
-.tournament-block-body { min-height: 24px; font-size: 16px; line-height: 1.95; }
+.tournament-block-body { font-size: 16px; line-height: 1.95; }
 .tournament-block-body p { margin: 0 0 14px; }
+.tournament-common-details .tournament-block-body:empty { min-height: 10px; }
+
+.tournament-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 24px;
+  margin-top: 40px;
+}
+.tournament-group-card {
+  min-width: 0;
+  border: 1px solid #ddd;
+  padding: clamp(20px, 2.5vw, 32px);
+  background: #fff;
+}
+.tournament-group-heading { font-size: 23px; font-weight: 600; margin: 0 0 16px; }
+.tournament-group-meta { line-height: 1.65; }
+.tournament-group-date { margin: 0 0 2px; font-size: 16px; font-weight: 600; }
+.tournament-group-venue { margin: 0; font-size: 15px; color: #555; }
+.tournament-game-list {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  list-style: none;
+  gap: 12px;
+  margin: 25px 0 28px;
+  padding: 0;
+}
+.tournament-game { min-width: 0; text-align: center; }
+.tournament-game-artwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 110px;
+  padding: 10px 8px;
+  background: #f8f8f8;
+}
+.tournament-game-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.tournament-game-image[hidden] { display: none; }
+.tournament-game-name { display: block; margin-top: 8px; font-size: 13px; }
+.tournament-group-rules { border-top: 1px solid #ddd; }
+.tournament-rules-summary {
+  position: relative;
+  padding: 18px 28px 18px 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+}
+.tournament-rules-summary::-webkit-details-marker { display: none; }
+.tournament-rules-summary::after {
+  content: "＋";
+  position: absolute;
+  right: 0;
+  top: 17px;
+  font-size: 18px;
+  font-weight: 400;
+}
+.tournament-group-rules[open] .tournament-rules-summary::after { content: "－"; }
+.tournament-rules-summary:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.tournament-rules-body { padding: 0 0 6px; font-size: 14px; line-height: 1.8; }
+.tournament-rules-body p { margin: 0 0 10px; }
+.tournament-pending { color: #777; }
+.tournament-registration { margin-top: 58px; }
+.tournament-registration-copy + .tournament-registration-copy { margin-top: 24px; }
+.tournament-registration-subheading { margin: 0 0 9px; font-size: 16px; font-weight: 600; }
+.tournament-registration-body { font-size: 15px; line-height: 1.85; }
+.tournament-registration-body:not(:empty) { margin-top: 8px; }
+.tournament-registration-body p { margin: 0 0 10px; }
+.tournament-registration-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
 .tournament-registration-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  margin-top: 4px;
-  padding: 9px 20px;
+  min-height: 44px;
+  padding: 9px 22px;
   border: 1px solid #171717;
-  background-color: #fff;
+  background: #fff;
+  color: #171717;
   text-decoration: none;
   font-size: 14px;
-  line-height: 1.4;
 }
-a.tournament-registration-link:hover,
-a.tournament-registration-link:focus-visible {
+a.tournament-registration-link:hover, a.tournament-registration-link:focus-visible {
   color: #fff;
-  background-color: #171717;
+  background: #171717;
 }
 .tournament-registration-link.is-disabled {
-  border-color: #ddd;
   color: #777;
-  background-color: #f7f7f7;
+  background: #f7f7f7;
+  border-color: #ddd;
   cursor: default;
+}
+@media (max-width: 760px) {
+  .tournament-groups { grid-template-columns: 1fr; gap: 18px; }
 }
 @media (max-width: 680px) {
   .tournament-content { margin-top: 30px; }
-  .tournament-block + .tournament-block { margin-top: 36px; }
   .tournament-block-heading { font-size: 18px; }
   .tournament-block-body { font-size: 15px; line-height: 1.85; }
+  .tournament-group-heading { font-size: 21px; }
+  .tournament-game-artwork { height: 104px; }
+  .tournament-registration { margin-top: 46px; }
 }
