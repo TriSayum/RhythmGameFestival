@@ -147,7 +147,29 @@
     root.appendChild(ongoingBlock);
   }
 
+
+  /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
+  function setupStickyHeaderOffset() {
+    const header = document.querySelector(".site-header");
+    if (!header) return;
+
+    const updateOffset = function () {
+      const height = Math.ceil(header.getBoundingClientRect().height);
+      document.documentElement.style.setProperty("--site-header-height", height + "px");
+    };
+
+    updateOffset();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updateOffset);
+      observer.observe(header);
+    } else {
+      window.addEventListener("resize", updateOffset);
+    }
+  }
+
   renderHeader();
+  setupStickyHeaderOffset();
   renderHeadings();
   renderIntro();
   renderSchedule();

@@ -23,6 +23,10 @@ a {
 }
 
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -283,4 +287,9 @@ a {
   .timeline-child-detail { display: block; }
   .timeline-speaker { margin-right: 8px; }
   .ongoing-list { grid-template-columns: 1fr; }
+}
+
+/* 页首常驻顶部：锚点滚动时为标题预留当前导航高度。 */
+.page-section {
+  scroll-margin-top: calc(var(--site-header-height, 96px) + 20px);
 }
