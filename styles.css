@@ -349,65 +349,58 @@ a {
   color: #666;
   font-weight: 400;
 }
+/* 两组共用完全一致的项目排列方式：游戏名在上，标识在下。
+   等高的只是图片展示区域，不强行给不同宽高比的图片同样的视觉尺寸。 */
 .tournament-game-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   list-style: none;
-  gap: 12px;
-  margin: 0 0 28px;
+  gap: 18px;
+  margin: 0 0 24px;
   padding: 0;
-  min-height: 180px;
 }
-.tournament-game { min-width: 0; text-align: center; }
+.tournament-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+.tournament-game-name {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #171717;
+}
 .tournament-game-artwork {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 140px;
+  height: 136px;
+  min-width: 0;
 }
 .tournament-game-image {
   display: block;
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 .tournament-game-image[hidden] { display: none; }
-/* 横向Logo如果仍分两栏，高度会受到图片宽度的限制。
-   街机组改为一行一个横向Logo，可利用整行宽度放大内容，保持原图比例。 */
-.tournament-group-card--arcade .tournament-game-list {
-  grid-template-columns: 1fr;
-  gap: 12px;
-  align-content: start;
+/* 横向街机Logo使用较宽的上限，防止中二节奏过大、舞萌过小。 */
+.tournament-group-card--arcade .tournament-game-image {
+  max-width: min(100%, 215px);
+  max-height: 116px;
 }
-.tournament-group-card--arcade .tournament-game {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-}
-.tournament-group-card--arcade .tournament-game-artwork { height: 78px; }
-.tournament-group-card--arcade .tournament-game-name { margin: 0; }
-/* 方形图标使用独立的正方形尺寸，居中放进同高度的项目区域。 */
-.tournament-group-card--mobile .tournament-game-artwork {
-  height: 140px;
-  padding: 4px;
-  background: transparent;
-}
+/* 方形移动端图标限制为相同边长，避免占满整列宽度。 */
 .tournament-group-card--mobile .tournament-game-image {
-  width: 124px;
-  height: 124px;
-  max-width: 100%;
-  max-height: 100%;
-}
-.tournament-game-name {
-  display: block;
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.45;
-  color: #171717;
+  max-width: 128px;
+  max-height: 128px;
 }
 .tournament-group-rules {
   margin-top: auto;

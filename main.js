@@ -204,8 +204,9 @@
           });
           artwork.appendChild(img);
         }
-        item.appendChild(artwork);
+        // 四个比赛项目统一采用名称在上、游戏标识在下的视觉结构。
         item.appendChild(make("span", "tournament-game-name", game.name));
+        item.appendChild(artwork);
         gameList.appendChild(item);
       });
       card.appendChild(gameList);
