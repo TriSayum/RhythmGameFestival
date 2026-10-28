@@ -148,6 +148,62 @@
   }
 
 
+
+  /* 03赛事：无正文时保持空白，有效问卷链接启用后才提供外部跳转。 */
+  function renderTournament() {
+    const content = data.tournament;
+    const root = document.getElementById("tournament-content");
+    if (!content || !root) return;
+
+    const intro = make("div", "tournament-block");
+    intro.appendChild(make("h3", "tournament-block-heading", content.introduction.heading));
+    const introBody = make("div", "tournament-block-body");
+    addParagraphs(introBody, content.introduction.paragraphs);
+    intro.appendChild(introBody);
+    root.appendChild(intro);
+
+    const registration = content.registration;
+    const regBlock = make("div", "tournament-block");
+    regBlock.appendChild(make("h3", "tournament-block-heading", registration.heading));
+    const regBody = make("div", "tournament-block-body");
+    if (registration.description) {
+      regBody.appendChild(make("p", "", registration.description));
+    }
+
+    let destination = "";
+    if (registration.enabled && typeof registration.url === "string") {
+      try {
+        const url = new URL(registration.url);
+        if (url.protocol === "https:" || url.protocol === "http:") {
+          destination = url.href;
+        }
+      } catch (_) {
+        // 无效或未填写的URL不生成链接。
+      }
+    }
+
+    if (destination) {
+      const link = make("a", "tournament-registration-link", registration.label);
+      link.href = destination;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      regBody.appendChild(link);
+    } else {
+      const closed = make("span", "tournament-registration-link is-disabled", registration.unavailableLabel);
+      closed.setAttribute("aria-disabled", "true");
+      regBody.appendChild(closed);
+    }
+    regBlock.appendChild(regBody);
+    root.appendChild(regBlock);
+
+    const details = make("div", "tournament-block");
+    details.appendChild(make("h3", "tournament-block-heading", content.details.heading));
+    const detailBody = make("div", "tournament-block-body");
+    addParagraphs(detailBody, content.details.paragraphs);
+    details.appendChild(detailBody);
+    root.appendChild(details);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -173,4 +229,5 @@
   renderHeadings();
   renderIntro();
   renderSchedule();
+  renderTournament();
 }());

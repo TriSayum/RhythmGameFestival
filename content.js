@@ -3,6 +3,7 @@
  * time表示主环节开始时间，start/end表示子环节的时间范围。
  * 含speaker的节目可填写title作为演讲题目；未定时留空即可。
  * schedule.ongoing：常驻展出；site.sections：章节标题；site.navigation：页首导航。
+ * tournament：03赛事介绍、报名与详情。报名填写腾讯文档问卷URL并启用enabled。
  */
 window.FESTIVAL_CONTENT = {
   "site": {
@@ -185,5 +186,23 @@ window.FESTIVAL_CONTENT = {
         "title": "现场体验"
       }
     ]
+  },
+  "tournament": {
+    "introduction": {
+      "heading": "赛事介绍",
+      "paragraphs": []
+    },
+    "registration": {
+      "heading": "赛事报名",
+      "description": "",
+      "label": "填写报名问卷",
+      "url": "",
+      "enabled": false,
+      "unavailableLabel": "报名即将开放"
+    },
+    "details": {
+      "heading": "赛事详情",
+      "paragraphs": []
+    }
   }
 };

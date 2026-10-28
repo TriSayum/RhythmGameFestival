@@ -293,3 +293,45 @@ a {
 .page-section {
   scroll-margin-top: calc(var(--site-header-height, 96px) + 20px);
 }
+
+/* 03音游赛事：赛事简介、外部报名入口及赛制详情，均由content.js填写。 */
+.tournament-content { max-width: 850px; margin-top: 42px; }
+.tournament-block + .tournament-block { margin-top: 48px; }
+.tournament-block-heading {
+  margin: 0 0 16px;
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.tournament-block-body { min-height: 24px; font-size: 16px; line-height: 1.95; }
+.tournament-block-body p { margin: 0 0 14px; }
+.tournament-registration-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 4px;
+  padding: 9px 20px;
+  border: 1px solid #171717;
+  background-color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.4;
+}
+a.tournament-registration-link:hover,
+a.tournament-registration-link:focus-visible {
+  color: #fff;
+  background-color: #171717;
+}
+.tournament-registration-link.is-disabled {
+  border-color: #ddd;
+  color: #777;
+  background-color: #f7f7f7;
+  cursor: default;
+}
+@media (max-width: 680px) {
+  .tournament-content { margin-top: 30px; }
+  .tournament-block + .tournament-block { margin-top: 36px; }
+  .tournament-block-heading { font-size: 18px; }
+  .tournament-block-body { font-size: 15px; line-height: 1.85; }
+}
