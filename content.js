@@ -196,7 +196,7 @@ window.FESTIVAL_CONTENT = {
     "introduction": {
       "heading": "赛事介绍",
       "paragraphs": [
-        "音游赛事是TRY动漫社·音游部长期开展的常规活动。本届音游秋季赛将作为西柚音游节的组成部分，继续由TRY动漫社·音游部主办，分设街机组与移动组两个组别。"
+        "音游赛事是TRY动漫社·音游部长期开展的常规活动。本届音游秋季赛将作为西柚音游节的组成部分，继续由TRY动漫社·音游部主办，并分设街机组与移动组两个组别。"
       ]
     },
     "details": {
@@ -207,7 +207,7 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "arcade",
         "heading": "街机组",
-        "date": "11月21日（周六）",
+        "date": "11月21日",
         "period": "下午",
         "venue": "米莱音游研究所",
         "games": [
@@ -222,14 +222,14 @@ window.FESTIVAL_CONTENT = {
             "logo": "./assets/games/chunithm_logo.webp"
           }
         ],
-        "rulesSummary": "查看街机组赛制",
+        "rulesSummary": "查看详细信息",
         "rules": [],
-        "pendingLabel": "赛制详情待公布"
+        "pendingLabel": ""
       },
       {
         "id": "mobile",
         "heading": "移动组",
-        "date": "11月22日（周日）",
+        "date": "11月22日",
         "period": "上午",
         "venue": "",
         "venuePending": "具体教室待定",
@@ -245,9 +245,9 @@ window.FESTIVAL_CONTENT = {
             "logo": "./assets/games/arcaea_icon.webp"
           }
         ],
-        "rulesSummary": "查看移动组赛制",
+        "rulesSummary": "查看详细信息",
         "rules": [],
-        "pendingLabel": "赛制详情待公布"
+        "pendingLabel": ""
       }
     ],
     "registration": {
