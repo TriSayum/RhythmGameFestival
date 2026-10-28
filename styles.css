@@ -312,11 +312,13 @@ a {
 .tournament-groups {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
   gap: 24px;
   margin-top: 40px;
 }
 .tournament-group-card {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   border: 1px solid #ddd;
   padding: clamp(20px, 2.5vw, 32px);
@@ -339,13 +341,22 @@ a {
   color: #171717;
   overflow-wrap: anywhere;
 }
+/* 与“时间”“地点”使用同一左边界和标签文字规格。 */
+.tournament-games-heading {
+  margin: 23px 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #666;
+  font-weight: 400;
+}
 .tournament-game-list {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   list-style: none;
   gap: 12px;
-  margin: 25px 0 28px;
+  margin: 0 0 28px;
   padding: 0;
+  min-height: 180px;
 }
 .tournament-game { min-width: 0; text-align: center; }
 .tournament-game-artwork {
@@ -353,9 +364,7 @@ a {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 110px;
-  padding: 10px 8px;
-  background: #f8f8f8;
+  height: 140px;
 }
 .tournament-game-image {
   display: block;
@@ -364,22 +373,46 @@ a {
   object-fit: contain;
 }
 .tournament-game-image[hidden] { display: none; }
-/* 横向Logo继续使用宽幅展示；方形图标则真正使用1:1区域，避免大面积留白。 */
+/* 横向Logo如果仍分两栏，高度会受到图片宽度的限制。
+   街机组改为一行一个横向Logo，可利用整行宽度放大内容，保持原图比例。 */
+.tournament-group-card--arcade .tournament-game-list {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-content: start;
+}
+.tournament-group-card--arcade .tournament-game {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.tournament-group-card--arcade .tournament-game-artwork { height: 78px; }
+.tournament-group-card--arcade .tournament-game-name { margin: 0; }
+/* 方形图标使用独立的正方形尺寸，居中放进同高度的项目区域。 */
 .tournament-group-card--mobile .tournament-game-artwork {
-  height: auto;
-  aspect-ratio: 1 / 1;
-  padding: 0;
+  height: 140px;
+  padding: 4px;
   background: transparent;
+}
+.tournament-group-card--mobile .tournament-game-image {
+  width: 124px;
+  height: 124px;
+  max-width: 100%;
+  max-height: 100%;
 }
 .tournament-game-name {
   display: block;
-  margin-top: 12px;
+  margin-top: 10px;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.45;
   color: #171717;
 }
-.tournament-group-rules { border-top: 1px solid #ddd; }
+.tournament-group-rules {
+  margin-top: auto;
+  border-top: 1px solid #ddd;
+}
 .tournament-rules-summary {
   position: relative;
   padding: 18px 28px 18px 0;
@@ -432,7 +465,8 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   border-color: #ddd;
   cursor: default;
 }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
+  /* 窄屏下让两张卡片独占整行，避免街机Logo被压得过窄。 */
   .tournament-groups { grid-template-columns: 1fr; gap: 18px; }
 }
 @media (max-width: 680px) {
@@ -440,7 +474,6 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .tournament-block-heading { font-size: 18px; }
   .tournament-block-body { font-size: 15px; line-height: 1.85; }
   .tournament-group-heading { font-size: 21px; }
-  .tournament-game-artwork { height: 104px; }
   .tournament-registration { margin-top: 46px; }
   .tournament-registration-description { font-size: 15px; line-height: 1.85; }
 }

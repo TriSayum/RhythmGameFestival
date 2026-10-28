@@ -187,6 +187,8 @@
       meta.append(dateEntry, venueEntry);
       card.appendChild(meta);
 
+      // “项目”与“时间”“地点”左对齐，形成一致的信息标签。
+      card.appendChild(make("h4", "tournament-games-heading", "项目"));
       const gameList = make("ul", "tournament-game-list");
       (group.games || []).forEach(function (game) {
         const item = make("li", "tournament-game");
