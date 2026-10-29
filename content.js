@@ -1,9 +1,6 @@
 /* 网站文案与活动信息：日常修改优先编辑此文件。
- * schedule.main：主会场节目，顺序就是显示顺序，children是子环节。
- * time表示主环节开始时间，start/end表示子环节的时间范围。
- * 含speaker的节目可填写title作为演讲题目；未定时留空即可。
- * schedule.ongoing：常驻展出；mainHeader和ongoingHeader：两组标题上方的日期、地点。
- * site.sections：章节标题；site.navigation：页首导航。
+ * 02日程和04茶欢会共用的节目与讲者数据已迁移到program.js。
+ * 本文件保留活动名称、01简介、03赛事和其他章节内容。
  */
 /* 03赛事：
  * tournament.introduction.paragraphs：赛事介绍（不显示小标题）。
@@ -101,105 +98,6 @@ window.FESTIVAL_CONTENT = {
       ],
       "conclusion": "空间可以被看见、被听见、被碰见，也可以由我们共同创造。",
       "invitation": "本届西柚音游节以「空间」为主题，邀请大家从词语本身、游戏、音乐、文化、情绪等不同视角展开探索。不必拘泥于某一种解释，也不必局限于某一种表现形式。"
-    }
-  },
-  "schedule": {
-    "mainTitle": "主会场",
-    "ongoingTitle": "同期开放",
-    "main": [
-      {
-        "id": "opening",
-        "time": "10:00",
-        "title": "开幕"
-      },
-      {
-        "id": "tournament",
-        "time": "10:10",
-        "title": "移动组赛事",
-        "children": [
-          {
-            "start": "10:10",
-            "end": "10:20",
-            "title": "赛前预热"
-          },
-          {
-            "start": "10:20",
-            "end": "11:50",
-            "title": "正式比赛"
-          },
-          {
-            "start": "11:50",
-            "end": "12:10",
-            "title": "颁奖典礼"
-          }
-        ]
-      },
-      {
-        "id": "salon",
-        "time": "13:30",
-        "title": "主题分享茶欢会",
-        "children": [
-          {
-            "start": "13:30",
-            "end": "13:40",
-            "title": "会前预热"
-          },
-          {
-            "start": "13:40",
-            "end": "15:40",
-            "speaker": "cot",
-            "title": "学术视角下的音乐游戏Ⅱ"
-          },
-          {
-            "start": "15:45",
-            "end": "16:15",
-            "speaker": "雨令",
-            "title": ""
-          }
-        ]
-      },
-      {
-        "id": "focused-experience",
-        "time": "16:20",
-        "title": "作品集中体验"
-      },
-      {
-        "id": "awards-and-closing",
-        "time": "17:00",
-        "title": "创作作品颁奖典礼、闭幕"
-      },
-      {
-        "id": "free-experience",
-        "time": "17:20",
-        "title": "自由交流与参观"
-      },
-      {
-        "id": "end",
-        "time": "20:00",
-        "title": "结束"
-      }
-    ],
-    "ongoing": [
-      {
-        "id": "works-exhibition",
-        "start": "10:00",
-        "end": "20:00",
-        "title": "创作作品展览"
-      },
-      {
-        "id": "hands-on",
-        "start": "10:00",
-        "end": "20:00",
-        "title": "现场体验"
-      }
-    ],
-    "mainHeader": {
-      "date": "11月22日",
-      "venue": "具体教室待定"
-    },
-    "ongoingHeader": {
-      "date": "11月22日",
-      "venue": "具体教室待定"
     }
   },
   "tournament": {

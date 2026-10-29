@@ -190,29 +190,31 @@ a {
 /* 02 日程：主会场一级时间轴与嵌套二级节点。 */
 .schedule-content { margin-top: 42px; }
 .schedule-block + .schedule-block { margin-top: 72px; }
-/* 参考CGS DAY日期条：上方为紧凑的日期地点行，下方为贯穿内容宽度的矩形标题。 */
+/* 02日程：日期地点与主标题同处黑底白字横贯条，压缩竖向内边距。 */
+.schedule-block-banner {
+  width: 100%;
+  margin: 0 0 30px;
+  padding: 10px 24px 11px;
+  color: #fff;
+  background-color: #171717;
+}
 .schedule-block-meta {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  column-gap: 20px;
+  column-gap: 18px;
   row-gap: 2px;
-  margin: 0 0 5px;
+  margin: 0 0 3px;
   font-size: 14px;
   line-height: 1.25;
-  color: #666;
+  color: inherit;
 }
 .schedule-block-heading {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 76px;
-  padding: 16px 24px;
-  margin: 0 0 30px;
-  border: 1px solid #d6d6d6;
+  margin: 0;
   font-size: clamp(26px, 3.2vw, 34px);
-  line-height: 1.2;
+  line-height: 1.12;
   font-weight: 600;
+  color: inherit;
 }
 .timeline {
   --time-column: 86px;
@@ -299,8 +301,8 @@ a {
 @media (max-width: 680px) {
   .schedule-content { margin-top: 30px; }
   .schedule-block + .schedule-block { margin-top: 56px; }
-  .schedule-block-meta { column-gap: 12px; font-size: 13px; margin-bottom: 4px; }
-  .schedule-block-heading { min-height: 62px; padding: 13px 18px; margin-bottom: 26px; }
+  .schedule-block-banner { padding: 9px 18px 10px; margin-bottom: 26px; }
+  .schedule-block-meta { column-gap: 12px; font-size: 13px; margin-bottom: 2px; }
   .timeline { --time-column: 55px; --node-column: 28px; }
   .timeline-item { padding-bottom: 30px; }
   .timeline-time { font-size: 13px; }
@@ -494,4 +496,63 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .tournament-group-heading { font-size: 21px; }
   .tournament-registration { margin-top: 46px; }
   .tournament-registration-description { font-size: 15px; line-height: 1.85; }
+}
+
+/* 04主题分享茶欢会：左侧分享题目，右侧主讲者信息。 */
+.salon-content { margin-top: 40px; }
+.salon-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; }
+.salon-introduction p { margin: 0 0 16px; }
+.salon-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 0 0 40px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.salon-list-heading {
+  margin: 0 0 22px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.salon-talk {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(20px, 4vw, 56px);
+  padding: 32px 0 38px;
+  border-top: 1px solid #ddd;
+}
+.salon-talk:last-child { border-bottom: 1px solid #ddd; }
+.salon-talk-subject { min-width: 0; }
+.salon-talk-time { font-size: 14px; line-height: 1.5; color: #555; font-variant-numeric: tabular-nums; }
+.salon-talk-title {
+  margin: 14px 0 0;
+  font-size: clamp(21px, 2.6vw, 28px);
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.salon-talk-speaker { display: flex; align-items: flex-start; gap: 18px; min-width: 0; }
+.salon-speaker-avatar {
+  flex: 0 0 88px;
+  display: block;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.salon-speaker-avatar[hidden] { display: none; }
+.salon-speaker-details { min-width: 0; }
+.salon-speaker-name { margin: 0 0 10px; font-size: 20px; font-weight: 600; line-height: 1.45; }
+.salon-speaker-bio { font-size: 15px; line-height: 1.7; color: #555; }
+.salon-speaker-bio p { margin: 0 0 5px; }
+@media (max-width: 680px) {
+  .salon-content { margin-top: 30px; }
+  .salon-info { gap: 5px 16px; margin-bottom: 30px; font-size: 15px; }
+  .salon-list-heading { font-size: 18px; margin-bottom: 18px; }
+  .salon-talk { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 25px 0 28px; }
+  .salon-talk-title { font-size: 22px; }
+  .salon-speaker-name { font-size: 18px; }
+  .salon-speaker-avatar { flex-basis: 72px; width: 72px; height: 72px; }
 }

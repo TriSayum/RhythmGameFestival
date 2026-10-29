@@ -3,8 +3,9 @@
   "use strict";
 
   const data = window.FESTIVAL_CONTENT;
-  if (!data) {
-    console.error("content.js未加载，无法显示网站内容。");
+  const program = window.FESTIVAL_PROGRAM;
+  if (!data || !program) {
+    console.error("content.js或program.js未加载，无法显示网站内容。");
     return;
   }
 
@@ -88,9 +89,10 @@
       range.appendChild(time(item.end));
     }
     const detail = make("div", "timeline-child-detail");
-    if (item.speaker) detail.appendChild(make("span", "timeline-speaker", item.speaker));
+    const speaker = item.speakerId ? program.salon.speakers[item.speakerId] : null;
+    if (speaker?.name) detail.appendChild(make("span", "timeline-speaker", speaker.name));
     if (item.title) {
-      const label = item.speaker ? "《" + item.title + "》" : item.title;
+      const label = speaker ? "《" + item.title + "》" : item.title;
       detail.appendChild(make("span", "timeline-child-title", label));
     }
     row.append(range, detail);
@@ -126,32 +128,35 @@
     return row;
   }
 
-  /* 02日程：日期地点使用紧凑提示行，随后显示贯穿整栏的分组标题。 */
+  /* 02日程：日期、地点与大标题统一显示在紧凑的深色横贯条内。 */
   function addScheduleBlockHeader(block, heading, meta) {
+    const banner = make("div", "schedule-block-banner");
     if (meta && (meta.date || meta.venue)) {
       const note = make("div", "schedule-block-meta");
       if (meta.date) note.appendChild(make("span", "schedule-block-date", meta.date));
       if (meta.venue) note.appendChild(make("span", "schedule-block-venue", meta.venue));
-      block.appendChild(note);
+      banner.appendChild(note);
     }
-    block.appendChild(make("h3", "schedule-block-heading", heading));
+    banner.appendChild(make("h3", "schedule-block-heading", heading));
+    block.appendChild(banner);
   }
 
   function renderSchedule() {
     const root = document.getElementById("schedule-content");
+    const schedule = program.schedule;
     const mainBlock = make("div", "schedule-block");
-    addScheduleBlockHeader(mainBlock, data.schedule.mainTitle, data.schedule.mainHeader);
+    addScheduleBlockHeader(mainBlock, schedule.mainTitle, schedule.mainHeader);
     const timeline = make("ol", "timeline");
-    data.schedule.main.forEach(function (item) {
+    schedule.main.forEach(function (item) {
       timeline.appendChild(renderEvent(item));
     });
     mainBlock.appendChild(timeline);
     root.appendChild(mainBlock);
 
     const ongoingBlock = make("div", "schedule-block");
-    addScheduleBlockHeader(ongoingBlock, data.schedule.ongoingTitle, data.schedule.ongoingHeader);
+    addScheduleBlockHeader(ongoingBlock, schedule.ongoingTitle, schedule.ongoingHeader);
     const ongoingList = make("ul", "ongoing-list");
-    data.schedule.ongoing.forEach(function (item) {
+    schedule.ongoing.forEach(function (item) {
       ongoingList.appendChild(renderOngoing(item));
     });
     ongoingBlock.appendChild(ongoingList);
@@ -275,6 +280,81 @@
     root.appendChild(regBlock);
   }
 
+  /* 04茶欢会：采用左主题/右讲者的信息层级，仅呈现正式分享。 */
+  function renderSalon() {
+    const root = document.getElementById("salon-content");
+    if (!root || !program.salon) return;
+
+    const salon = program.salon;
+    if (salon.introduction?.length) {
+      const intro = make("div", "salon-introduction");
+      addParagraphs(intro, salon.introduction);
+      root.appendChild(intro);
+    }
+
+    const info = salon.info || {};
+    if (info.date || info.period || info.venue) {
+      const meta = make("p", "salon-info");
+      [info.date, info.period, info.venue].filter(Boolean).forEach(function (part) {
+        meta.appendChild(make("span", "salon-info-item", part));
+      });
+      root.appendChild(meta);
+    }
+
+    const heading = make("h3", "salon-list-heading", "分享安排");
+    root.appendChild(heading);
+
+    const list = make("div", "salon-talk-list");
+    const salonEvent = program.schedule.main.find(function (event) {
+      return event.id === "salon";
+    });
+    const talks = (salonEvent?.children || []).filter(function (item) {
+      return item.type === "talk";
+    });
+
+    talks.forEach(function (talk) {
+      const speaker = salon.speakers[talk.speakerId];
+      const row = make("article", "salon-talk");
+      if (talk.id) row.id = "salon-" + talk.id;
+
+      const subject = make("div", "salon-talk-subject");
+      const talkTime = make("div", "salon-talk-time");
+      talkTime.appendChild(time(talk.start));
+      if (talk.end) {
+        talkTime.appendChild(document.createTextNode("—"));
+        talkTime.appendChild(time(talk.end));
+      }
+      subject.appendChild(talkTime);
+      if (talk.title) {
+        subject.appendChild(make("h4", "salon-talk-title", "《" + talk.title + "》"));
+      }
+      row.appendChild(subject);
+
+      const person = make("div", "salon-talk-speaker");
+      if (speaker?.avatar) {
+        const avatar = make("img", "salon-speaker-avatar");
+        avatar.src = speaker.avatar;
+        avatar.alt = speaker.name + "的头像";
+        avatar.loading = "lazy";
+        avatar.addEventListener("error", function () { avatar.hidden = true; });
+        person.appendChild(avatar);
+      }
+      const personInfo = make("div", "salon-speaker-details");
+      if (speaker?.name) personInfo.appendChild(make("h4", "salon-speaker-name", speaker.name));
+      if (speaker?.bio?.length) {
+        const bio = make("div", "salon-speaker-bio");
+        speaker.bio.filter(Boolean).forEach(function (line) {
+          bio.appendChild(make("p", "", line));
+        });
+        personInfo.appendChild(bio);
+      }
+      person.appendChild(personInfo);
+      row.appendChild(person);
+      list.appendChild(row);
+    });
+    root.appendChild(list);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -301,4 +381,5 @@
   renderIntro();
   renderSchedule();
   renderTournament();
+  renderSalon();
 }());
