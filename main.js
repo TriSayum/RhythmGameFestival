@@ -126,10 +126,21 @@
     return row;
   }
 
+  /* 02日程：日期地点使用紧凑提示行，随后显示贯穿整栏的分组标题。 */
+  function addScheduleBlockHeader(block, heading, meta) {
+    if (meta && (meta.date || meta.venue)) {
+      const note = make("div", "schedule-block-meta");
+      if (meta.date) note.appendChild(make("span", "schedule-block-date", meta.date));
+      if (meta.venue) note.appendChild(make("span", "schedule-block-venue", meta.venue));
+      block.appendChild(note);
+    }
+    block.appendChild(make("h3", "schedule-block-heading", heading));
+  }
+
   function renderSchedule() {
     const root = document.getElementById("schedule-content");
     const mainBlock = make("div", "schedule-block");
-    mainBlock.appendChild(make("h3", "schedule-block-heading", data.schedule.mainTitle));
+    addScheduleBlockHeader(mainBlock, data.schedule.mainTitle, data.schedule.mainHeader);
     const timeline = make("ol", "timeline");
     data.schedule.main.forEach(function (item) {
       timeline.appendChild(renderEvent(item));
@@ -138,12 +149,12 @@
     root.appendChild(mainBlock);
 
     const ongoingBlock = make("div", "schedule-block");
-    ongoingBlock.appendChild(make("h3", "schedule-block-heading", data.schedule.ongoingTitle));
-    const list = make("ul", "ongoing-list");
+    addScheduleBlockHeader(ongoingBlock, data.schedule.ongoingTitle, data.schedule.ongoingHeader);
+    const ongoingList = make("ul", "ongoing-list");
     data.schedule.ongoing.forEach(function (item) {
-      list.appendChild(renderOngoing(item));
+      ongoingList.appendChild(renderOngoing(item));
     });
-    ongoingBlock.appendChild(list);
+    ongoingBlock.appendChild(ongoingList);
     root.appendChild(ongoingBlock);
   }
 

@@ -190,7 +190,30 @@ a {
 /* 02 日程：主会场一级时间轴与嵌套二级节点。 */
 .schedule-content { margin-top: 42px; }
 .schedule-block + .schedule-block { margin-top: 72px; }
-.schedule-block-heading { margin: 0 0 30px; font-size: 20px; line-height: 1.4; font-weight: 600; }
+/* 参考CGS DAY日期条：上方为紧凑的日期地点行，下方为贯穿内容宽度的矩形标题。 */
+.schedule-block-meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 2px;
+  margin: 0 0 5px;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #666;
+}
+.schedule-block-heading {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 76px;
+  padding: 16px 24px;
+  margin: 0 0 30px;
+  border: 1px solid #d6d6d6;
+  font-size: clamp(26px, 3.2vw, 34px);
+  line-height: 1.2;
+  font-weight: 600;
+}
 .timeline {
   --time-column: 86px;
   --node-column: 44px;
@@ -276,6 +299,8 @@ a {
 @media (max-width: 680px) {
   .schedule-content { margin-top: 30px; }
   .schedule-block + .schedule-block { margin-top: 56px; }
+  .schedule-block-meta { column-gap: 12px; font-size: 13px; margin-bottom: 4px; }
+  .schedule-block-heading { min-height: 62px; padding: 13px 18px; margin-bottom: 26px; }
   .timeline { --time-column: 55px; --node-column: 28px; }
   .timeline-item { padding-bottom: 30px; }
   .timeline-time { font-size: 13px; }

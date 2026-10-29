@@ -2,7 +2,8 @@
  * schedule.main：主会场节目，顺序就是显示顺序，children是子环节。
  * time表示主环节开始时间，start/end表示子环节的时间范围。
  * 含speaker的节目可填写title作为演讲题目；未定时留空即可。
- * schedule.ongoing：常驻展出；site.sections：章节标题；site.navigation：页首导航。
+ * schedule.ongoing：常驻展出；mainHeader和ongoingHeader：两组标题上方的日期、地点。
+ * site.sections：章节标题；site.navigation：页首导航。
  */
 /* 03赛事：
  * tournament.introduction.paragraphs：赛事介绍（不显示小标题）。
@@ -191,7 +192,15 @@ window.FESTIVAL_CONTENT = {
         "end": "20:00",
         "title": "现场体验"
       }
-    ]
+    ],
+    "mainHeader": {
+      "date": "11月22日",
+      "venue": "具体教室待定"
+    },
+    "ongoingHeader": {
+      "date": "11月22日",
+      "venue": "具体教室待定"
+    }
   },
   "tournament": {
     "introduction": {
