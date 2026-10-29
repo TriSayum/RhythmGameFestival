@@ -1,7 +1,7 @@
 /* 02日程与04茶欢会共用的唯一节目数据。
  * schedule.main：按时间顺序列出主会场节目及子节目。
  * schedule.mainHeader / ongoingHeader：02两组黑色标题条中的日期、地点。
- * salon.info：04专用的日期、时段、地点简要说明。
+ * salon.info：04每场分享标题下复用的日期与地点，场次时间来自节目本身。
  * salon.introduction：04的介绍段落，暂时留空。
  * salon.speakers：讲者名称、可选头像路径和多行介绍（bio数组）。
  * 正式分享标记 type: "talk" 并使用 speakerId 关联讲者。
@@ -115,18 +115,17 @@ window.FESTIVAL_PROGRAM = {
     "introduction": [],
     "info": {
       "date": "11月22日",
-      "period": "下午",
       "venue": "具体教室待定"
     },
     "speakers": {
       "cot": {
         "name": "cot",
-        "avatar": "",
+        "avatar": "./assets/speakers/cot_avatar.webp",
         "bio": []
       },
       "yuling": {
         "name": "雨令",
-        "avatar": "",
+        "avatar": "./assets/speakers/yuling_avatar.webp",
         "bio": []
       }
     }

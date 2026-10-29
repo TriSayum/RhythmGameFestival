@@ -502,14 +502,6 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 .salon-content { margin-top: 40px; }
 .salon-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; }
 .salon-introduction p { margin: 0 0 16px; }
-.salon-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 24px;
-  margin: 0 0 40px;
-  font-size: 16px;
-  line-height: 1.6;
-}
 .salon-list-heading {
   margin: 0 0 22px;
   font-size: 20px;
@@ -525,14 +517,25 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 }
 .salon-talk:last-child { border-bottom: 1px solid #ddd; }
 .salon-talk-subject { min-width: 0; }
-.salon-talk-time { font-size: 14px; line-height: 1.5; color: #555; font-variant-numeric: tabular-nums; }
 .salon-talk-title {
-  margin: 14px 0 0;
+  margin: 0;
   font-size: clamp(21px, 2.6vw, 28px);
   font-weight: 600;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+.salon-talk-meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+}
+.salon-talk-meta:first-child { margin-top: 0; }
+.salon-talk-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .salon-talk-speaker { display: flex; align-items: flex-start; gap: 18px; min-width: 0; }
 .salon-speaker-avatar {
   flex: 0 0 88px;
@@ -549,7 +552,7 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 .salon-speaker-bio p { margin: 0 0 5px; }
 @media (max-width: 680px) {
   .salon-content { margin-top: 30px; }
-  .salon-info { gap: 5px 16px; margin-bottom: 30px; font-size: 15px; }
+  .salon-talk-meta { gap: 4px 12px; }
   .salon-list-heading { font-size: 18px; margin-bottom: 18px; }
   .salon-talk { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 25px 0 28px; }
   .salon-talk-title { font-size: 22px; }

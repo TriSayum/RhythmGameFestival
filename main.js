@@ -292,15 +292,6 @@
       root.appendChild(intro);
     }
 
-    const info = salon.info || {};
-    if (info.date || info.period || info.venue) {
-      const meta = make("p", "salon-info");
-      [info.date, info.period, info.venue].filter(Boolean).forEach(function (part) {
-        meta.appendChild(make("span", "salon-info-item", part));
-      });
-      root.appendChild(meta);
-    }
-
     const heading = make("h3", "salon-list-heading", "分享安排");
     root.appendChild(heading);
 
@@ -318,16 +309,26 @@
       if (talk.id) row.id = "salon-" + talk.id;
 
       const subject = make("div", "salon-talk-subject");
-      const talkTime = make("div", "salon-talk-time");
-      talkTime.appendChild(time(talk.start));
-      if (talk.end) {
-        talkTime.appendChild(document.createTextNode("—"));
-        talkTime.appendChild(time(talk.end));
-      }
-      subject.appendChild(talkTime);
+      // 左右两栏顶部齐平：左侧标题，右侧讲者。
+      // 日期、场次时间和地点放在标题下方，不再重复一个章节总信息栏。
       if (talk.title) {
         subject.appendChild(make("h4", "salon-talk-title", "《" + talk.title + "》"));
       }
+      const metadata = make("div", "salon-talk-meta");
+      if (salon.info?.date) {
+        metadata.appendChild(make("span", "salon-talk-date", salon.info.date));
+      }
+      const range = make("span", "salon-talk-time");
+      range.appendChild(time(talk.start));
+      if (talk.end) {
+        range.appendChild(document.createTextNode("—"));
+        range.appendChild(time(talk.end));
+      }
+      metadata.appendChild(range);
+      if (salon.info?.venue) {
+        metadata.appendChild(make("span", "salon-talk-venue", salon.info.venue));
+      }
+      subject.appendChild(metadata);
       row.appendChild(subject);
 
       const person = make("div", "salon-talk-speaker");
