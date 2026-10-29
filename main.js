@@ -356,6 +356,58 @@
     root.appendChild(list);
   }
 
+
+  /* 06现场体验：四款游戏与设备共用一份顺序列表，不为设备设置特别分隔。 */
+  function renderExperience() {
+    const root = document.getElementById("experience-content");
+    const experience = data.experience;
+    if (!root || !experience) return;
+
+    if (Array.isArray(experience.introduction) && experience.introduction.length) {
+      const intro = make("div", "experience-introduction");
+      addParagraphs(intro, experience.introduction);
+      root.appendChild(intro);
+    }
+
+    const list = make("div", "experience-list");
+    (experience.items || []).forEach(function (item) {
+      if (item.visible !== true) return;
+
+      // 当内容仍全部留空时，不渲染没有实际信息的空白条目。
+      if (!item.name && !item.summary && !item.description && !item.image) return;
+
+      const game = item.type === "game";
+      const row = make("article", game ? "experience-item experience-item--game" : "experience-item experience-item--equipment");
+      if (item.id) row.id = "experience-" + item.id;
+
+      const textBlock = make("div", "experience-item-text");
+      if (item.name) textBlock.appendChild(make("h3", "experience-item-name", item.name));
+      if (game && item.summary) textBlock.appendChild(make("p", "experience-item-summary", item.summary));
+      if (item.description) textBlock.appendChild(make("p", "experience-item-description", item.description));
+      row.appendChild(textBlock);
+
+      if (game && item.image) {
+        const artwork = make("div", "experience-item-artwork");
+        const image = make("img", "experience-item-image");
+        image.src = item.image;
+        image.alt = (item.name || "音乐游戏") + "展示图片";
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.addEventListener("error", function () {
+          artwork.hidden = true;
+          row.classList.add("experience-item--no-image");
+        });
+        artwork.appendChild(image);
+        row.appendChild(artwork);
+      } else {
+        row.classList.add("experience-item--no-image");
+      }
+      list.appendChild(row);
+    });
+
+    if (list.childElementCount) root.appendChild(list);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -383,4 +435,5 @@
   renderSchedule();
   renderTournament();
   renderSalon();
+  renderExperience();
 }());

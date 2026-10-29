@@ -563,3 +563,69 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .salon-speaker-name { font-size: 18px; }
   .salon-speaker-avatar { flex-basis: 72px; width: 72px; height: 72px; }
 }
+
+/* 06现场体验：单列作品目录。五个条目共用同一种细线，不区分音游和设备。 */
+.experience-content { margin-top: 40px; }
+.experience-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; margin-bottom: 34px; }
+.experience-introduction p { margin: 0 0 16px; }
+.experience-list { width: 100%; }
+.experience-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: start;
+  gap: clamp(24px, 4vw, 56px);
+  padding: 36px 0 40px;
+  border-top: 1px solid #ddd;
+}
+.experience-item:last-child { border-bottom: 1px solid #ddd; }
+.experience-item--equipment,
+.experience-item--no-image { grid-template-columns: minmax(0, 1fr); }
+.experience-item-text { min-width: 0; }
+.experience-item-name {
+  margin: 0 0 16px;
+  font-size: clamp(23px, 2.8vw, 30px);
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.experience-item-summary {
+  margin: 0 0 16px;
+  font-size: 17px;
+  line-height: 1.7;
+  font-weight: 500;
+}
+.experience-item-description {
+  margin: 0;
+  max-width: 850px;
+  font-size: 15px;
+  line-height: 1.95;
+  white-space: pre-line;
+  color: #555;
+}
+.experience-item-artwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: #f7f7f7;
+}
+.experience-item-artwork[hidden] { display: none; }
+.experience-item-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 760px) {
+  .experience-content { margin-top: 30px; }
+  .experience-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    padding: 27px 0 31px;
+  }
+  .experience-item-name { font-size: 23px; margin-bottom: 12px; }
+  .experience-item-summary { font-size: 16px; }
+  .experience-item-description { font-size: 15px; }
+}

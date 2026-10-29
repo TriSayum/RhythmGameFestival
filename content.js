@@ -9,6 +9,16 @@
  * tournament.registration.description：报名说明（一个正文段落）。
  * tournament.registration.groups：分别填写腾讯文档问卷URL并设置enabled为true。
  */
+
+/* 06现场体验：
+ * introduction：章节开场介绍（可留空）。
+ * items：按排列顺序显示四件音游作品与最后的碟机，均用相同细线分隔。
+ * 每项 visible:true 才展示；false 时完全跳过，不保留空白或分隔线。
+ * game：name名称、summary一句简介、description一段介绍、image图片路径。
+ * 图片默认16:9横向展示，不裁切；未填写image时不显示空图片区。
+ * equipment：name与description纯文字，不添加图片或额外分隔。
+ * 初始均设为false，避免对外展示尚未确定的内容。
+ */
 window.FESTIVAL_CONTENT = {
   "site": {
     "name": "西柚音游节",
@@ -177,5 +187,53 @@ window.FESTIVAL_CONTENT = {
         }
       ]
     }
+  },
+  "experience": {
+    "introduction": [],
+    "items": [
+      {
+        "id": "game-01",
+        "type": "game",
+        "visible": false,
+        "name": "",
+        "summary": "",
+        "description": "",
+        "image": ""
+      },
+      {
+        "id": "game-02",
+        "type": "game",
+        "visible": false,
+        "name": "",
+        "summary": "",
+        "description": "",
+        "image": ""
+      },
+      {
+        "id": "game-03",
+        "type": "game",
+        "visible": false,
+        "name": "",
+        "summary": "",
+        "description": "",
+        "image": ""
+      },
+      {
+        "id": "game-04",
+        "type": "game",
+        "visible": false,
+        "name": "",
+        "summary": "",
+        "description": "",
+        "image": ""
+      },
+      {
+        "id": "turntable",
+        "type": "equipment",
+        "visible": false,
+        "name": "碟机",
+        "description": ""
+      }
+    ]
   }
 };
