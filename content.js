@@ -192,13 +192,13 @@ window.FESTIVAL_CONTENT = {
     "introduction": [],
     "items": [
       {
-        "id": "game-01",
+        "id": "in-falsus",
         "type": "game",
-        "visible": false,
-        "name": "",
-        "summary": "",
-        "description": "",
-        "image": ""
+        "visible": true,
+        "name": "In Falsus",
+        "summary": "由lowiro于今年九月初发售的音乐游戏×卡牌制成×故事剧情作品",
+        "description": "在被真实裹挟的世界里，「连接」。《In Falsus》将细致的卡牌系统与层层递进的剧情紧密结合，是一款魅力独特的节奏游戏。通过五位主角的不同视角体验相互交织的故事，享受深刻反映剧情的各式乐曲，纵身沉浸于近未来的鲜艳世界之中。",
+        "image": "./assets/experience/in_falsus_poster.webp"
       },
       {
         "id": "game-02",
