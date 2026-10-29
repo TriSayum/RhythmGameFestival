@@ -510,8 +510,8 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 }
 .salon-talk {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(20px, 4vw, 56px);
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: clamp(20px, 3vw, 44px);
   padding: 32px 0 38px;
   border-top: 1px solid #ddd;
 }
@@ -519,7 +519,7 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 .salon-talk-subject { min-width: 0; }
 .salon-talk-title {
   margin: 0;
-  font-size: clamp(21px, 2.6vw, 28px);
+  font-size: clamp(20px, 2.2vw, 25px);
   font-weight: 600;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -548,8 +548,12 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 .salon-speaker-avatar[hidden] { display: none; }
 .salon-speaker-details { min-width: 0; }
 .salon-speaker-name { margin: 0 0 10px; font-size: 20px; font-weight: 600; line-height: 1.45; }
-.salon-speaker-bio { font-size: 15px; line-height: 1.7; color: #555; }
+.salon-speaker-bio { font-size: 14px; line-height: 1.75; color: #555; }
 .salon-speaker-bio p { margin: 0 0 5px; }
+/* 中等宽度视口先改成上下排列，避免讲者履历被挤成零碎短行。 */
+@media (max-width: 960px) {
+  .salon-talk { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
 @media (max-width: 680px) {
   .salon-content { margin-top: 30px; }
   .salon-talk-meta { gap: 4px 12px; }

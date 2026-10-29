@@ -312,7 +312,7 @@
       // 左右两栏顶部齐平：左侧标题，右侧讲者。
       // 日期、场次时间和地点放在标题下方，不再重复一个章节总信息栏。
       if (talk.title) {
-        subject.appendChild(make("h4", "salon-talk-title", "《" + talk.title + "》"));
+        subject.appendChild(make("h4", "salon-talk-title", talk.title));
       }
       const metadata = make("div", "salon-talk-meta");
       if (salon.info?.date) {
