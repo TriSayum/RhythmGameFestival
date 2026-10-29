@@ -122,7 +122,7 @@ window.FESTIVAL_PROGRAM = {
     },
     "speakers": {
       "cot": {
-        "name": "cot",
+        "name": "COT",
         "avatar": "./assets/speakers/cot_avatar.webp",
         "bio": [
           "2025音乐部分享《学术视角下的音乐游戏》主讲人",
