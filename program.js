@@ -112,7 +112,10 @@ window.FESTIVAL_PROGRAM = {
     }
   },
   "salon": {
-    "introduction": [],
+    "introduction": [
+      "去年由未来媒体协会·音乐部带来的音游主题分享，将在本届西柚音游节迎来续篇。",
+      "今年，音乐部还邀请了其他分享者加入，共同带来这场主题分享茶欢会。现场将准备简单茶点，希望大家能够在轻松的氛围中，聆听分享、交流各自的观察与思考。"
+    ],
     "info": {
       "date": "11月22日",
       "venue": "具体教室待定"
@@ -121,12 +124,18 @@ window.FESTIVAL_PROGRAM = {
       "cot": {
         "name": "cot",
         "avatar": "./assets/speakers/cot_avatar.webp",
-        "bio": []
+        "bio": [
+          "2025年音乐部《学术视角下的音乐游戏》主题分享主讲人",
+          "2026年动院毕设展音游作品《忒伊亚零》全栈作者",
+          "音游痴（划掉）不爱打音游（这句也划掉）"
+        ]
       },
       "yuling": {
         "name": "雨令",
         "avatar": "./assets/speakers/yuling_avatar.webp",
-        "bio": []
+        "bio": [
+          "2026年网易问剑Game Jam节奏游戏作品《艾希礼的献曲》策划、程序"
+        ]
       }
     }
   }
