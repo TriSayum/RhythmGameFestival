@@ -52,7 +52,7 @@ window.FESTIVAL_PROGRAM = {
           {
             "start": "13:40",
             "end": "15:40",
-            "title": "学术视角下的音乐游戏Ⅱ",
+            "title": "学术视角下的音乐游戏·二",
             "id": "talk-cot",
             "type": "talk",
             "speakerId": "cot"
