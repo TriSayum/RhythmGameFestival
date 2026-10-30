@@ -742,3 +742,39 @@ a.submissions-submit-link:hover, a.submissions-submit-link:focus-visible { backg
   .experience-item-summary { font-size: 16px; }
   .experience-item-description { font-size: 15px; }
 }
+
+/* 07常见问题：简单问卷入口与纵向问答，沿用全站黑白灰风格。 */
+.faq-content { margin-top: 40px; }
+.faq-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; }
+.faq-introduction p { margin: 0 0 16px; }
+.faq-action { margin-top: 24px; }
+.faq-form-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  padding: 10px 28px;
+  border: 1px solid #171717;
+  background: #171717;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+a.faq-form-link:hover, a.faq-form-link:focus-visible { color: #171717; background: #fff; }
+.faq-form-link.is-disabled { background: #f7f7f7; border-color: #ddd; color: #777; cursor: default; }
+.faq-list { margin-top: 48px; }
+.faq-item { padding: 25px 0 29px; border-top: 1px solid #ddd; }
+.faq-item:last-child { border-bottom: 1px solid #ddd; }
+.faq-question { margin: 0 0 13px; font-size: 18px; font-weight: 600; line-height: 1.65; white-space: pre-line; }
+.faq-answer { margin: 0; font-size: 16px; line-height: 1.85; color: #555; white-space: pre-line; }
+.faq-prefix { font-weight: 600; color: #171717; }
+@media (max-width: 680px) {
+  .faq-content { margin-top: 30px; }
+  .faq-introduction { font-size: 15px; line-height: 1.85; }
+  .faq-action { margin-top: 22px; }
+  .faq-list { margin-top: 35px; }
+  .faq-item { padding: 22px 0 25px; }
+  .faq-question { font-size: 17px; }
+  .faq-answer { font-size: 15px; }
+}

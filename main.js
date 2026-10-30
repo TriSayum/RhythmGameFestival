@@ -537,6 +537,62 @@
     if (list.childElementCount) root.appendChild(list);
   }
 
+
+  /* 07常见问题：介绍、问卷链接，以及可隐藏的Q/A问答。 */
+  function renderFaq() {
+    const root = document.getElementById("faq-content");
+    const faq = data.faq;
+    if (!root || !faq) return;
+
+    if (faq.introduction?.length) {
+      const intro = make("div", "faq-introduction");
+      addParagraphs(intro, faq.introduction);
+      root.appendChild(intro);
+    }
+
+    if (faq.form) {
+      const action = make("div", "faq-action");
+      let href = "";
+      if (faq.form.enabled && typeof faq.form.url === "string") {
+        try {
+          const link = new URL(faq.form.url);
+          if (link.protocol === "https:") href = link.href;
+        } catch (_) { /* 链接无效时禁用按钮 */ }
+      }
+      const label = (faq.form.label || "提交问题") + " ↗";
+      if (href) {
+        const link = make("a", "faq-form-link", label);
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        action.appendChild(link);
+      } else {
+        const disabled = make("span", "faq-form-link is-disabled", label);
+        disabled.setAttribute("aria-disabled", "true");
+        action.appendChild(disabled);
+      }
+      root.appendChild(action);
+    }
+
+    const list = make("div", "faq-list");
+    (faq.items || []).forEach(function (entry) {
+      if (entry.visible !== true || typeof entry.question !== "string" || !entry.question.trim()
+          || typeof entry.answer !== "string" || !entry.answer.trim()) return;
+
+      const row = make("article", "faq-item");
+      const question = make("h3", "faq-question");
+      question.appendChild(make("span", "faq-prefix", "Q："));
+      question.appendChild(document.createTextNode(entry.question));
+
+      const answer = make("p", "faq-answer");
+      answer.appendChild(make("span", "faq-prefix", "A："));
+      answer.appendChild(document.createTextNode(entry.answer));
+      row.append(question, answer);
+      list.appendChild(row);
+    });
+    if (list.childElementCount) root.appendChild(list);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -566,4 +622,5 @@
   renderSalon();
   renderSubmissions();
   renderExperience();
+  renderFaq();
 }());

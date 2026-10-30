@@ -27,6 +27,11 @@
  * equipment：name与description纯文字，不添加图片或额外分隔。
  * 初始均设为false，避免对外展示尚未确定的内容。
  */
+/* 07常见问题：
+ * introduction：页面介绍段落；form：腾讯文档问卷入口。
+ * items：增添{question:"问题", answer:"回答", visible:true}后即可显示Q/A。
+ * visible=false或问题/回答未填完时均不显示，答案允许用\\n换行。
+ */
 window.FESTIVAL_CONTENT = {
   "site": {
     "name": "西柚音游节",
@@ -455,6 +460,23 @@ window.FESTIVAL_CONTENT = {
         "visible": false,
         "name": "碟机",
         "description": ""
+      }
+    ]
+  },
+  "faq": {
+    "introduction": [
+      "如果您对西柚音游节的活动内容有任何疑问，欢迎通过下方问卷向我们提问。我们将整理具有普遍性的问题及其解答，并陆续更新至本区域。"
+    ],
+    "form": {
+      "label": "提交问题",
+      "url": "https://docs.qq.com/form/page/DVU5OTk9iY1FJVXJs",
+      "enabled": true
+    },
+    "items": [
+      {
+        "question": "",
+        "answer": "",
+        "visible": false
       }
     ]
   }
