@@ -564,6 +564,102 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .salon-speaker-avatar { flex-basis: 72px; width: 72px; height: 72px; }
 }
 
+/* 05创作作品征集：四赛道切换、中文时间节点与统一投稿入口。 */
+.submissions-content { margin-top: 40px; }
+.submissions-introduction, .submissions-notes { max-width: 850px; font-size: 16px; line-height: 1.95; }
+.submissions-introduction { margin-bottom: 34px; }
+.submissions-introduction p, .submissions-notes p { margin: 0 0 16px; }
+.submissions-track-shell { border: 1px solid #d6d6d6; }
+.submissions-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-bottom: 1px solid #d6d6d6;
+}
+.submissions-tab {
+  appearance: none;
+  min-width: 0;
+  min-height: 58px;
+  padding: 15px 10px;
+  border: 0;
+  border-right: 1px solid #d6d6d6;
+  border-radius: 0;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #171717;
+  background: #fff;
+  cursor: pointer;
+}
+.submissions-tab:last-child { border-right: 0; }
+.submissions-tab[aria-selected="true"] { color: #fff; background: #171717; }
+.submissions-tab:hover:not([aria-selected="true"]) { background: #f3f3f3; }
+.submissions-tab:focus-visible { outline: 2px solid #508bff; outline-offset: -4px; z-index: 1; position: relative; }
+.submissions-track-panel {
+  min-height: 124px;
+  padding: 25px 28px 28px;
+  font-size: 16px;
+  line-height: 1.9;
+}
+.submissions-track-panel p { margin: 0 0 14px; white-space: pre-line; }
+.submissions-track-panel p:last-child { margin-bottom: 0; }
+.submissions-milestones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 36px);
+  list-style: none;
+  padding: 0;
+  margin: 48px 0 0;
+}
+.submissions-milestone { min-width: 0; }
+.submissions-milestone-heading {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #555;
+}
+.submissions-milestone-date {
+  margin-top: 16px;
+  font-size: clamp(21px, 2.6vw, 32px);
+  line-height: 1.2;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.submissions-notes { margin-top: 34px; }
+.submissions-action { margin-top: 34px; }
+.submissions-submit-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+  padding: 10px 28px;
+  border: 1px solid #171717;
+  background: #171717;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+a.submissions-submit-link:hover, a.submissions-submit-link:focus-visible { background: #fff; color: #171717; }
+.submissions-submit-link.is-disabled { background: #f7f7f7; border-color: #ddd; color: #777; cursor: default; }
+@media (max-width: 760px) {
+  .submissions-content { margin-top: 30px; }
+  .submissions-tab { min-height: 52px; font-size: 15px; }
+  .submissions-track-panel { padding: 20px 18px 22px; min-height: 98px; font-size: 15px; }
+  .submissions-milestones { gap: 18px; }
+  .submissions-milestone-date { font-size: 21px; }
+}
+@media (max-width: 680px) {
+  .submissions-introduction, .submissions-notes { font-size: 15px; line-height: 1.85; }
+  .submissions-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .submissions-tab:nth-child(2) { border-right: 0; }
+  .submissions-tab:nth-child(-n+2) { border-bottom: 1px solid #d6d6d6; }
+  .submissions-milestones { grid-template-columns: 1fr; gap: 20px; padding: 22px 24px 26px; margin-top: 36px; }
+  .submissions-milestone-date { font-size: 26px; margin-top: 6px; }
+  .submissions-action { margin-top: 26px; }
+}
+
 /* 06现场体验：单列作品目录。五个条目共用同一种细线，不区分音游和设备。 */
 .experience-content { margin-top: 40px; }
 .experience-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; margin-bottom: 34px; }
@@ -628,106 +724,4 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
   .experience-item-name { font-size: 23px; margin-bottom: 12px; }
   .experience-item-summary { font-size: 16px; }
   .experience-item-description { font-size: 15px; }
-}
-
-/* 05创作作品征集：四赛道切换、三项CGS式关键节点与投稿入口。 */
-.submissions-content { margin-top: 40px; }
-.submissions-introduction, .submissions-notes { max-width: 850px; font-size: 16px; line-height: 1.95; }
-.submissions-introduction { margin-bottom: 34px; }
-.submissions-introduction p, .submissions-notes p { margin: 0 0 16px; }
-.submissions-track-shell { border: 1px solid #d6d6d6; }
-.submissions-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-bottom: 1px solid #d6d6d6;
-}
-.submissions-tab {
-  appearance: none;
-  min-width: 0;
-  min-height: 58px;
-  padding: 15px 10px;
-  border: 0;
-  border-right: 1px solid #d6d6d6;
-  border-radius: 0;
-  font: inherit;
-  font-size: 16px;
-  line-height: 1.5;
-  font-weight: 600;
-  color: #171717;
-  background: #fff;
-  cursor: pointer;
-}
-.submissions-tab:last-child { border-right: 0; }
-.submissions-tab[aria-selected="true"] { color: #fff; background: #171717; }
-.submissions-tab:hover:not([aria-selected="true"]) { background: #f3f3f3; }
-.submissions-tab:focus-visible { outline: 2px solid #508bff; outline-offset: -4px; z-index: 1; position: relative; }
-.submissions-track-panel {
-  min-height: 124px;
-  padding: 25px 28px 28px;
-  font-size: 16px;
-  line-height: 1.9;
-}
-.submissions-track-panel p { margin: 0 0 14px; white-space: pre-line; }
-.submissions-track-panel p:last-child { margin-bottom: 0; }
-.submissions-milestones {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(16px, 3vw, 36px);
-  list-style: none;
-  padding: 28px clamp(20px, 3.4vw, 38px) 32px;
-  margin: 48px 0 0;
-  color: #fff;
-  background: #0c0c0c;
-}
-.submissions-milestone { min-width: 0; }
-.submissions-milestone-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #40e77b;
-}
-.submissions-milestone-en::before { content: "·"; margin-right: 8px; }
-.submissions-milestone-date {
-  margin-top: 16px;
-  font-size: clamp(21px, 2.6vw, 32px);
-  line-height: 1.2;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.submissions-notes { margin-top: 34px; }
-.submissions-action { margin-top: 34px; }
-.submissions-submit-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 45px;
-  padding: 10px 28px;
-  border: 1px solid #171717;
-  background: #171717;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: none;
-}
-a.submissions-submit-link:hover, a.submissions-submit-link:focus-visible { background: #fff; color: #171717; }
-.submissions-submit-link.is-disabled { background: #f7f7f7; border-color: #ddd; color: #777; cursor: default; }
-@media (max-width: 760px) {
-  .submissions-content { margin-top: 30px; }
-  .submissions-tab { min-height: 52px; font-size: 15px; }
-  .submissions-track-panel { padding: 20px 18px 22px; min-height: 98px; font-size: 15px; }
-  .submissions-milestones { gap: 18px; }
-  .submissions-milestone-date { font-size: 21px; }
-}
-@media (max-width: 680px) {
-  .submissions-introduction, .submissions-notes { font-size: 15px; line-height: 1.85; }
-  .submissions-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .submissions-tab:nth-child(2) { border-right: 0; }
-  .submissions-tab:nth-child(-n+2) { border-bottom: 1px solid #d6d6d6; }
-  .submissions-milestones { grid-template-columns: 1fr; gap: 20px; padding: 22px 24px 26px; margin-top: 36px; }
-  .submissions-milestone-date { font-size: 26px; margin-top: 6px; }
-  .submissions-action { margin-top: 26px; }
 }

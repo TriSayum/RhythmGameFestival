@@ -426,11 +426,6 @@
         const milestone = make("li", "submissions-milestone");
         const heading = make("div", "submissions-milestone-heading");
         heading.appendChild(make("span", "submissions-milestone-cn", item.label));
-        if (item.labelEn) {
-          const english = make("span", "submissions-milestone-en", item.labelEn);
-          english.lang = "en";
-          heading.appendChild(english);
-        }
         milestone.append(heading, make("div", "submissions-milestone-date", item.date));
         list.appendChild(milestone);
       });
