@@ -357,6 +357,119 @@
   }
 
 
+
+  /* 05创作作品征集：四选一标签与正文共用边框，三项关键日期另成一栏。 */
+  function renderSubmissions() {
+    const root = document.getElementById("submissions-content");
+    const config = data.submissions;
+    if (!root || !config) return;
+
+    if (config.introduction?.length) {
+      const intro = make("div", "submissions-introduction");
+      addParagraphs(intro, config.introduction);
+      root.appendChild(intro);
+    }
+
+    if (config.tracks?.length) {
+      const shell = make("div", "submissions-track-shell");
+      const tablist = make("div", "submissions-tabs");
+      tablist.setAttribute("role", "tablist");
+      tablist.setAttribute("aria-label", "征集赛道");
+      const panel = make("div", "submissions-track-panel");
+      panel.id = "submissions-track-panel";
+      panel.tabIndex = 0;
+      panel.setAttribute("role", "tabpanel");
+      const tabs = config.tracks.map(function (track) {
+        const tab = make("button", "submissions-tab", track.label);
+        tab.type = "button";
+        tab.id = "submissions-tab-" + track.id;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute("aria-controls", panel.id);
+        tablist.appendChild(tab);
+        return tab;
+      });
+      function select(index, shouldFocus) {
+        tabs.forEach(function (tab, i) {
+          tab.setAttribute("aria-selected", i === index ? "true" : "false");
+          tab.tabIndex = i === index ? 0 : -1;
+        });
+        panel.setAttribute("aria-labelledby", tabs[index].id);
+        panel.replaceChildren();
+        addParagraphs(panel, config.tracks[index].paragraphs);
+        if (shouldFocus) tabs[index].focus();
+      }
+      tabs.forEach(function (tab, index) {
+        tab.addEventListener("click", function () { select(index, false); });
+        tab.addEventListener("keydown", function (event) {
+          let next;
+          switch (event.key) {
+            case "ArrowRight": next = (index + 1) % tabs.length; break;
+            case "ArrowLeft": next = (index - 1 + tabs.length) % tabs.length; break;
+            case "ArrowDown": next = (index + (window.matchMedia?.("(max-width: 680px)").matches ? 2 : 1)) % tabs.length; break;
+            case "ArrowUp": next = (index + tabs.length - (window.matchMedia?.("(max-width: 680px)").matches ? 2 : 1)) % tabs.length; break;
+            case "Home": next = 0; break;
+            case "End": next = tabs.length - 1; break;
+            default: return;
+          }
+          event.preventDefault();
+          select(next, true);
+        });
+      });
+      shell.append(tablist, panel);
+      root.appendChild(shell);
+      select(0, false);
+    }
+
+    if (config.milestones?.length) {
+      const list = make("ol", "submissions-milestones");
+      config.milestones.forEach(function (item) {
+        const milestone = make("li", "submissions-milestone");
+        const heading = make("div", "submissions-milestone-heading");
+        heading.appendChild(make("span", "submissions-milestone-cn", item.label));
+        if (item.labelEn) {
+          const english = make("span", "submissions-milestone-en", item.labelEn);
+          english.lang = "en";
+          heading.appendChild(english);
+        }
+        milestone.append(heading, make("div", "submissions-milestone-date", item.date));
+        list.appendChild(milestone);
+      });
+      root.appendChild(list);
+    }
+
+    if (config.notes?.length) {
+      const notes = make("div", "submissions-notes");
+      addParagraphs(notes, config.notes);
+      root.appendChild(notes);
+    }
+
+    if (config.submission) {
+      const action = make("div", "submissions-action");
+      const setting = config.submission;
+      let target = "";
+      if (setting.enabled && typeof setting.url === "string") {
+        try {
+          const parsed = new URL(setting.url);
+          if (parsed.protocol === "https:") target = parsed.href;
+        } catch (_) { /* 未填写链接或链接无效时关闭投稿 */ }
+      }
+      const label = setting.label + " ↗";
+      if (target) {
+        const link = make("a", "submissions-submit-link", label);
+        link.href = target;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        action.appendChild(link);
+      } else {
+        const unavailable = make("span", "submissions-submit-link is-disabled", label);
+        unavailable.setAttribute("aria-disabled", "true");
+        unavailable.title = "投稿入口尚未开放";
+        action.appendChild(unavailable);
+      }
+      root.appendChild(action);
+    }
+  }
+
   /* 06现场体验：四款游戏与设备共用一份顺序列表，不为设备设置特别分隔。 */
   function renderExperience() {
     const root = document.getElementById("experience-content");
@@ -435,5 +548,6 @@
   renderSchedule();
   renderTournament();
   renderSalon();
+  renderSubmissions();
   renderExperience();
 }());

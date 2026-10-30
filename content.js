@@ -19,6 +19,10 @@
  * equipment：name与description纯文字，不添加图片或额外分隔。
  * 初始均设为false，避免对外展示尚未确定的内容。
  */
+/* 05征集：introduction为无标题征集介绍；tracks[].paragraphs为各赛道文本；
+ * milestones是三项日期节点；notes为日期下方无标题补充说明；
+ * submission.url填写腾讯文档HTTPS链接，enabled设true时开放投稿。
+ */
 window.FESTIVAL_CONTENT = {
   "site": {
     "name": "西柚音游节",
@@ -237,5 +241,56 @@ window.FESTIVAL_CONTENT = {
         "description": ""
       }
     ]
+  },
+  "submissions": {
+    "introduction": [],
+    "tracks": [
+      {
+        "id": "game",
+        "label": "游戏Demo",
+        "paragraphs": []
+      },
+      {
+        "id": "music",
+        "label": "音乐",
+        "paragraphs": []
+      },
+      {
+        "id": "chart",
+        "label": "谱面",
+        "paragraphs": []
+      },
+      {
+        "id": "article",
+        "label": "观察文章",
+        "paragraphs": []
+      }
+    ],
+    "milestones": [
+      {
+        "id": "open",
+        "label": "征集开放",
+        "labelEn": "Submissions Open",
+        "date": "2026.11.01"
+      },
+      {
+        "id": "deadline",
+        "label": "投稿截止",
+        "labelEn": "Submission Deadline",
+        "date": "2026.11.20"
+      },
+      {
+        "id": "showcase",
+        "label": "现场展示",
+        "labelEn": "On-site Showcase",
+        "date": "2026.11.22"
+      }
+    ],
+    "notes": [],
+    "submission": {
+      "label": "作品投稿",
+      "url": "",
+      "enabled": false
+    }
   }
 };
