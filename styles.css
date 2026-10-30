@@ -105,31 +105,44 @@ a {
   color: #777;
 }
 
+/* 页尾：全幅浅灰色收尾区域，不沿用正文内容最大宽度。 */
 .site-footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
   align-items: end;
-  gap: 32px 48px;
-  max-width: 1200px;
+  gap: 24px 48px;
+  width: 100%;
   min-width: 0;
-  margin-inline: auto;
-  padding: 48px clamp(20px, 5vw, 72px) 58px;
+  margin: 0;
+  padding: 31px clamp(20px, 3.2vw, 52px) 35px;
+  border-top: 1px solid #e5e5e5;
+  background: #fafafa;
 }
 .footer-left, .footer-right { min-width: 0; }
-.footer-left p, .footer-right p { margin: 0; }
-.footer-theme { font-size: 14px; font-weight: 600; line-height: 1.5; }
-.footer-name { margin-top: 8px !important; font-size: clamp(22px, 2.5vw, 27px); font-weight: 600; line-height: 1.4; }
-.footer-name-en { margin-top: 3px !important; font-size: 14px; line-height: 1.65; }
-.footer-date { margin-top: 14px !important; font-size: 14px; line-height: 1.5; color: #555; font-variant-numeric: tabular-nums; }
+.site-footer p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #666;
+}
+/* 只有首行略突出；其余六行使用完全相同的字体、字号及颜色。 */
+.site-footer .footer-theme {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #333;
+}
 .footer-right { justify-self: end; }
-.footer-credit { font-size: 14px; line-height: 1.65; }
-.footer-credit + .footer-credit { margin-top: 7px; }
+/* 三行署名约占左侧普通文字3.5行的高度，并与左栏底部齐平。 */
+.site-footer .footer-credit { line-height: 2.05; }
+/* 章节内容区的分割线由全幅页尾统一接管，避免相邻两条边线。 */
+#faq.page-section { border-bottom: 0; }
 @media (max-width: 680px) {
   .site-footer {
     grid-template-columns: minmax(0, 1fr);
-    gap: 30px;
-    padding-top: 38px;
-    padding-bottom: 45px;
+    gap: 20px;
+    padding: 27px 20px 32px;
   }
   .footer-right { justify-self: start; }
 }
