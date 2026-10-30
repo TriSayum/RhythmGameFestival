@@ -32,6 +32,10 @@
  * items：增添{question:"问题", answer:"回答", visible:true}后即可显示Q/A。
  * visible=false或问题/回答未填完时均不显示，答案允许用\\n换行。
  */
+
+/* 页尾信息：左侧theme/name/nameEn/date四行，右侧credits三行。
+ * 左右底部对齐；不包含返回顶部或额外版权信息。
+ */
 window.FESTIVAL_CONTENT = {
   "site": {
     "name": "西柚音游节",
@@ -478,6 +482,17 @@ window.FESTIVAL_CONTENT = {
         "answer": "",
         "visible": false
       }
+    ]
+  },
+  "footer": {
+    "theme": "空间/SPACE · CRGF 2026",
+    "name": "2026 西柚音游节",
+    "nameEn": "Citrus Rhythm Game Festival 2026",
+    "date": "2026.11.22",
+    "credits": [
+      "主办：未来媒体协会·音乐部",
+      "联合主办：TRY动漫社·音游部",
+      "活动筹备：COT"
     ]
   }
 };

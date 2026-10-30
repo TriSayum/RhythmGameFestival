@@ -593,6 +593,29 @@
     if (list.childElementCount) root.appendChild(list);
   }
 
+
+  /* 页尾：活动名称与署名两栏，内容来自content.js，底部对齐。 */
+  function renderFooter() {
+    const root = document.getElementById("site-footer");
+    const footer = data.footer;
+    if (!root || !footer) return;
+
+    const left = make("div", "footer-left");
+    left.appendChild(make("p", "footer-theme", footer.theme));
+    left.appendChild(make("p", "footer-name", footer.name));
+    const english = make("p", "footer-name-en", footer.nameEn);
+    english.lang = "en";
+    left.appendChild(english);
+    left.appendChild(make("p", "footer-date", footer.date));
+
+    const right = make("div", "footer-right");
+    (footer.credits || []).forEach(function (credit) {
+      right.appendChild(make("p", "footer-credit", credit));
+    });
+
+    root.append(left, right);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -623,4 +646,5 @@
   renderSubmissions();
   renderExperience();
   renderFaq();
+  renderFooter();
 }());
