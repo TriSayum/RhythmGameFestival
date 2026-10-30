@@ -395,7 +395,28 @@
         });
         panel.setAttribute("aria-labelledby", tabs[index].id);
         panel.replaceChildren();
-        addParagraphs(panel, config.tracks[index].paragraphs);
+        const track = config.tracks[index];
+        if (track.blocks?.length) {
+          // 规则文字完全由数据驱动，支持正文、小标题和列表；不解析HTML。
+          track.blocks.forEach(function (block) {
+            if (block.type === "paragraph") {
+              panel.appendChild(make("p", "submissions-track-paragraph", block.text));
+            } else if (block.type === "heading") {
+              panel.appendChild(make("h3", "submissions-track-heading", block.text));
+            } else if (block.type === "list") {
+              const list = make("ul", "submissions-track-list");
+              (block.items || []).forEach(function (entry) {
+                const item = make("li", "submissions-track-list-item");
+                if (entry.label) item.appendChild(make("strong", "", entry.label + "："));
+                if (entry.text) item.appendChild(document.createTextNode(entry.text));
+                list.appendChild(item);
+              });
+              panel.appendChild(list);
+            }
+          });
+        } else {
+          addParagraphs(panel, track.paragraphs);
+        }
         if (shouldFocus) tabs[index].focus();
       }
       tabs.forEach(function (tab, index) {
