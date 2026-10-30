@@ -226,7 +226,7 @@ window.FESTIVAL_CONTENT = {
         "visible": true,
         "name": "忒伊亚零",
         "summary": "由COT全栈开发的2026动院毕设展音游作品",
-        "description": "《忒伊亚零》是一款融合了弹幕躲避的3D俯视角音乐游戏。\n*只写这么点不是因为犯懒了是因为真就只有这么多可以介绍的了QAQ",
+        "description": "《忒伊亚零》是一款融合了弹幕躲避的3D音乐游戏。\n*只写这么点不是因为犯懒了是因为真就只有这么多可以介绍的了QAQ",
         "image": "./assets/experience/theia_zero_poster.webp"
       },
       {
