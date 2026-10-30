@@ -189,7 +189,9 @@ window.FESTIVAL_CONTENT = {
     }
   },
   "experience": {
-    "introduction": [],
+    "introduction": [
+      "除了上述内容，音乐部还将在现场准备数款音乐游戏作品及相关设备，欢迎大家在活动期间自由体验。"
+    ],
     "items": [
       {
         "id": "in-falsus",
