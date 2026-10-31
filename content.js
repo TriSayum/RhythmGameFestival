@@ -159,11 +159,11 @@ window.FESTIVAL_CONTENT = {
       }
     ],
     "overlayWords": [
-      "SPACE",
-      "CITRUS",
-      "RHYTHM",
-      "GAME",
-      "FESTIVAL",
+      "Space",
+      "Citrus",
+      "Rhythm",
+      "Game",
+      "Festival",
       "2026"
     ]
   },

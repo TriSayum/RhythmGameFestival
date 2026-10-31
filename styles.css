@@ -1993,7 +1993,7 @@ a.faq-form-link:active .button-label { transform: none; }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * 主视觉第三轮：双信息块大灰字、简化主体文字和宽幅柔光
- * DOM中的六个灰字始终按SPACE→CITRUS→RHYTHM→GAME→FESTIVAL→2026排列。
+ * 灰字按Space→Citrus→Rhythm→Game→Festival→2026顺序错位排布。
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 /* 信息块只保留白色年份／活动名／日期、繁体主题字／主会场地点。
@@ -2014,7 +2014,7 @@ a.faq-form-link:active .button-label { transform: none; }
   font-size: clamp(74px, 7.8vw, 124px);
   line-height: 1.02;
   letter-spacing: -.045em;
-  margin: 0 0 .04em clamp(10px,1.4vw,26px);
+  margin: 0 0 .04em 0;
   text-shadow: 0 3px 19px rgba(3,10,20,.46);
 }
 .hero-title-name {
@@ -2028,7 +2028,7 @@ a.faq-form-link:active .button-label { transform: none; }
 .hero-date {
   position: relative;
   z-index: 3;
-  margin: 12px 0 0 9px;
+  margin: 12px 0 0 0;
   text-shadow: 0 2px 14px rgba(3,10,20,.5);
 }
 .hero-topic {
@@ -2078,7 +2078,7 @@ a.faq-form-link:active .button-label { transform: none; }
 .hero-primary-overlay .hero-overlay-word--5 { top: 62%; left: 14%; font-size: clamp(57px,5.8vw,94px); }
 .hero-primary-overlay .hero-overlay-word--6 { top: 79%; left: 59%; }
 /* 右块：同样保持词序，以右侧偏移与半行错高呈现另一种排列。 */
-.hero-secondary-overlay .hero-overlay-word--1 { top: 0%; right: 21%; }
+.hero-secondary-overlay .hero-overlay-word--1 { top: 7%; right: 8%; }
 .hero-secondary-overlay .hero-overlay-word--2 { top: 15%; right: 0%; font-size: clamp(56px,5.9vw,95px); }
 .hero-secondary-overlay .hero-overlay-word--3 { top: 33%; right: 33%; }
 .hero-secondary-overlay .hero-overlay-word--4 { top: 44%; right: 2%; font-size: clamp(58px,5.9vw,94px); }
@@ -2096,13 +2096,13 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-title-year {
     font-size: clamp(54px,13.5vw,81px);
     line-height: 1.02;
-    margin: 0 0 2px 8px;
+    margin: 0 0 2px 0;
   }
   .hero-title-name {
     font-size: clamp(35px,9.6vw,50px);
     letter-spacing: .018em;
   }
-  .hero-date { font-size: clamp(23px,6.4vw,34px); margin: 9px 0 0 5px; }
+  .hero-date { font-size: clamp(23px,6.4vw,34px); margin: 9px 0 0 0; }
   .hero-topic { font-size: clamp(86px,25.5vw,135px); letter-spacing: -.005em; }
   .hero-venue { font-size: clamp(21px,5.9vw,31px); }
   .hero-word-overlay {
@@ -2110,6 +2110,11 @@ a.faq-form-link:active .button-label { transform: none; }
     height: clamp(172px,48vw,235px);
   }
   .hero-primary-overlay { left: 0; top: -15px; }
+  /* 手机端的Citrus/Game/2026原先向右伸出太多，整体内收。 */
+  .hero-primary-overlay .hero-overlay-word--2 { left: 25%; }
+  .hero-primary-overlay .hero-overlay-word--4 { left: 35%; }
+  .hero-primary-overlay .hero-overlay-word--6 { left: 34%; }
+  .hero-secondary-overlay .hero-overlay-word--1 { top: 7%; right: 15%; }
   .hero-secondary-overlay { right: -5px; bottom: -20px; }
   .hero-overlay-word {
     font-size: clamp(28px,8.3vw,43px);
@@ -2123,6 +2128,13 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-secondary-overlay .hero-overlay-word--4,
   .hero-secondary-overlay .hero-overlay-word--5 {
     font-size: clamp(28px,8vw,42px);
+  }
+  /* WebKit中ui-monospace映射系统SF Mono；Android继续用可用等宽回退。 */
+  .hero-title-year, .hero-date, .hero-overlay-word,
+  .hero-fragment, .hero-fragment-label, .hero-fragment-text {
+    font-family: ui-monospace, "SFMono-Regular", "Menlo", "Monaco",
+                 "Consolas", "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
   }
   .hero-fragment { font-size: 8px; max-width: min(245px,74vw); }
   .hero-fragment:nth-child(n+5) { display: flex; }

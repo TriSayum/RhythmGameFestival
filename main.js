@@ -810,7 +810,7 @@
     function makeOverlay(extraClass) {
       const overlay = make("div", "hero-word-overlay " + extraClass);
       overlay.setAttribute("aria-hidden", "true");
-      (conf.overlayWords || ["SPACE","CITRUS","RHYTHM","GAME","FESTIVAL","2026"])
+      (conf.overlayWords || ["Space","Citrus","Rhythm","Game","Festival","2026"])
         .forEach(function (word, index) {
           overlay.appendChild(make("span", "hero-overlay-word hero-overlay-word--" + (index + 1), word));
         });
