@@ -817,23 +817,31 @@
     art.appendChild(fragments);
 
     const primary = make("div", "hero-primary");
-    primary.appendChild(make("p", "hero-overline", conf.signature + "   /   SPACE"));
+    primary.appendChild(make("p", "hero-overline", "CRGF / 2026  ·  SPACE"));
+    primary.appendChild(make("p", "hero-primary-serial", "CITRUS RHYTHM GAME FESTIVAL   /   " + conf.signature));
     const h1 = make("h1", "hero-title");
     h1.appendChild(make("span", "hero-title-year", conf.year));
     h1.appendChild(make("span", "hero-title-name", conf.festivalName));
     primary.appendChild(h1);
     primary.appendChild(make("p", "hero-date", data.footer.date));
     primary.appendChild(make("p", "hero-space-tag", conf.topicEn));
+    primary.appendChild(make("p", "hero-primary-footnote", conf.signature + " / " + data.footer.date));
 
     const secondary = make("div", "hero-secondary");
     secondary.appendChild(make("p", "hero-secondary-index", "SPACE / " + conf.signature));
+    secondary.appendChild(make("span", "hero-topic-echo", conf.topicEn));
+    secondary.appendChild(make("p", "hero-secondary-serial", "EDITION 01 / 2026.11.22"));
     secondary.appendChild(make("h2", "hero-topic", conf.topicDisplay));
     secondary.appendChild(make("p", "hero-venue", program.mainVenue));
     const english = make("p", "hero-name-en", data.site.nameEn);
     english.lang = "en";
     secondary.appendChild(english);
+    secondary.appendChild(make("p", "hero-secondary-footnote", conf.signature + "  /  SPACE  /  2026"));
     root.append(primary, secondary);
 
+    /* 鼠标靠近时逐渐照亮编码，代替推开位置的排斥互动。
+     * 文字完全不移动，因此不会与主信息块产生新的碰撞。
+     */
     const finePointer = window.matchMedia?.("(pointer: fine)")?.matches;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (!finePointer || reduced) return;
@@ -843,21 +851,18 @@
     function update() {
       frame = 0;
       nodes.forEach(function (node) {
-        let dx = 0, dy = 0;
-        if (pointer) {
+        let intensity = 0;
+        if (pointer && node.getClientRects().length) {
           const box = node.getBoundingClientRect();
-          const cx = box.left + box.width / 2;
-          const cy = box.top + box.height / 2;
-          const vx = cx - pointer.x, vy = cy - pointer.y;
-          const distance = Math.hypot(vx, vy);
-          if (distance < 165 && distance > .001) {
-            const push = Math.pow(1 - distance / 165, 1.6) * 19;
-            dx = vx / distance * push;
-            dy = vy / distance * push;
-          }
+          const dx = box.left + box.width / 2 - pointer.x;
+          const dy = box.top + box.height / 2 - pointer.y;
+          const distance = Math.hypot(dx, dy);
+          intensity = Math.pow(Math.max(0, 1 - distance / 220), 1.3);
         }
-        node.style.setProperty("--repel-x", dx.toFixed(2) + "px");
-        node.style.setProperty("--repel-y", dy.toFixed(2) + "px");
+        node.style.opacity = (0.60 + intensity * 0.4).toFixed(3);
+        node.style.textShadow = intensity > 0.02 ?
+          "0 0 " + (5 + intensity * 12).toFixed(1) + "px rgba(48,227,255," +
+          (intensity * .60).toFixed(2) + ")" : "none";
       });
     }
     function schedule() {
@@ -918,8 +923,7 @@
         node.classList.remove("hero-fragment--unplaced");
         node.style.removeProperty("left");
         node.style.removeProperty("top");
-        node.style.setProperty("--repel-x", "0px");
-        node.style.setProperty("--repel-y", "0px");
+        // 新互动仅改变亮度，编码位置完全由避障结果控制。
       });
 
       nodes.forEach(function (node, index) {
@@ -998,6 +1002,29 @@
     if (document.fonts?.ready) document.fonts.ready.then(schedule);
   }
 
+
+  /* 初次加载时确定首屏高度，之后浏览器工具栏的伸缩不会改动主视觉。
+   * 只有横竖屏切换或实际窗口宽度变化才重新计算。
+   */
+  function setupInitialHeroHeight() {
+    const header = document.querySelector(".site-header");
+    const hero = document.getElementById("hero");
+    if (!header || !hero) return;
+    let viewportWidth = document.documentElement.clientWidth;
+    function measure() {
+      const headerHeight = Math.ceil(header.getBoundingClientRect().height);
+      const height = Math.max(1, Math.ceil(window.innerHeight - headerHeight) + 1);
+      document.documentElement.style.setProperty("--hero-initial-height", height + "px");
+    }
+    measure();
+    window.addEventListener("resize", function () {
+      const width = document.documentElement.clientWidth;
+      if (Math.abs(width - viewportWidth) < 2) return;
+      viewportWidth = width;
+      measure();
+    }, { passive: true });
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -1021,6 +1048,7 @@
   renderHeader();
   setupMobileNavigation();
   setupStickyHeaderOffset();
+  setupInitialHeroHeight();
   renderHero();
   setupHeroFragmentLayout();
   renderHeadings();
