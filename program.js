@@ -1,14 +1,16 @@
 /* 02日程与04茶欢会共用的唯一节目数据。
  * schedule.main：按时间顺序列出主会场节目及子节目。
  * schedule.ongoing[].target：同期开放卡片跳转的章节ID。
- * schedule.mainHeader / ongoingHeader：02两组黑色标题条中的日期、地点。
- * salon.info：04每场分享标题下复用的日期与地点，场次时间来自节目本身。
+ * mainVenue：主会场唯一地点数据。02两大横幅、03移动组、04全部分享和主视觉统一使用。
+ * schedule.mainHeader / ongoingHeader：仅保存日期，地点由mainVenue提供。
+ * salon.info：04每场分享标题下复用的日期，地点来自mainVenue。
  * salon.introduction：04的介绍段落，暂时留空。
  * salon.speakers：讲者名称、可选头像路径和多行介绍（bio数组）。
  * 正式分享标记 type: "talk" 并使用 speakerId 关联讲者。
  * 02显示所有节目；04只显示正式分享，不显示会前预热。
  */
 window.FESTIVAL_PROGRAM = {
+  "mainVenue": "具体教室待定",
   "schedule": {
     "mainTitle": "主会场",
     "ongoingTitle": "同期开放",
@@ -106,12 +108,10 @@ window.FESTIVAL_PROGRAM = {
       }
     ],
     "mainHeader": {
-      "date": "11月22日",
-      "venue": "具体教室待定"
+      "date": "11月22日"
     },
     "ongoingHeader": {
-      "date": "11月22日",
-      "venue": "具体教室待定"
+      "date": "11月22日"
     }
   },
   "salon": {
@@ -120,8 +120,7 @@ window.FESTIVAL_PROGRAM = {
       "今年，音乐部还一并邀请了其他分享者，共同带来这场主题分享茶欢会。现场将准备简单茶点，希望大家能够在轻松的氛围中聆听分享，并一起交流各自的观察与思考。"
     ],
     "info": {
-      "date": "11月22日",
-      "venue": "具体教室待定"
+      "date": "11月22日"
     },
     "speakers": {
       "cot": {

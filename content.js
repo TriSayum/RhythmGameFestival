@@ -36,10 +36,13 @@
 /* 页尾信息：左侧theme/name/nameEn/date四行，右侧credits三行。
  * 左右底部对齐；不包含返回顶部或额外版权信息。
  */
+/* 主视觉字标与真实编码集中于hero；日期使用footer.date，地点统一使用program.mainVenue。
+ * 仅首屏与01的大主题字使用繁体“空間”，其他文字沿用简体“空间”。
+ */
 window.FESTIVAL_CONTENT = {
   "site": {
-    "name": "西柚音游节",
-    "nameEn": "Citrus Rhythm Game Festival",
+    "name": "2026 西柚音游节",
+    "nameEn": "Citrus Rhythm Game Festival 2026",
     "navigation": [
       {
         "id": "intro",
@@ -111,6 +114,55 @@ window.FESTIVAL_CONTENT = {
       }
     ]
   },
+  "hero": {
+    "year": "2026",
+    "festivalName": "西柚音游节",
+    "topicDisplay": "空間",
+    "topicEn": "SPACE",
+    "signature": "CRGF.2026",
+    "codes": [
+      {
+        "label": "UTF-8 / 简",
+        "text": "E7 A9 BA E9 97 B4"
+      },
+      {
+        "label": "UTF-8 / 繁",
+        "text": "E7 A9 BA E9 96 93"
+      },
+      {
+        "label": "URL / 简",
+        "text": "%E7%A9%BA%E9%97%B4"
+      },
+      {
+        "label": "URL / 繁",
+        "text": "%E7%A9%BA%E9%96%93"
+      },
+      {
+        "label": "BIN / 简",
+        "text": "11100111 10101001 10111010 11101001 10010111 10110100"
+      },
+      {
+        "label": "BIN / 繁",
+        "text": "11100111 10101001 10111010 11101001 10010110 10010011"
+      },
+      {
+        "label": "HEX / SPACE",
+        "text": "53 50 41 43 45"
+      },
+      {
+        "label": "BIN / SPACE",
+        "text": "01010011 01010000 01000001 01000011 01000101"
+      },
+      {
+        "label": "ID / EVENT",
+        "text": "CRGF.2026"
+      },
+      {
+        "label": "SYSTEM",
+        "text": "SPACE / CITRUS RHYTHM GAME FESTIVAL"
+      }
+    ]
+  },
   "intro": {
     "paragraphs": [
       "西柚音游节是由未来媒体协会·音乐部与TRY动漫社·音游部联合发起的音乐游戏活动日。",
@@ -124,7 +176,8 @@ window.FESTIVAL_CONTENT = {
         "空间并不止于游戏与音乐，它存在于创作者的构想之中，也存在于每一次分享、交流与相遇之间。当构想化为作品，当相遇引发共鸣，原本属于个人的空间，便有了向更多人敞开的可能。"
       ],
       "conclusion": "空间可以被看见、被听见、被碰见，也可以由我们共同创造。",
-      "invitation": "本届西柚音游节以「空间」为主题，邀请大家从词语本身、游戏、音乐、文化、情绪等不同视角展开探索。不必拘泥于某一种解释，也不必局限于某一种表现形式。"
+      "invitation": "本届西柚音游节以「空间」为主题，邀请大家从词语本身、游戏、音乐、文化、情绪等不同视角展开探索。不必拘泥于某一种解释，也不必局限于某一种表现形式。",
+      "displayName": "空間"
     }
   },
   "tournament": {
@@ -165,8 +218,6 @@ window.FESTIVAL_CONTENT = {
         "heading": "移动组",
         "date": "11月22日",
         "period": "上午",
-        "venue": "",
-        "venuePending": "具体教室待定",
         "games": [
           {
             "id": "phigros",
@@ -181,7 +232,8 @@ window.FESTIVAL_CONTENT = {
         ],
         "rulesSummary": "查看详细信息",
         "rules": [],
-        "pendingLabel": ""
+        "pendingLabel": "",
+        "venueRef": "main"
       }
     ],
     "registration": {

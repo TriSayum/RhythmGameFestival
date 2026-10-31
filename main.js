@@ -46,6 +46,39 @@
     document.title = data.site.name + " | " + data.site.nameEn;
   }
 
+  /* 移动端菜单：内容在页首下方平滑展开，不改变页首高度。 */
+  function setupMobileNavigation() {
+    const toggle = document.getElementById("nav-toggle");
+    const nav = document.getElementById("site-nav");
+    const header = document.querySelector(".site-header");
+    if (!toggle || !nav || !header) return;
+    function setOpen(open) {
+      header.classList.toggle("menu-open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "关闭导航菜单" : "展开导航菜单");
+    }
+    toggle.addEventListener("click", function () {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+    nav.addEventListener("click", function (event) {
+      if (event.target.closest("a")) setOpen(false);
+    });
+    const brand = document.getElementById("site-brand");
+    if (brand) brand.addEventListener("click", function () { setOpen(false); });
+    document.addEventListener("pointerdown", function (event) {
+      if (!header.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 760 && toggle.getAttribute("aria-expanded") === "true") setOpen(false);
+    }, { passive: true });
+  }
+
   function renderHeadings() {
     data.site.sections.forEach(function (item) {
       const root = document.getElementById(item.id + "-heading");
@@ -68,7 +101,7 @@
     const theme = data.intro.theme;
     const body = make("div", "theme-content");
     body.setAttribute("aria-labelledby", "theme-heading");
-    const heading = make("h3", "theme-heading", theme.name);
+    const heading = make("h3", "theme-heading", theme.displayName || theme.name);
     heading.id = "theme-heading";
     const en = make("span", "", "/" + theme.nameEn);
     en.lang = "en";
@@ -143,10 +176,10 @@
   /* 02日程：日期、地点与大标题统一显示在紧凑的深色横贯条内。 */
   function addScheduleBlockHeader(block, heading, meta) {
     const banner = make("div", "schedule-block-banner");
-    if (meta && (meta.date || meta.venue)) {
+    if (meta && (meta.date || program.mainVenue)) {
       const note = make("div", "schedule-block-meta");
       if (meta.date) note.appendChild(make("span", "schedule-block-date", meta.date));
-      if (meta.venue) note.appendChild(make("span", "schedule-block-venue", meta.venue));
+      if (program.mainVenue) note.appendChild(make("span", "schedule-block-venue", program.mainVenue));
       banner.appendChild(note);
     }
     banner.appendChild(make("h3", "schedule-block-heading", heading));
@@ -211,7 +244,7 @@
 
       const venueEntry = make("div", "tournament-group-meta-item");
       venueEntry.appendChild(make("dt", "tournament-group-meta-label", "地点"));
-      venueEntry.appendChild(make("dd", "tournament-group-meta-value", group.venue || group.venuePending || ""));
+      venueEntry.appendChild(make("dd", "tournament-group-meta-value", group.venueRef === "main" ? program.mainVenue : (group.venue || group.venuePending || "")));
       meta.append(dateEntry, venueEntry);
       card.appendChild(meta);
 
@@ -277,7 +310,8 @@
         }
       }
       if (destination) {
-        const link = make("a", "tournament-registration-link", group.label + " ↗");
+        const link = make("a", "tournament-registration-link");
+        link.appendChild(make("span", "button-label", group.label + " ↗"));
         link.href = destination;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
@@ -334,8 +368,8 @@
         range.appendChild(time(talk.end));
       }
       metadata.appendChild(range);
-      if (salon.info?.venue) {
-        metadata.appendChild(make("span", "salon-talk-venue", salon.info.venue));
+      if (program.mainVenue) {
+        metadata.appendChild(make("span", "salon-talk-venue", program.mainVenue));
       }
       subject.appendChild(metadata);
       row.appendChild(subject);
@@ -480,7 +514,8 @@
       }
       const label = setting.label + " ↗";
       if (target) {
-        const link = make("a", "submissions-submit-link", label);
+        const link = make("a", "submissions-submit-link");
+        link.appendChild(make("span", "button-label", label));
         link.href = target;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
@@ -570,7 +605,8 @@
       }
       const label = (faq.form.label || "提交问题") + " ↗";
       if (href) {
-        const link = make("a", "faq-form-link", label);
+        const link = make("a", "faq-form-link");
+        link.appendChild(make("span", "button-label", label));
         link.href = href;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
@@ -633,7 +669,7 @@
     const grid = document.querySelector(".bg-grid");
     if (!grid) return;
 
-    const cellSize = 250; // 每个250×250px区域按固定概率布置方块。
+    const cellSize = window.innerWidth <= 760 ? 195 : 250; // 手机按面积增密，不固定数量。
     const cells = new Set(); // 已经生成的方块不会因为内容展开/收起而重新创建。
     let pending = false;
 
@@ -752,6 +788,84 @@
     elements.forEach(function (element) { observer.observe(element); });
   }
 
+
+  /* 首屏：文字构图与编码装饰均使用普通DOM和CSS，便于继续调整。
+   * 主视觉保留中间区域，等待后续单独设计的视觉效果带。
+   */
+  function renderHero() {
+    const art = document.getElementById("hero-art");
+    const root = document.getElementById("hero-content");
+    const conf = data.hero;
+    if (!art || !root || !conf) return;
+
+    const ghost = make("div", "hero-ghost", conf.topicEn);
+    art.appendChild(ghost);
+    const fragments = make("div", "hero-fragments");
+    (conf.codes || []).forEach(function (entry) {
+      const fragment = make("div", "hero-fragment");
+      fragment.appendChild(make("span", "hero-fragment-label", entry.label));
+      fragment.appendChild(make("span", "hero-fragment-text", entry.text));
+      fragments.appendChild(fragment);
+    });
+    art.appendChild(fragments);
+
+    const primary = make("div", "hero-primary");
+    primary.appendChild(make("p", "hero-overline", conf.signature + "   /   SPACE"));
+    const h1 = make("h1", "hero-title");
+    h1.appendChild(make("span", "hero-title-year", conf.year));
+    h1.appendChild(make("span", "hero-title-name", conf.festivalName));
+    primary.appendChild(h1);
+    primary.appendChild(make("p", "hero-date", data.footer.date));
+    primary.appendChild(make("p", "hero-space-tag", conf.topicEn));
+
+    const secondary = make("div", "hero-secondary");
+    secondary.appendChild(make("p", "hero-secondary-index", "SPACE / " + conf.signature));
+    secondary.appendChild(make("h2", "hero-topic", conf.topicDisplay));
+    secondary.appendChild(make("p", "hero-venue", program.mainVenue));
+    const english = make("p", "hero-name-en", data.site.nameEn);
+    english.lang = "en";
+    secondary.appendChild(english);
+    root.append(primary, secondary);
+
+    const finePointer = window.matchMedia?.("(pointer: fine)")?.matches;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (!finePointer || reduced) return;
+    const nodes = Array.from(fragments.children);
+    let pointer = null;
+    let frame = 0;
+    function update() {
+      frame = 0;
+      nodes.forEach(function (node) {
+        let dx = 0, dy = 0;
+        if (pointer) {
+          const box = node.getBoundingClientRect();
+          const cx = box.left + box.width / 2;
+          const cy = box.top + box.height / 2;
+          const vx = cx - pointer.x, vy = cy - pointer.y;
+          const distance = Math.hypot(vx, vy);
+          if (distance < 165 && distance > .001) {
+            const push = Math.pow(1 - distance / 165, 1.6) * 19;
+            dx = vx / distance * push;
+            dy = vy / distance * push;
+          }
+        }
+        node.style.setProperty("--repel-x", dx.toFixed(2) + "px");
+        node.style.setProperty("--repel-y", dy.toFixed(2) + "px");
+      });
+    }
+    function schedule() {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    }
+    root.parentElement.addEventListener("pointermove", function (event) {
+      pointer = { x:event.clientX, y:event.clientY };
+      schedule();
+    }, { passive: true });
+    root.parentElement.addEventListener("pointerleave", function () {
+      pointer = null;
+      schedule();
+    });
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -773,7 +887,9 @@
   }
 
   renderHeader();
+  setupMobileNavigation();
   setupStickyHeaderOffset();
+  renderHero();
   renderHeadings();
   renderIntro();
   renderSchedule();
