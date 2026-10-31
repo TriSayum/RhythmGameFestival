@@ -616,6 +616,76 @@
     root.append(left, right);
   }
 
+
+  /* 整页背景：固定密度、确定性分布；手机端随宽度自然减少方块数量。
+   * 网格属于文档，不属于视口；章节高度或窗口尺寸变化时重新铺设。
+   */
+  function setupBackground() {
+    const grid = document.querySelector(".bg-grid");
+    if (!grid) return;
+
+    const cellSize = 250; // 每个250×250px区域按一定概率出现一个方块。
+    let lastWidth = 0;
+    let lastHeight = 0;
+    let pending = false;
+
+    function hash(column, row, salt) {
+      let value = Math.imul(column + 17 * salt, 374761393) ^
+                  Math.imul(row + 31 * salt, 668265263);
+      value = Math.imul(value ^ (value >>> 13), 1274126177);
+      return ((value ^ (value >>> 16)) >>> 0) / 4294967296;
+    }
+
+    function rebuild() {
+      pending = false;
+      const width = document.documentElement.clientWidth;
+      const height = Math.max(document.body.scrollHeight, window.innerHeight);
+      if (width === lastWidth && Math.abs(height - lastHeight) < 8) return;
+      lastWidth = width;
+      lastHeight = height;
+
+      const fragment = document.createDocumentFragment();
+      const columns = Math.ceil(width / cellSize);
+      const rows = Math.ceil(height / cellSize);
+      for (let row = 0; row < rows; row++) {
+        for (let column = 0; column < columns; column++) {
+          if (hash(column, row, 1) > .68) continue;
+          const x = (column + .16 + hash(column, row, 2) * .68) * cellSize;
+          const y = (row + .16 + hash(column, row, 3) * .68) * cellSize;
+          if (x >= width - 8 || y >= height - 8) continue;
+
+          const square = document.createElement("span");
+          square.className = "bg-square";
+          square.style.setProperty("--x", x.toFixed(1) + "px");
+          square.style.setProperty("--y", y.toFixed(1) + "px");
+          square.style.setProperty("--size", (9 + Math.floor(hash(column, row, 4) * 17)) + "px");
+          square.style.setProperty("--duration", (5.2 + hash(column, row, 5) * 3.5).toFixed(2) + "s");
+          square.style.setProperty("--delay", (-hash(column, row, 6) * 8).toFixed(2) + "s");
+          fragment.appendChild(square);
+        }
+      }
+      grid.replaceChildren(fragment);
+    }
+
+    function scheduleRebuild() {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(rebuild);
+    }
+
+    rebuild();
+    window.addEventListener("resize", scheduleRebuild, { passive: true });
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(scheduleRebuild);
+      ["app", "site-footer"].forEach(function (id) {
+        const element = document.getElementById(id);
+        if (element) observer.observe(element);
+      });
+      const header = document.querySelector(".site-header");
+      if (header) observer.observe(header);
+    }
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -647,4 +717,5 @@
   renderExperience();
   renderFaq();
   renderFooter();
+  setupBackground();
 }());
