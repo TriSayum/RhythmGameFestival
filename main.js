@@ -692,8 +692,8 @@
       glow.style.animationDelay = phaseDelay(11000, 0);
     }
     const orbs = document.querySelectorAll(".bg-orb");
-    const orbDurations = [36000, 44000, 51000];
-    const orbPhaseOffsets = [0, 11800, 27600];
+    const orbDurations = [62000, 72000, 83000];
+    const orbPhaseOffsets = [0, 16300, 35100];
     orbs.forEach(function (orb, index) {
       const duration = orbDurations[index] || 44000;
       orb.style.animationDelay = phaseDelay(duration, orbPhaseOffsets[index] || 0);
@@ -805,8 +805,19 @@
     const conf = data.hero;
     if (!art || !root || !conf) return;
 
-    const ghost = make("div", "hero-ghost", conf.topicEn);
-    art.appendChild(ghost);
+    // 两块大灰字叠层共享同一组原序词语，按错位的行阶组成视觉骨架。
+    // 真实主信息独立置于上层，叠层文字仅用于视觉陪衬。
+    function makeOverlay(extraClass) {
+      const overlay = make("div", "hero-word-overlay " + extraClass);
+      overlay.setAttribute("aria-hidden", "true");
+      (conf.overlayWords || ["SPACE","CITRUS","RHYTHM","GAME","FESTIVAL","2026"])
+        .forEach(function (word, index) {
+          overlay.appendChild(make("span", "hero-overlay-word hero-overlay-word--" + (index + 1), word));
+        });
+      return overlay;
+    }
+
+    // 小编码作为独立的一层，经后续避障算法放到不遮挡主信息的位置。
     const fragments = make("div", "hero-fragments");
     (conf.codes || []).forEach(function (entry) {
       const fragment = make("div", "hero-fragment");
@@ -817,26 +828,17 @@
     art.appendChild(fragments);
 
     const primary = make("div", "hero-primary");
-    primary.appendChild(make("p", "hero-overline", "CRGF / 2026  ·  SPACE"));
-    primary.appendChild(make("p", "hero-primary-serial", "CITRUS RHYTHM GAME FESTIVAL   /   " + conf.signature));
+    primary.appendChild(makeOverlay("hero-primary-overlay"));
     const h1 = make("h1", "hero-title");
     h1.appendChild(make("span", "hero-title-year", conf.year));
     h1.appendChild(make("span", "hero-title-name", conf.festivalName));
     primary.appendChild(h1);
     primary.appendChild(make("p", "hero-date", data.footer.date));
-    primary.appendChild(make("p", "hero-space-tag", conf.topicEn));
-    primary.appendChild(make("p", "hero-primary-footnote", conf.signature + " / " + data.footer.date));
 
     const secondary = make("div", "hero-secondary");
-    secondary.appendChild(make("p", "hero-secondary-index", "SPACE / " + conf.signature));
-    secondary.appendChild(make("span", "hero-topic-echo", conf.topicEn));
-    secondary.appendChild(make("p", "hero-secondary-serial", "EDITION 01 / 2026.11.22"));
+    secondary.appendChild(makeOverlay("hero-secondary-overlay"));
     secondary.appendChild(make("h2", "hero-topic", conf.topicDisplay));
     secondary.appendChild(make("p", "hero-venue", program.mainVenue));
-    const english = make("p", "hero-name-en", data.site.nameEn);
-    english.lang = "en";
-    secondary.appendChild(english);
-    secondary.appendChild(make("p", "hero-secondary-footnote", conf.signature + "  /  SPACE  /  2026"));
     root.append(primary, secondary);
 
     /* 鼠标靠近时逐渐照亮编码，代替推开位置的排斥互动。
@@ -904,8 +906,8 @@
       const height = heroBox.height;
       if (width <= 0 || height <= 0) return;
 
-      // 手机只保留四组短编码，始终优先保证重要信息完整可读。
-      const visibleCount = window.matchMedia("(max-width:760px)").matches ? 4 : nodes.length;
+      // 全部编码均尝试参与布局；仅在确实没有安全位置时隐藏。
+      const visibleCount = nodes.length;
       const protectedAreas = [primary, secondary].map(function (node) {
         const rect = node.getBoundingClientRect();
         return {
@@ -914,8 +916,8 @@
         };
       });
       const used = [];
-      const edge = width <= 760 ? 13 : 24;
-      const clearance = width <= 760 ? 23 : 29;
+      const edge = width <= 760 ? 9 : 20;
+      const clearance = width <= 760 ? 14 : 26;
 
       // 恢复初始CSS锚点以获取每个编码的偏好位置。
       group.classList.remove("is-arranged");
@@ -951,14 +953,14 @@
               y + itemHeight > height - edge) return;
           const box = {left:x, top:y, right:x+itemWidth, bottom:y+itemHeight};
           if (protectedAreas.some(area => overlaps(box, area, clearance))) return;
-          if (used.some(area => overlaps(box, area, 14))) return;
+          if (used.some(area => overlaps(box, area, width <= 760 ? 7 : 11))) return;
           // 主视觉中心留出未来视觉效果带的空间，排布优先靠近侧边。
           const centerX = x + itemWidth / 2;
           const centerY = y + itemHeight / 2;
           const central = centerX > width * .24 && centerX < width * .76 &&
                           centerY > height * .39 && centerY < height * .62;
           const dx = x - preferredX, dy = y - preferredY;
-          const score = dx * dx + dy * dy + (central ? 36000 : 0);
+          const score = dx * dx + dy * dy + (central ? (width <= 760 ? 5500 : 18000) : 0);
           if (score < bestScore) { bestScore = score; best = box; }
         }
         tryCandidate(preferredX, preferredY);

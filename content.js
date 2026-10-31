@@ -154,13 +154,17 @@ window.FESTIVAL_CONTENT = {
         "text": "01010011 01010000 01000001 01000011 01000101"
       },
       {
-        "label": "ID / EVENT",
-        "text": "CRGF.2026"
-      },
-      {
         "label": "SYSTEM",
-        "text": "SPACE / CITRUS RHYTHM GAME FESTIVAL"
+        "text": "SPACE / CRGF.2026"
       }
+    ],
+    "overlayWords": [
+      "SPACE",
+      "CITRUS",
+      "RHYTHM",
+      "GAME",
+      "FESTIVAL",
+      "2026"
     ]
   },
   "intro": {

@@ -1989,3 +1989,195 @@ a.faq-form-link:active .button-label { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-fragment { transition: none !important; }
 }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 主视觉第三轮：双信息块大灰字、简化主体文字和宽幅柔光
+ * DOM中的六个灰字始终按SPACE→CITRUS→RHYTHM→GAME→FESTIVAL→2026排列。
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 信息块只保留白色年份／活动名／日期、繁体主题字／主会场地点。
+ * 灰字作为独立图层，允许相互跨行和被主信息压盖。
+ */
+.hero-primary, .hero-secondary {
+  isolation: isolate;
+  overflow: visible;
+}
+.hero-primary { top: clamp(35px, 7%, 90px); }
+.hero-secondary { bottom: clamp(40px, 7%, 95px); padding-top: 0; }
+.hero-title { position: relative; z-index: 3; }
+.hero-title-year {
+  position: relative;
+  z-index: 3;
+  color: #f6fbff;
+  font-family: "Consolas","Liberation Mono","Courier New",monospace;
+  font-size: clamp(74px, 7.8vw, 124px);
+  line-height: 1.02;
+  letter-spacing: -.045em;
+  margin: 0 0 .04em clamp(10px,1.4vw,26px);
+  text-shadow: 0 3px 19px rgba(3,10,20,.46);
+}
+.hero-title-name {
+  position: relative;
+  z-index: 3;
+  font-size: clamp(58px,6.75vw,112px);
+  letter-spacing: .028em;
+  line-height: 1.1;
+  text-shadow: 0 3px 19px rgba(3,10,20,.46);
+}
+.hero-date {
+  position: relative;
+  z-index: 3;
+  margin: 12px 0 0 9px;
+  text-shadow: 0 2px 14px rgba(3,10,20,.5);
+}
+.hero-topic {
+  z-index: 3;
+  letter-spacing: .065em;
+  line-height: 1.12;
+  text-shadow: 0 3px 20px rgba(3,10,20,.55);
+}
+.hero-venue {
+  z-index: 3;
+  margin-top: 6px;
+  text-shadow: 0 2px 14px rgba(3,10,20,.5);
+}
+.hero-ghost { display: none; }
+
+/* 两组同词序词云：部分上下错开小于一行，空间由“有序单词”填充，
+ * 不把六个单词机械排列成六行。
+ */
+.hero-word-overlay {
+  position: absolute;
+  z-index: 0;
+  width: min(750px, 59vw);
+  height: clamp(290px, 29vw, 435px);
+  pointer-events: none;
+  overflow: visible;
+}
+.hero-primary-overlay { left: 6px; top: -42px; }
+.hero-secondary-overlay { right: -8px; bottom: -32px; width: min(705px, 56vw); }
+.hero-overlay-word {
+  position: absolute;
+  display: block;
+  z-index: 0;
+  white-space: nowrap;
+  font-family: "Consolas","Liberation Mono","Courier New",monospace;
+  font-size: clamp(58px,6.1vw,98px);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -.055em;
+  color: rgba(204,216,233,.39);
+  text-shadow: 0 2px 12px rgba(4,10,22,.11);
+}
+/* 左块：SPACE → CITRUS / RHYTHM ↗ GAME / FESTIVAL → 2026 */
+.hero-primary-overlay .hero-overlay-word--1 { top: 0%; left: 2%; }
+.hero-primary-overlay .hero-overlay-word--2 { top: 12%; left: 38%; font-size: clamp(57px,5.95vw,95px); }
+.hero-primary-overlay .hero-overlay-word--3 { top: 32%; left: 4%; }
+.hero-primary-overlay .hero-overlay-word--4 { top: 43%; left: 57%; font-size: clamp(57px,5.9vw,92px); }
+.hero-primary-overlay .hero-overlay-word--5 { top: 62%; left: 14%; font-size: clamp(57px,5.8vw,94px); }
+.hero-primary-overlay .hero-overlay-word--6 { top: 79%; left: 59%; }
+/* 右块：同样保持词序，以右侧偏移与半行错高呈现另一种排列。 */
+.hero-secondary-overlay .hero-overlay-word--1 { top: 0%; right: 21%; }
+.hero-secondary-overlay .hero-overlay-word--2 { top: 15%; right: 0%; font-size: clamp(56px,5.9vw,95px); }
+.hero-secondary-overlay .hero-overlay-word--3 { top: 33%; right: 33%; }
+.hero-secondary-overlay .hero-overlay-word--4 { top: 44%; right: 2%; font-size: clamp(58px,5.9vw,94px); }
+.hero-secondary-overlay .hero-overlay-word--5 { top: 65%; right: 21%; font-size: clamp(54px,5.7vw,91px); }
+.hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 1%; }
+.hero-fragments { z-index: 1; }
+.hero-content { z-index: 2; }
+
+/* 小编码优先尝试全部显示，手机端不再简单截断第5项以后。
+ * 确实没有避开两块主信息的安全位置时，仍交给布局算法隐藏。
+ */
+@media (max-width: 760px) {
+  .hero-primary { top: clamp(25px,5%,45px); left: 19px; }
+  .hero-secondary { right: 19px; bottom: clamp(24px,4%,40px); }
+  .hero-title-year {
+    font-size: clamp(54px,13.5vw,81px);
+    line-height: 1.02;
+    margin: 0 0 2px 8px;
+  }
+  .hero-title-name {
+    font-size: clamp(35px,9.6vw,50px);
+    letter-spacing: .018em;
+  }
+  .hero-date { font-size: clamp(23px,6.4vw,34px); margin: 9px 0 0 5px; }
+  .hero-topic { font-size: clamp(86px,25.5vw,135px); letter-spacing: -.005em; }
+  .hero-venue { font-size: clamp(21px,5.9vw,31px); }
+  .hero-word-overlay {
+    width: min(340px,87vw);
+    height: clamp(172px,48vw,235px);
+  }
+  .hero-primary-overlay { left: 0; top: -15px; }
+  .hero-secondary-overlay { right: -5px; bottom: -20px; }
+  .hero-overlay-word {
+    font-size: clamp(28px,8.3vw,43px);
+    letter-spacing: -.065em;
+    color: rgba(200,213,232,.33);
+  }
+  .hero-primary-overlay .hero-overlay-word--2,
+  .hero-primary-overlay .hero-overlay-word--4,
+  .hero-primary-overlay .hero-overlay-word--5,
+  .hero-secondary-overlay .hero-overlay-word--2,
+  .hero-secondary-overlay .hero-overlay-word--4,
+  .hero-secondary-overlay .hero-overlay-word--5 {
+    font-size: clamp(28px,8vw,42px);
+  }
+  .hero-fragment { font-size: 8px; max-width: min(245px,74vw); }
+  .hero-fragment:nth-child(n+5) { display: flex; }
+}
+
+/* 三个大范围光团互相漫射；运动幅度减小，变成缓慢游动的环境光，
+ * 而不是多个独立的小球。光团仍采用既有固定视口背景容器。
+ */
+.bg-orb {
+  width: clamp(520px,49vw,940px);
+  height: clamp(520px,49vw,940px);
+  filter: blur(83px);
+  opacity: .76;
+}
+.bg-orb--cyan {
+  background: radial-gradient(circle,
+    rgba(76,217,255,.20) 0%, rgba(40,162,242,.14) 25%,
+    rgba(22,117,208,.075) 49%,rgba(13,70,144,.027) 68%,transparent 86%);
+  animation-duration: 62s;
+}
+.bg-orb--violet {
+  background: radial-gradient(circle,
+    rgba(181,108,255,.19) 0%, rgba(122,72,228,.13) 25%,
+    rgba(90,45,178,.07) 49%,rgba(53,26,111,.024) 68%,transparent 86%);
+  animation-duration: 72s;
+}
+.bg-orb--teal {
+  background: radial-gradient(circle,
+    rgba(80,240,209,.17) 0%, rgba(46,185,193,.12) 25%,
+    rgba(16,120,152,.064) 49%,rgba(6,73,109,.025) 68%,transparent 86%);
+  animation-duration: 83s;
+}
+@keyframes orbFloatCyan {
+  0% { transform: translate3d(-5vw,-3vh,0) scale(.96); opacity: .66; }
+  50% { transform: translate3d(8vw,6vh,0) scale(1.09); opacity: .89; }
+  100% { transform: translate3d(13vw,-5vh,0) scale(1.02); opacity: .71; }
+}
+@keyframes orbFloatViolet {
+  0% { transform: translate3d(3vw,-4vh,0) scale(1.02); opacity: .67; }
+  50% { transform: translate3d(-9vw,7vh,0) scale(.98); opacity: .86; }
+  100% { transform: translate3d(-15vw,9vh,0) scale(1.08); opacity: .74; }
+}
+@keyframes orbFloatTeal {
+  0% { transform: translate3d(-6vw,5vh,0) scale(1.02); opacity: .67; }
+  50% { transform: translate3d(9vw,-10vh,0) scale(1.12); opacity: .88; }
+  100% { transform: translate3d(-5vw,-13vh,0) scale(.96); opacity: .73; }
+}
+@media (max-width:760px) {
+  .bg-orb {
+    width: clamp(350px,110vw,560px);
+    height: clamp(350px,110vw,560px);
+    filter: blur(62px);
+    opacity: .67;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb { animation: none !important; }
+}
