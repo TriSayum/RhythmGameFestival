@@ -292,9 +292,6 @@
       root.appendChild(intro);
     }
 
-    const heading = make("h3", "salon-list-heading", "分享安排");
-    root.appendChild(heading);
-
     const list = make("div", "salon-talk-list");
     const salonEvent = program.schedule.main.find(function (event) {
       return event.id === "salon";

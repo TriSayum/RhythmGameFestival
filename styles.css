@@ -32,31 +32,39 @@ body {
   --stroke: rgba(178, 194, 230, .18);
   --stroke-strong: rgba(178, 194, 230, .28);
   /* 唯一的全站主题色：固定青蓝色，避免与动态霓虹争夺注意力。 */
-  --theme-accent: #83dbf4;
-  --theme-banner-start: rgba(31, 85, 114, .94);
-  --theme-banner-end: rgba(21, 48, 77, .95);
+  --theme-accent: #30e3ff;
+  --theme-accent-soft: rgba(48, 227, 255, .54);
+  --theme-banner-start: #126e90;
+  --theme-banner-end: #174b70;
 }
 body { position: relative; min-height: 100vh; isolation: isolate; }
+/* 霓虹只占一个视口，固定不动，避免纵向重复造成“每一屏一个光晕”的分段感。 */
+.site-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--bg-base), var(--bg-base-2) 65%, #080b11);
+}
+.bg-gradient {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(ellipse 58% 50% at 15% 20%, var(--bg-glow-purple), transparent 78%),
+    radial-gradient(ellipse 58% 50% at 85% 46%, var(--bg-glow-cyan), transparent 78%),
+    radial-gradient(ellipse 60% 47% at 48% 85%, var(--bg-glow-teal), transparent 80%);
+  opacity: .66;
+  animation: bgGlowBreath 11s ease-in-out infinite alternate;
+}
+/* 仅网格、方块、扫描纹理随文档滚动；二者保持独立层级。 */
 .site-background {
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
-  background: linear-gradient(160deg, var(--bg-base), var(--bg-base-2) 65%, #080b11);
-}
-/* 以纵向重复的柔和色域覆盖整页；只调透明度以减少大面积重绘。 */
-.bg-gradient {
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(ellipse 58% 50% at 15% 20%, var(--bg-glow-purple), transparent 78%),
-    radial-gradient(ellipse 58% 50% at 85% 46%, var(--bg-glow-cyan), transparent 78%),
-    radial-gradient(ellipse 60% 47% at 48% 85%, var(--bg-glow-teal), transparent 80%);
-  background-size: 100% 1000px;
-  background-repeat: repeat-y;
-  opacity: .66;
-  animation: bgGlowBreath 11s ease-in-out infinite alternate;
+  background: transparent;
 }
 .bg-grid {
   position: absolute;
@@ -105,7 +113,6 @@ body { position: relative; min-height: 100vh; isolation: isolate; }
 }
 @media (max-width: 680px) {
   .bg-grid { background-size: 72px 72px; }
-  .bg-gradient { background-size: 100% 860px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .bg-gradient, .bg-square { animation: none !important; }
@@ -636,12 +643,6 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 .salon-content { margin-top: 40px; }
 .salon-introduction { max-width: 850px; font-size: 16px; line-height: 1.95; }
 .salon-introduction p { margin: 0 0 16px; }
-.salon-list-heading {
-  margin: 0 0 22px;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.4;
-}
 .salon-talk {
   display: grid;
   grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
@@ -691,7 +692,6 @@ a.tournament-registration-link:hover, a.tournament-registration-link:focus-visib
 @media (max-width: 680px) {
   .salon-content { margin-top: 30px; }
   .salon-talk-meta { gap: 4px 12px; }
-  .salon-list-heading { font-size: 18px; margin-bottom: 18px; }
   .salon-talk { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 25px 0 28px; }
   .salon-talk-title { font-size: 22px; }
   .salon-speaker-name { font-size: 18px; }
@@ -1030,13 +1030,40 @@ a.faq-form-link:hover, a.faq-form-link:focus-visible {
 a:focus-visible, button:focus-visible, summary:focus-visible { outline-color: #9cdeff; }
 
 
-/* 主题色仅用于活动级标题与日程两块横幅，其余正文颜色稳定。 */
-.page-section-heading .section-name { color: var(--theme-accent); }
-.theme-heading { color: var(--theme-accent); }
+/* 明亮青蓝主题色：重点信息明快，但正文和辅助文字保持稳定可读。 */
+.page-section-heading .section-name, .theme-heading { color: var(--theme-accent); }
 .site-nav a:hover, .site-nav a:focus-visible { color: var(--theme-accent); }
+/* 主会场、同期开放使用完整色块，不使用边框或左侧强调竖线。 */
 .schedule-block-banner {
   color: #f5fbff;
   background: linear-gradient(110deg, var(--theme-banner-start), var(--theme-banner-end));
-  border: 1px solid rgba(131, 219, 244, .42);
-  box-shadow: inset 3px 0 0 var(--theme-accent);
+  border: 0;
+  box-shadow: none;
 }
+/* 02：时间节点和纵向时间轴构成同一条青蓝色视觉路径。 */
+.timeline-time { color: var(--theme-accent); }
+.timeline::before { background: var(--theme-accent-soft); }
+.timeline-marker {
+  background: #0c1220;
+  border-color: var(--theme-accent);
+}
+.timeline-children { border-left-color: rgba(48, 227, 255, .32); }
+.timeline-child::before { border-color: var(--theme-accent-soft); }
+/* 03～07：只选择高一级的信息节点点缀主题色，不改变普通正文。 */
+.tournament-group-heading, .salon-talk-title,
+.experience-item-name, .faq-question .faq-prefix { color: var(--theme-accent); }
+.submissions-milestone-heading { color: var(--theme-accent); font-weight: 600; }
+/* 05：四个选项统一使用不透明背景，选中项使用完整的青蓝深色块。 */
+.submissions-tab {
+  background: #111725;
+  border-color: var(--stroke);
+}
+.submissions-tab[aria-selected="true"] {
+  background: #175b72;
+  color: #fff;
+  box-shadow: inset 0 -3px 0 var(--theme-accent);
+}
+.submissions-tab:hover:not([aria-selected="true"]) { background: #223246; }
+/* 04讲者头像与06海报增加细边框；不影响图片裁切及既有响应式布局。 */
+.salon-speaker-avatar { border: 1px solid var(--theme-accent-soft); }
+.experience-item-artwork { border: 1px solid var(--theme-accent-soft); }

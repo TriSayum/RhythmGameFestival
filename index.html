@@ -10,9 +10,12 @@
   <script src="./main.js" defer></script>
 </head>
 <body>
-  <!-- 全站装饰性背景：网格和呼吸方块沿页面纵深排列，不参与交互。 -->
-  <div class="site-background" aria-hidden="true">
+  <!-- 固定的霓虹氛围层：不跟随页面滚动；与随页面滚动的网格分离。 -->
+  <div class="site-ambient" aria-hidden="true">
     <div class="bg-gradient"></div>
+  </div>
+  <!-- 网格、呼吸方块与数字纹理沿文档深度铺开。 -->
+  <div class="site-background" aria-hidden="true">
     <div class="bg-grid"></div>
     <div class="bg-noise"></div>
   </div>
