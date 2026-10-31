@@ -2250,3 +2250,151 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-wave-ribbon-text,
   .hero-wave-ribbon-measure { font-size: 9px; letter-spacing:.035em; }
 }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 双信息块与新波带（已修复的“空間”视觉右对齐规则不变）
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.hero-primary-overlay,.hero-secondary-overlay {
+  height:clamp(315px,30vw,450px);width:min(750px,60vw);
+}
+.hero-primary-overlay {left:6px;top:-42px;}
+.hero-secondary-overlay {right:0;bottom:-30px;width:min(705px,57vw);}
+.hero-primary-overlay .hero-overlay-word--1 {top:0%;left:0%;}
+.hero-primary-overlay .hero-overlay-word--2 {top:21%;left:0%;}
+.hero-primary-overlay .hero-overlay-word--3 {top:42%;left:0%;}
+.hero-primary-overlay .hero-overlay-word--4 {top:43%;left:61%;}
+.hero-primary-overlay .hero-overlay-word--5 {top:66%;left:0%;}
+.hero-primary-overlay .hero-overlay-word--6 {top:81%;left:62%;}
+.hero-secondary-overlay .hero-overlay-word--1 {top:0%;right:0%;}
+.hero-secondary-overlay .hero-overlay-word--2 {top:21%;right:0%;}
+.hero-secondary-overlay .hero-overlay-word--3 {top:42%;right:0%;}
+.hero-secondary-overlay .hero-overlay-word--4 {top:43%;right:66%;}
+.hero-secondary-overlay .hero-overlay-word--5 {top:66%;right:0%;}
+.hero-secondary-overlay .hero-overlay-word--6 {top:81%;right:66%;}
+
+/* SVG静态曲线和分段面片，动效只改变图层transform/opacity。 */
+.hero-wave-ribbon {
+  position:absolute;inset:0;width:100%;height:100%;
+  overflow:hidden;pointer-events:none;z-index:0;
+  user-select:none;-webkit-user-select:none;
+}
+.hero-wave-glow-path {
+  fill:none;stroke:url(#crgf-structural-wave-gradient);stroke-width:110;
+  stroke-linecap:round;opacity:.085;filter:blur(28px);
+}
+.hero-wave-guide {
+  fill:none;stroke:url(#crgf-structural-wave-gradient);stroke-width:.9;
+  opacity:.35;stroke-dasharray:14 9;vector-effect:non-scaling-stroke;
+}
+.hero-wave-facet {stroke:rgba(150,226,255,.14);stroke-width:.6;}
+.hero-wave-facet--0 {fill:rgba(45,165,202,.12);}
+.hero-wave-facet--1 {fill:rgba(95,114,215,.11);}
+.hero-wave-facet--2 {fill:rgba(141,88,204,.12);}
+.hero-wave-cut {fill:none;stroke:rgba(142,218,255,.20);stroke-width:1;}
+.hero-wave-strand {
+  fill:none;stroke:url(#crgf-structural-wave-gradient);stroke-width:1.2;
+  vector-effect:non-scaling-stroke;stroke-linecap:round;
+}
+.hero-wave-strand--bright {stroke-width:1.55;}
+.hero-wave-signal {
+  fill:none;stroke:url(#crgf-structural-wave-gradient);
+  stroke-width:1.9;stroke-dasharray:34 25;opacity:.36;
+}
+.hero-wave-strands {
+  transform-box:fill-box;transform-origin:center;
+  animation:crgfWaveBreath 12s ease-in-out infinite alternate;
+}
+.hero-wave-facets {
+  transform-box:fill-box;transform-origin:center;
+  animation:crgfWaveFacets 17s ease-in-out infinite alternate;
+}
+.hero-wave-glints {
+  transform-box:fill-box;transform-origin:center;
+  animation:crgfWaveGlimmer 15s ease-in-out infinite alternate;
+}
+@keyframes crgfWaveBreath {
+  from {transform:translate3d(0,-5px,0) scaleY(.95);opacity:.84;}
+  to {transform:translate3d(0,5px,0) scaleY(1.07);opacity:1;}
+}
+@keyframes crgfWaveFacets {
+  from {transform:translate3d(-3px,0,0);opacity:.70;}
+  to {transform:translate3d(3px,0,0);opacity:1;}
+}
+@keyframes crgfWaveGlimmer {
+  from {transform:translate3d(0,-4px,0);opacity:.35;}
+  to {transform:translate3d(0,4px,0);opacity:.76;}
+}
+
+/* 两条编码带置于主视觉与01之间，按实际滚动量相向位移。 */
+.hero-ticker {
+  position:relative;width:100%;overflow:hidden;isolation:isolate;
+  border-block:1px solid rgba(48,227,255,.16);
+  background:rgba(7,15,25,.75);
+  user-select:none;-webkit-user-select:none;
+}
+.hero-ticker-row {
+  display:flex;align-items:center;height:60px;
+  position:relative;overflow:hidden;
+}
+.hero-ticker-row--forward {
+  background:linear-gradient(90deg,rgba(25,130,166,.31),rgba(12,39,64,.72));
+}
+.hero-ticker-row--reverse {
+  background:linear-gradient(90deg,rgba(26,34,69,.75),rgba(67,48,129,.31));
+  border-top:1px solid rgba(132,217,245,.12);
+}
+.hero-ticker-lane {
+  display:inline-flex;width:max-content;align-items:center;
+  white-space:nowrap;will-change:transform;
+}
+.hero-ticker-part {
+  display:inline-block;flex:0 0 auto;padding-right:2.6rem;
+  color:#91f0ff;
+  font-family:"Consolas",ui-monospace,"SFMono-Regular","Menlo",monospace;
+  font-weight:800;font-size:clamp(25px,2.65vw,40px);
+  letter-spacing:.035em;line-height:1;
+}
+.hero-ticker-row--reverse .hero-ticker-part {color:rgba(191,172,255,.94);}
+@media (max-width:760px) {
+  .hero-primary-overlay,.hero-secondary-overlay {
+    height:clamp(172px,48vw,235px);width:min(335px,84vw);
+  }
+  .hero-primary-overlay {left:0;top:-15px;}
+  .hero-secondary-overlay {right:-5px;bottom:-20px;width:min(320px,83vw);}
+  .hero-primary-overlay .hero-overlay-word--1 {top:0%;left:0%;}
+  .hero-primary-overlay .hero-overlay-word--2 {top:22%;left:0%;}
+  .hero-primary-overlay .hero-overlay-word--3 {top:44%;left:0%;}
+  .hero-primary-overlay .hero-overlay-word--4 {top:43%;left:54%;}
+  .hero-primary-overlay .hero-overlay-word--5 {top:68%;left:0%;}
+  .hero-primary-overlay .hero-overlay-word--6 {top:81%;left:54%;}
+  .hero-secondary-overlay .hero-overlay-word--1 {top:0%;right:0%;}
+  .hero-secondary-overlay .hero-overlay-word--2 {top:22%;right:0%;}
+  .hero-secondary-overlay .hero-overlay-word--3 {top:44%;right:0%;}
+  .hero-secondary-overlay .hero-overlay-word--4 {top:43%;right:58%;}
+  .hero-secondary-overlay .hero-overlay-word--5 {top:68%;right:0%;}
+  .hero-secondary-overlay .hero-overlay-word--6 {top:81%;right:58%;}
+  .hero-wave-glow-path {stroke-width:70;filter:blur(16px);opacity:.065;}
+  .hero-wave-strand {stroke-width:1;}
+  .hero-wave-strand--bright {stroke-width:1.2;}
+  .hero-ticker-row {height:45px;}
+  .hero-ticker-part {
+    font-size:clamp(18px,5.3vw,25px);padding-right:1.7rem;
+    font-family:ui-monospace,"SFMono-Regular","Menlo","Monaco",monospace;
+  }
+}
+@media (max-width:760px) and (max-height:720px) {
+  /* 内置扫码浏览器可见视口较矮，缩短两组信息纵向占用。 */
+  .hero-primary {top:16px;}
+  .hero-secondary {bottom:13px;}
+  .hero-title-year {font-size:clamp(46px,12.6vw,72px);}
+  .hero-title-name {font-size:clamp(31px,9.1vw,47px);}
+  .hero-topic {font-size:clamp(79px,23.8vw,118px);}
+  .hero-word-overlay {opacity:.83;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .hero-wave-strands,.hero-wave-facets,.hero-wave-glints {
+    animation:none!important;transform:none!important;
+  }
+  .hero-ticker-lane {will-change:auto;}
+}

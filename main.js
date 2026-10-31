@@ -804,158 +804,160 @@
    * 横向曲线由若干归一化控制点决定；手机使用较浅的波形，保持中间留白。
    * 仅在首屏可见时刷新SVG路径，并在减少动态效果时停留在静态画面。
    */
-  function createHeroWave(art, conf) {
-    const NS = "http://www.w3.org/2000/svg";
-    const XNS = "http://www.w3.org/1999/xlink";
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
-    const svg = document.createElementNS(NS, "svg");
-    svg.setAttribute("class", "hero-wave-ribbon");
-    svg.setAttribute("aria-hidden", "true");
-    svg.setAttribute("preserveAspectRatio", "none");
 
-    function element(tag, attributes, parent) {
-      const result = document.createElementNS(NS, tag);
-      Object.entries(attributes || {}).forEach(function (pair) {
-        result.setAttribute(pair[0], pair[1]);
-      });
-      if (parent) parent.appendChild(result);
-      return result;
+  /* 静态SVG结构空间波带：初始化时建形，持续波动由CSS变换实现。
+   * 不逐帧更新几十条SVG路径；避让遮罩实时读取信息块及编码的实际边界。
+   */
+  function createHeroWave(art) {
+    const ns="http://www.w3.org/2000/svg";
+    const hero=document.getElementById("hero");
+    if(!hero)return;
+    const svg=document.createElementNS(ns,"svg");
+    svg.setAttribute("class","hero-wave-ribbon");
+    svg.setAttribute("aria-hidden","true");
+    svg.setAttribute("preserveAspectRatio","none");
+    function item(tag,attrs,parent) {
+      const el=document.createElementNS(ns,tag);
+      Object.entries(attrs||{}).forEach(function ([k,v]){el.setAttribute(k,v);});
+      (parent||svg).appendChild(el);
+      return el;
     }
-
-    const defs = element("defs", {}, svg);
-    const gradient = element("linearGradient", {
-      id: "crgf-wave-ribbon-gradient", x1: "0%", y1: "0%", x2: "100%", y2: "0%"
-    }, defs);
-    [
-      ["0%", "#56f8ef"], ["23%", "#8be9ff"], ["47%", "#859cfc"],
-      ["69%", "#c478ef"], ["86%", "#f57edc"], ["100%", "#ff65b9"]
-    ].forEach(function (stop) {
-      element("stop", {"offset": stop[0], "stop-color": stop[1]}, gradient);
+    const defs=item("defs");
+    const gradient=item("linearGradient",{id:"crgf-structural-wave-gradient",x1:"0%",y1:"0%",x2:"100%",y2:"0%"},defs);
+    [["0%","#4af8e9"],["25%","#83e2ff"],["48%","#899aff"],["72%","#c477ef"],["100%","#f477c5"]].forEach(function ([offset,color]){
+      item("stop",{offset,"stop-color":color},gradient);
     });
-    const glow = element("path", { "class": "hero-wave-ribbon-glow" }, svg);
-    const lines = element("g", { "class": "hero-wave-ribbon-lines" }, svg);
-    const flowPath = element("path", {id:"crgf-wave-ribbon-flow", fill:"none", stroke:"none"}, defs);
-    const flowText = element("text", {"class":"hero-wave-ribbon-text"}, svg);
-    const textPath = element("textPath", {"href":"#crgf-wave-ribbon-flow"}, flowText);
-    textPath.setAttributeNS(XNS, "xlink:href", "#crgf-wave-ribbon-flow");
-    const sentence = conf.streamText || "... / SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / SPACE / ...";
-    textPath.textContent = (sentence + "    ").repeat(14);
-    // 仅用于测量单个循环长度，视觉上不会显示。
-    const measure = element("text", {"class":"hero-wave-ribbon-measure","visibility":"hidden"}, svg);
-    measure.textContent = sentence + "    ";
-    const paths = [];
-
-    let width = 0, height = 0, isMobile = false, points = [];
-    let visible = true, pending = 0, previousTick = 0, frameCount = 0, phraseWidth = 360;
-
-    function prepareSize() {
-      const hero = document.getElementById("hero");
-      if (!hero) return;
-      const rect = hero.getBoundingClientRect();
-      const nextWidth = Math.max(1, Math.round(rect.width));
-      const nextHeight = Math.max(1, Math.round(rect.height));
-      if (nextWidth === width && nextHeight === height) return;
-
-      width = nextWidth;
-      height = nextHeight;
-      isMobile = width <= 760;
-      svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-      const anchors = isMobile ?
-        [[-.08,.49],[.11,.53],[.28,.55],[.42,.52],[.64,.44],[.82,.44],[1.07,.51]] :
-        [[-.08,.47],[.08,.51],[.21,.56],[.34,.54],[.58,.41],[.72,.31],[.84,.32],[1.07,.46]];
-      points = anchors.map(function (point) { return {x:point[0], y:point[1]*height}; });
-
-      const count = isMobile ? 22 : 38;
-      while (paths.length < count) {
-        const path = element("path", {"class":"hero-wave-ribbon-strand"}, lines);
-        paths.push(path);
-      }
-      paths.forEach(function (path, index) { path.style.display = index < count ? "" : "none"; });
-      const measured = measure.getComputedTextLength();
-      phraseWidth = measured > 10 ? measured : Math.max(100, sentence.length * (isMobile ? 5.5 : 7.0));
-    }
-
-    function centerY(u) {
-      let i=0;
-      while (i < points.length - 2 && u > points[i+1].x) i++;
-      const a=points[i], b=points[i+1];
-      const d=b.x-a.x, v=Math.max(0,Math.min(1,(u-a.x)/d));
-      const prev=points[Math.max(0,i-1)], next=points[Math.min(points.length-1,i+2)];
-      const slopeA = (b.y-prev.y)/(b.x-prev.x)*d;
-      const slopeB = (next.y-a.y)/(next.x-a.x)*d;
-      const v2=v*v, v3=v2*v;
-      return (2*v3-3*v2+1)*a.y + (v3-2*v2+v)*slopeA
-        + (-2*v3+3*v2)*b.y + (v3-v2)*slopeB;
-    }
-
-    function curvePath(index, count, t, displacement) {
-      const step = isMobile ? 11 : 19;
-      const mid = (count-1)/2;
-      const spread = isMobile ? .86 : 1.75;
-      const weight = mid > 0 ? (index-mid)/mid : 0;
-      let result = "";
-      for(let x=0; x<=width+step; x+=step) {
-        const u=x/width;
-        const baseline=centerY(u);
-        const moving = Math.sin(u*5.4+t*.52)* (isMobile ? 6 : 10);
-        const folding = Math.sin(u*10.5-t*.45+index*.21)
-          * weight * (isMobile ? 11 : 24);
-        const ripple = Math.sin(u*19+t*.9+index*.14)
-          * Math.abs(weight) * (isMobile ? 3.5 : 6);
-        const y=baseline + moving + folding + ripple + (index-mid)*spread + displacement;
-        result += (x===0?"M":"L") + x.toFixed(1) + "," + y.toFixed(1);
-      }
-      return result;
-    }
-
-    function paint(now) {
-      pending=0;
-      if (!reduced && !visible) return;
-      if (!reduced && now-previousTick < 40) { pending=window.requestAnimationFrame(paint); return; }
-      previousTick=now;
-      prepareSize();
-      const t=reduced?0:Date.now()/1000;
-      const count=isMobile?22:38;
-      const axis=curvePath((count-1)/2,count,t,0);
-      glow.setAttribute("d",axis);
-      flowPath.setAttribute("d",curvePath((count-1)/2,count,t,isMobile?27:43));
-      for(let i=0;i<count;i++) {
-        paths[i].setAttribute("d",curvePath(i,count,t,0));
-        paths[i].setAttribute("opacity",(0.24+0.48*(1-Math.abs(i-(count-1)/2)/((count-1)/2))).toFixed(3));
-      }
-      const movePixels = (t*(isMobile?14:23))%phraseWidth;
-      textPath.setAttribute("startOffset",(-phraseWidth+movePixels).toFixed(1));
-      if (!reduced && visible) pending=window.requestAnimationFrame(paint);
-      frameCount++;
-    }
-
+    const mask=item("mask",{id:"crgf-wave-safe-mask",maskUnits:"userSpaceOnUse"},defs);
+    const maskBg=item("rect",{fill:"#fff"},mask);
+    const clipped=item("g",{mask:"url(#crgf-wave-safe-mask)"});
+    const glow=item("g",{"class":"hero-wave-glow"},clipped);
+    const facets=item("g",{"class":"hero-wave-facets"},clipped);
+    const strands=item("g",{"class":"hero-wave-strands"},clipped);
+    const glints=item("g",{"class":"hero-wave-glints"},clipped);
     art.appendChild(svg);
-    if (typeof IntersectionObserver !== "undefined" && !reduced) {
-      const observer=new IntersectionObserver(function (entries) {
-        visible=entries[0]?.isIntersecting ?? true;
-        if (visible && !pending) pending=window.requestAnimationFrame(paint);
-        if (!visible && pending) { window.cancelAnimationFrame(pending); pending=0; }
-      }, {threshold:0});
-      observer.observe(document.getElementById("hero"));
-    }
-    document.addEventListener("visibilitychange",function () {
-      if (!reduced && !document.hidden && visible && !pending) {
-        pending=window.requestAnimationFrame(paint);
+    let currentW=0,currentH=0,scheduled=false,maskScheduled=false;
+
+    function center(u,mobile) {
+      const k=mobile?
+      [[0,.55],[.17,.61],[.31,.61],[.47,.53],[.67,.44],[.82,.42],[1,.51]]:
+      [[0,.59],[.17,.65],[.31,.63],[.47,.52],[.67,.38],[.83,.35],[1,.47]];
+      for(let i=0;i<k.length-1;i++){
+        if(u>k[i+1][0]&&i<k.length-2)continue;
+        const a=k[i],b=k[i+1],p=k[Math.max(0,i-1)],n=k[Math.min(k.length-1,i+2)];
+        const step=b[0]-a[0],t=Math.max(0,Math.min(1,(u-a[0])/step));
+        const da=(b[1]-p[1])/(b[0]-p[0])*step,db=(n[1]-a[1])/(n[0]-a[0])*step;
+        return (2*t**3-3*t*t+1)*a[1]+(t**3-2*t*t+t)*da+(-2*t**3+3*t*t)*b[1]+(t**3-t*t)*db;
       }
-    });
-    window.addEventListener("resize",function () {
-      prepareSize();
-      if (reduced) paint(0);
-    }, {passive:true});
-    paint(0);
+      return .53;
+    }
+    const xy=(x,y)=>x.toFixed(1)+","+y.toFixed(1);
+    function curve(w,h,mobile,offset,phase){
+      const steps=mobile?35:64;
+      const coords=[];
+      for(let i=0;i<=steps;i++){
+        const u=i/steps;
+        coords.push({x:w*u,y:center(u,mobile)*h+offset+Math.sin(u*13+phase)*(mobile?1.7:3.2)});
+      }
+      let d="M"+xy(coords[0].x,coords[0].y);
+      for(let i=1;i<coords.length;i++){
+        const a=coords[i-1],b=coords[i];
+        d+=" Q"+xy(a.x,a.y)+" "+xy((a.x+b.x)/2,(a.y+b.y)/2);
+      }
+      const z=coords[coords.length-1];return d+" L"+xy(z.x,z.y);
+    }
+    function build(){
+      scheduled=false;
+      const rect=hero.getBoundingClientRect(),w=Math.max(1,Math.round(rect.width)),h=Math.max(1,Math.round(rect.height));
+      if(w===currentW&&h===currentH){requestMask();return;}
+      currentW=w;currentH=h;
+      const mobile=w<=760;
+      svg.setAttribute("viewBox","0 0 "+w+" "+h);
+      maskBg.setAttribute("width",w);maskBg.setAttribute("height",h);
+      glow.replaceChildren();facets.replaceChildren();strands.replaceChildren();glints.replaceChildren();
+      const count=mobile?18:28,spacing=mobile?4.9:5.35,mid=(count-1)/2;
+      item("path",{d:curve(w,h,mobile,0,0),"class":"hero-wave-glow-path"},glow);
+      for(const offset of [-(mobile?45:69),mobile?45:69]){
+        item("path",{d:curve(w,h,mobile,offset,0),"class":"hero-wave-guide"},facets);
+      }
+      for(let i=0;i<10;i++){
+        const left=i/10,right=(i+1)/10,x1=w*left,x2=w*right;
+        const y1=center(left,mobile)*h,y2=center(right,mobile)*h;
+        const a=mobile?26:42,b=mobile?30:46;
+        const polygon="M"+xy(x1,y1-a)+" L"+xy(x2,y2-b)+" L"+xy(x2,y2+b)+" L"+xy(x1,y1+a)+" Z";
+        item("path",{d:polygon,"class":"hero-wave-facet hero-wave-facet--"+i%3},facets);
+        if(i>0)item("path",{d:"M"+xy(x1,y1-(mobile?41:62))+" L"+xy(x1+7,y1+(mobile?41:62)),"class":"hero-wave-cut"},facets);
+      }
+      for(let i=0;i<count;i++){
+        const relative=Math.abs(i-mid)/(mid||1);
+        item("path",{
+          d:curve(w,h,mobile,(i-mid)*spacing,i*.11),
+          "class":i%4===0?"hero-wave-strand hero-wave-strand--bright":"hero-wave-strand",
+          opacity:(.40+.18*(1-relative)).toFixed(3)
+        },strands);
+      }
+      for(const offset of [-19,21])item("path",{d:curve(w,h,mobile,offset,.24),"class":"hero-wave-signal"},glints);
+      requestMask();
+    }
+    function layoutMask(){
+      maskScheduled=false;
+      Array.from(mask.querySelectorAll(".hero-wave-avoid")).forEach(n=>n.remove());
+      const hb=hero.getBoundingClientRect();
+      hero.querySelectorAll(".hero-title,.hero-date,.hero-topic,.hero-venue,.hero-overlay-word,.hero-fragment:not(.hero-fragment--unplaced)").forEach(function (el){
+        if(window.getComputedStyle(el).display==="none")return;
+        const r=el.getBoundingClientRect();if(!r.width||!r.height)return;
+        const pad=currentW<=760?10:18;
+        item("rect",{"class":"hero-wave-avoid",fill:"#000",
+          x:(r.left-hb.left-pad).toFixed(1),y:(r.top-hb.top-pad).toFixed(1),
+          width:(r.width+pad*2).toFixed(1),height:(r.height+pad*2).toFixed(1)},mask);
+      });
+    }
+    function requestMask(){if(maskScheduled)return;maskScheduled=true;window.requestAnimationFrame(layoutMask);}
+    function schedule(){if(scheduled)return;scheduled=true;window.requestAnimationFrame(build);}
+    build();
+    hero.addEventListener("hero-fragments-layout",requestMask);
+    window.addEventListener("resize",schedule,{passive:true});
+    if(typeof ResizeObserver!=="undefined")new ResizeObserver(schedule).observe(hero);
+    if(document.fonts?.ready)document.fonts.ready.then(requestMask);
   }
+
+  /* 纯滚动驱动的双向编码带，不绑定持续动画和后台计时器。 */
+  function setupHeroTicker() {
+    const root=document.getElementById("hero-ticker");
+    if(!root)return;
+    const phrase=(data.hero.streamText||"... / SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / SPACE / ...")+"    ";
+    const entries=[];
+    for(const dir of ["forward","reverse"]){
+      const row=make("div","hero-ticker-row hero-ticker-row--"+dir);
+      const lane=make("div","hero-ticker-lane");
+      for(let i=0;i<6;i++)lane.appendChild(make("span","hero-ticker-part",phrase));
+      row.appendChild(lane);root.appendChild(row);
+      entries.push({lane,part:lane.firstElementChild});
+    }
+    let pending=false;
+    function update() {
+      pending=false;
+      const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      const move=reduced?0:Math.max(0,window.scrollY||window.pageYOffset||0)*.46;
+      entries.forEach(function (e,index){
+        const w=Math.max(1,e.part.getBoundingClientRect().width);
+        const phase=(move+w*.16)%w;
+        e.lane.style.transform="translate3d("+(index===0?-phase:-w+phase).toFixed(1)+"px,0,0)";
+      });
+    }
+    function schedule(){if(pending)return;pending=true;window.requestAnimationFrame(update);}
+    update();
+    window.addEventListener("scroll",schedule,{passive:true});
+    window.addEventListener("resize",schedule,{passive:true});
+    if(document.fonts?.ready)document.fonts.ready.then(schedule);
+  }
+
 
   function renderHero() {
     const art = document.getElementById("hero-art");
     const root = document.getElementById("hero-content");
     const conf = data.hero;
     if (!art || !root || !conf) return;
-    createHeroWave(art, conf);
+    createHeroWave(art);
 
     // 两块大灰字叠层共享同一组原序词语，按错位的行阶组成视觉骨架。
     // 真实主信息独立置于上层，叠层文字仅用于视觉陪衬。
@@ -1141,6 +1143,7 @@
       });
 
       group.classList.add("is-arranged");
+      hero.dispatchEvent(new Event("hero-fragments-layout"));
     }
     function schedule() {
       if (pending) return;
@@ -1167,8 +1170,11 @@
     let viewportWidth = document.documentElement.clientWidth;
     function measure() {
       const headerHeight = Math.ceil(header.getBoundingClientRect().height);
-      const height = Math.max(1, Math.ceil(window.innerHeight - headerHeight) + 1);
-      document.documentElement.style.setProperty("--hero-initial-height", height + "px");
+      const inner=window.innerHeight;
+      const client=document.documentElement.clientHeight||inner;
+      const visual=window.visualViewport?.height||inner;
+      const height=Math.max(1,Math.floor(Math.min(inner,client,visual)-headerHeight));
+      document.documentElement.style.setProperty("--hero-initial-height",height+"px");
     }
     measure();
     window.addEventListener("resize", function () {
@@ -1205,6 +1211,7 @@
   setupInitialHeroHeight();
   renderHero();
   setupHeroFragmentLayout();
+  setupHeroTicker();
   renderHeadings();
   renderIntro();
   renderSchedule();
