@@ -691,6 +691,13 @@
     if (glow) {
       glow.style.animationDelay = phaseDelay(11000, 0);
     }
+    const orbs = document.querySelectorAll(".bg-orb");
+    const orbDurations = [36000, 44000, 51000];
+    const orbPhaseOffsets = [0, 11800, 27600];
+    orbs.forEach(function (orb, index) {
+      const duration = orbDurations[index] || 44000;
+      orb.style.animationDelay = phaseDelay(duration, orbPhaseOffsets[index] || 0);
+    });
 
     function extendSquares() {
       pending = false;
@@ -866,6 +873,131 @@
     });
   }
 
+
+  /* 编码组件在渲染结束后自动避让两块主信息。
+   * 优先保留设计时指定的大致位置；对实际DOM边界做检测，避免遮挡正文。
+   * 布局仅在首屏/字体/窗口尺寸变化后更新，不响应其他章节的高度变化。
+   */
+  function setupHeroFragmentLayout() {
+    const hero = document.getElementById("hero");
+    const group = hero?.querySelector(".hero-fragments");
+    const primary = hero?.querySelector(".hero-primary");
+    const secondary = hero?.querySelector(".hero-secondary");
+    if (!hero || !group || !primary || !secondary) return;
+
+    const nodes = Array.from(group.children);
+    let pending = false;
+
+    function overlaps(a, b, gap) {
+      return a.left < b.right + gap && a.right > b.left - gap &&
+             a.top < b.bottom + gap && a.bottom > b.top - gap;
+    }
+    function layout() {
+      pending = false;
+      const heroBox = hero.getBoundingClientRect();
+      const width = heroBox.width;
+      const height = heroBox.height;
+      if (width <= 0 || height <= 0) return;
+
+      // 手机只保留四组短编码，始终优先保证重要信息完整可读。
+      const visibleCount = window.matchMedia("(max-width:760px)").matches ? 4 : nodes.length;
+      const protectedAreas = [primary, secondary].map(function (node) {
+        const rect = node.getBoundingClientRect();
+        return {
+          left: rect.left - heroBox.left, top: rect.top - heroBox.top,
+          right: rect.right - heroBox.left, bottom: rect.bottom - heroBox.top
+        };
+      });
+      const used = [];
+      const edge = width <= 760 ? 13 : 24;
+      const clearance = width <= 760 ? 23 : 29;
+
+      // 恢复初始CSS锚点以获取每个编码的偏好位置。
+      group.classList.remove("is-arranged");
+      nodes.forEach(function (node) {
+        node.classList.remove("hero-fragment--unplaced");
+        node.style.removeProperty("left");
+        node.style.removeProperty("top");
+        node.style.setProperty("--repel-x", "0px");
+        node.style.setProperty("--repel-y", "0px");
+      });
+
+      nodes.forEach(function (node, index) {
+        if (index >= visibleCount) return;
+        const style = window.getComputedStyle(node);
+        if (style.display === "none") return;
+
+        const rect = node.getBoundingClientRect();
+        const itemWidth = rect.width;
+        const itemHeight = rect.height;
+        const preferredX = rect.left - heroBox.left;
+        const preferredY = rect.top - heroBox.top;
+        if (!itemWidth || !itemHeight || itemWidth > width - 2 * edge ||
+            itemHeight > height - 2 * edge) {
+          node.classList.add("hero-fragment--unplaced");
+          return;
+        }
+
+        let best = null;
+        let bestScore = Infinity;
+        function tryCandidate(x, y) {
+          x = Math.round(x);
+          y = Math.round(y);
+          if (x < edge || y < edge || x + itemWidth > width - edge ||
+              y + itemHeight > height - edge) return;
+          const box = {left:x, top:y, right:x+itemWidth, bottom:y+itemHeight};
+          if (protectedAreas.some(area => overlaps(box, area, clearance))) return;
+          if (used.some(area => overlaps(box, area, 14))) return;
+          // 主视觉中心留出未来视觉效果带的空间，排布优先靠近侧边。
+          const centerX = x + itemWidth / 2;
+          const centerY = y + itemHeight / 2;
+          const central = centerX > width * .24 && centerX < width * .76 &&
+                          centerY > height * .39 && centerY < height * .62;
+          const dx = x - preferredX, dy = y - preferredY;
+          const score = dx * dx + dy * dy + (central ? 36000 : 0);
+          if (score < bestScore) { bestScore = score; best = box; }
+        }
+        tryCandidate(preferredX, preferredY);
+
+        // 环状采样先寻找周边空隙，只有空间不足时才考虑页面其他区域。
+        for (let radius = 28; radius <= Math.max(width,height) && bestScore > 600; radius += 28) {
+          for (let step = 0; step < 20; step++) {
+            const angle = step * Math.PI / 10;
+            tryCandidate(preferredX + Math.cos(angle) * radius,
+                         preferredY + Math.sin(angle) * radius);
+          }
+          if (bestScore < radius * radius * 1.1) break;
+        }
+        if (!best) {
+          for (let y = edge; y < height - itemHeight - edge; y += 24)
+            for (let x = edge; x < width - itemWidth - edge; x += 24)
+              tryCandidate(x,y);
+        }
+        if (!best) {
+          node.classList.add("hero-fragment--unplaced");
+          return;
+        }
+        node.style.left = best.left + "px";
+        node.style.top = best.top + "px";
+        used.push(best);
+      });
+
+      group.classList.add("is-arranged");
+    }
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(layout);
+    }
+    schedule();
+    window.addEventListener("resize", schedule, {passive:true});
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(schedule);
+      [hero, primary, secondary].forEach(node => observer.observe(node));
+    }
+    if (document.fonts?.ready) document.fonts.ready.then(schedule);
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -890,6 +1022,7 @@
   setupMobileNavigation();
   setupStickyHeaderOffset();
   renderHero();
+  setupHeroFragmentLayout();
   renderHeadings();
   renderIntro();
   renderSchedule();

@@ -1658,3 +1658,113 @@ a.faq-form-link:active .button-label { transform: none; }
   .bg-gradient { transform: none !important; }
   .button-label { transform: none !important; }
 }
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 主视觉第二轮：真实首屏、编码避障、移动页首与缓慢游走的霓虹光球
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 修复旧的680px媒体查询把页首改为纵列的历史规则。 */
+@media (max-width: 760px) {
+  .site-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 9px 18px;
+    min-height: 62px;
+  }
+  .site-brand { flex: 1 1 auto; min-width: 0; }
+  .nav-toggle { flex: 0 0 42px; margin-left: auto; }
+  .site-header .site-nav { top: 100%; }
+}
+
+/* 100dvh跟随手机浏览器实际可见视口高度；覆盖原先550/520px最小高度。 */
+.site-hero {
+  min-height: 0;
+  height: calc(100vh - var(--site-header-height, 88px));
+  height: calc(100svh - var(--site-header-height, 88px));
+  height: calc(100dvh - var(--site-header-height, 88px));
+}
+@media (max-width: 760px) {
+  .site-hero { min-height: 0; }
+}
+
+/* 编码先隐藏，待检测主标题实际边界并完成重新排布后统一显示。
+ * 内容不足时可删除单个装饰，不允许覆盖活动名称、日期和地点。
+ */
+.hero-fragments { opacity: 0; transition: opacity .36s ease; }
+.hero-fragments.is-arranged { opacity: 1; }
+.hero-fragment {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: min(340px,32vw);
+}
+.hero-fragment--unplaced { display: none !important; }
+@media (max-width:760px) {
+  .hero-fragment { max-width: min(220px,62vw); }
+}
+
+/* 柔和的底部霓虹继续保留，三个更集中的小光球在视口内缓慢游走。
+ * 所有光球都不可交互，不影响文字或滚动。
+ */
+.bg-orb {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  width: clamp(190px,25vw,340px);
+  height: clamp(190px,25vw,340px);
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(29px);
+  opacity: .84;
+  will-change: transform, opacity;
+}
+.bg-orb--cyan {
+  left: 8%;
+  top: 12%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(39,205,255,.26) 0%, rgba(32,143,241,.15) 24%,
+    rgba(23,93,201,.065) 49%, transparent 71%);
+  animation: orbFloatCyan 36s ease-in-out infinite alternate;
+}
+.bg-orb--violet {
+  right: 8%;
+  top: 23%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(163,95,255,.23) 0%, rgba(116,65,217,.14) 27%,
+    rgba(85,48,167,.06) 52%, transparent 73%);
+  animation: orbFloatViolet 44s ease-in-out infinite alternate;
+}
+.bg-orb--teal {
+  left: 37%;
+  bottom: 5%;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(60,243,206,.19) 0%, rgba(28,179,177,.12) 26%,
+    rgba(12,111,146,.045) 51%, transparent 72%);
+  animation: orbFloatTeal 51s ease-in-out infinite alternate;
+}
+@keyframes orbFloatCyan {
+  0% { transform: translate3d(-6vw,-5vh,0) scale(.9); opacity: .58; }
+  40% { transform: translate3d(17vw,13vh,0) scale(1.09); opacity: .95; }
+  100% { transform: translate3d(26vw,-10vh,0) scale(.95); opacity: .73; }
+}
+@keyframes orbFloatViolet {
+  0% { transform: translate3d(5vw,-6vh,0) scale(1); opacity: .63; }
+  52% { transform: translate3d(-16vw,9vh,0) scale(.86); opacity: .94; }
+  100% { transform: translate3d(-29vw,16vh,0) scale(1.12); opacity: .71; }
+}
+@keyframes orbFloatTeal {
+  0% { transform: translate3d(-11vw,8vh,0) scale(1); opacity: .72; }
+  55% { transform: translate3d(19vw,-18vh,0) scale(1.17); opacity: .99; }
+  100% { transform: translate3d(-9vw,-25vh,0) scale(.89); opacity: .65; }
+}
+@media (max-width:760px) {
+  .bg-orb { width: 195px; height: 195px; filter: blur(23px); opacity: .68; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb { animation: none !important; transform: none !important; }
+  .hero-fragments { transition: none; }
+}
