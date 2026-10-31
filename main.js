@@ -633,9 +633,8 @@
     const grid = document.querySelector(".bg-grid");
     if (!grid) return;
 
-    const cellSize = 250; // 每个250×250px区域按一定概率出现一个方块。
-    let lastWidth = 0;
-    let lastHeight = 0;
+    const cellSize = 250; // 每个250×250px区域按固定概率布置方块。
+    const cells = new Set(); // 已经生成的方块不会因为内容展开/收起而重新创建。
     let pending = false;
 
     function hash(column, row, salt) {
@@ -645,47 +644,66 @@
       return ((value ^ (value >>> 16)) >>> 0) / 4294967296;
     }
 
-    function rebuild() {
+    // 使用绝对时间对齐呼吸相位。刷新后同一方块在相近时刻的亮度仍然相近。
+    // infinite alternate为往返周期，故相位模数为两倍的动画时长。
+    function phaseDelay(durationMs, offsetMs) {
+      const elapsed = (Date.now() + offsetMs) % (durationMs * 2);
+      return "-" + (elapsed / 1000).toFixed(3) + "s";
+    }
+
+    const glow = document.querySelector(".bg-gradient");
+    if (glow) {
+      glow.style.animationDelay = phaseDelay(11000, 0);
+    }
+
+    function extendSquares() {
       pending = false;
       const width = document.documentElement.clientWidth;
       const height = Math.max(document.body.scrollHeight, window.innerHeight);
-      if (width === lastWidth && Math.abs(height - lastHeight) < 8) return;
-      lastWidth = width;
-      lastHeight = height;
-
-      const fragment = document.createDocumentFragment();
       const columns = Math.ceil(width / cellSize);
       const rows = Math.ceil(height / cellSize);
+      const fragment = document.createDocumentFragment();
+
+      // 仅添加还不存在的方块。页面高度改变时不会重启之前的动画。
       for (let row = 0; row < rows; row++) {
         for (let column = 0; column < columns; column++) {
-          if (hash(column, row, 1) > .68) continue;
+          const key = row + ":" + column;
+          if (cells.has(key) || hash(column, row, 1) > .68) continue;
+
           const x = (column + .16 + hash(column, row, 2) * .68) * cellSize;
           const y = (row + .16 + hash(column, row, 3) * .68) * cellSize;
           if (x >= width - 8 || y >= height - 8) continue;
 
+          const variant = hash(column, row, 7);
           const square = document.createElement("span");
-          square.className = "bg-square";
+          square.className = variant < .2 ? "bg-square bg-square--teal" :
+                             variant < .5 ? "bg-square bg-square--purple" : "bg-square";
           square.style.setProperty("--x", x.toFixed(1) + "px");
           square.style.setProperty("--y", y.toFixed(1) + "px");
           square.style.setProperty("--size", (9 + Math.floor(hash(column, row, 4) * 17)) + "px");
-          square.style.setProperty("--duration", (5.2 + hash(column, row, 5) * 3.5).toFixed(2) + "s");
-          square.style.setProperty("--delay", (-hash(column, row, 6) * 8).toFixed(2) + "s");
+
+          const durationMs = Math.round((5.2 + hash(column, row, 5) * 3.5) * 1000 / 10) * 10;
+          square.style.setProperty("--duration", (durationMs / 1000).toFixed(2) + "s");
+          const seedOffsetMs = Math.floor(hash(column, row, 6) * durationMs * 2);
+          square.style.setProperty("--delay", phaseDelay(durationMs, seedOffsetMs));
+
           fragment.appendChild(square);
+          cells.add(key);
         }
       }
-      grid.replaceChildren(fragment);
+      if (fragment.childNodes.length) grid.appendChild(fragment);
     }
 
-    function scheduleRebuild() {
+    function scheduleExtend() {
       if (pending) return;
       pending = true;
-      window.requestAnimationFrame(rebuild);
+      window.requestAnimationFrame(extendSquares);
     }
 
-    rebuild();
-    window.addEventListener("resize", scheduleRebuild, { passive: true });
+    extendSquares();
+    window.addEventListener("resize", scheduleExtend, { passive: true });
     if (typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(scheduleRebuild);
+      const observer = new ResizeObserver(scheduleExtend);
       ["app", "site-footer"].forEach(function (id) {
         const element = document.getElementById(id);
         if (element) observer.observe(element);
@@ -694,7 +712,6 @@
       if (header) observer.observe(header);
     }
   }
-
 
   /* 内容入场动效：每个区域只展示一次，后续滚动不会再次淡出。
    * 以视口底部约5%作为进入位置；页尾不参与，避免滚动锚定回弹。
