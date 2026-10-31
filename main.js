@@ -683,6 +683,47 @@
     }
   }
 
+
+  /* 内容入场动效：每个区域只展示一次，后续滚动不会再次淡出。
+   * 以视口底部约15%作为进入位置；大章节拆成内容块分别触发。
+   */
+  function setupScrollReveal() {
+    if (typeof IntersectionObserver === "undefined" ||
+        window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+
+    const selectors = [
+      ".page-section-heading",
+      ".intro-overview", ".theme-content",
+      ".schedule-block-banner", ".timeline-item", ".ongoing-item",
+      ".tournament-introduction", ".tournament-common-details",
+      ".tournament-group-card", ".tournament-registration",
+      ".salon-introduction", ".salon-talk",
+      ".submissions-introduction", ".submissions-track-shell",
+      ".submissions-milestones", ".submissions-notes", ".submissions-action",
+      ".experience-introduction", ".experience-item",
+      ".faq-introduction", ".faq-action", ".faq-item",
+      ".site-footer"
+    ];
+    const elements = Array.from(document.querySelectorAll(selectors.join(", ")));
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        observer.unobserve(entry.target);
+      });
+    }, {
+      root: null,
+      rootMargin: "0px 0px -15% 0px",
+      threshold: 0.04
+    });
+
+    elements.forEach(function (element) { element.classList.add("reveal-target"); });
+    document.documentElement.classList.add("reveal-enabled");
+    elements.forEach(function (element) { observer.observe(element); });
+  }
+
   /* 页首在窄屏上可能换行，实时测量高度，防止锚点标题被遮挡。 */
   function setupStickyHeaderOffset() {
     const header = document.querySelector(".site-header");
@@ -715,4 +756,5 @@
   renderFaq();
   renderFooter();
   setupBackground();
+  setupScrollReveal();
 }());
