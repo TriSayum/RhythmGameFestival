@@ -918,6 +918,10 @@
     window.addEventListener("resize",schedule,{passive:true});
     if(typeof ResizeObserver!=="undefined")new ResizeObserver(schedule).observe(hero);
     if(document.fonts?.ready)document.fonts.ready.then(requestMask);
+    // 进入后台时冻结CSS波形动画相位，切回来接着播放，不追赶后台时间。
+    function syncVisibility() { svg.classList.toggle("hero-wave-paused",document.hidden); }
+    document.addEventListener("visibilitychange",syncVisibility);
+    syncVisibility();
   }
 
   /* 纯滚动驱动的双向编码带，不绑定持续动画和后台计时器。 */

@@ -2398,3 +2398,9 @@ a.faq-form-link:active .button-label { transform: none; }
   }
   .hero-ticker-lane {will-change:auto;}
 }
+/* 页面切后台时冻结而非重建波形，恢复时延续暂停前的相位。 */
+.hero-wave-ribbon.hero-wave-paused .hero-wave-strands,
+.hero-wave-ribbon.hero-wave-paused .hero-wave-facets,
+.hero-wave-ribbon.hero-wave-paused .hero-wave-glints {
+  animation-play-state:paused;
+}
