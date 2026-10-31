@@ -799,11 +799,163 @@
   /* 首屏：文字构图与编码装饰均使用普通DOM和CSS，便于继续调整。
    * 主视觉保留中间区域，等待后续单独设计的视觉效果带。
    */
+
+  /* 中央空间波带：沿横贯首屏的曲线绘制细线，不再以两块信息为连接终点。
+   * 横向曲线由若干归一化控制点决定；手机使用较浅的波形，保持中间留白。
+   * 仅在首屏可见时刷新SVG路径，并在减少动态效果时停留在静态画面。
+   */
+  function createHeroWave(art, conf) {
+    const NS = "http://www.w3.org/2000/svg";
+    const XNS = "http://www.w3.org/1999/xlink";
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "hero-wave-ribbon");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    function element(tag, attributes, parent) {
+      const result = document.createElementNS(NS, tag);
+      Object.entries(attributes || {}).forEach(function (pair) {
+        result.setAttribute(pair[0], pair[1]);
+      });
+      if (parent) parent.appendChild(result);
+      return result;
+    }
+
+    const defs = element("defs", {}, svg);
+    const gradient = element("linearGradient", {
+      id: "crgf-wave-ribbon-gradient", x1: "0%", y1: "0%", x2: "100%", y2: "0%"
+    }, defs);
+    [
+      ["0%", "#56f8ef"], ["23%", "#8be9ff"], ["47%", "#859cfc"],
+      ["69%", "#c478ef"], ["86%", "#f57edc"], ["100%", "#ff65b9"]
+    ].forEach(function (stop) {
+      element("stop", {"offset": stop[0], "stop-color": stop[1]}, gradient);
+    });
+    const glow = element("path", { "class": "hero-wave-ribbon-glow" }, svg);
+    const lines = element("g", { "class": "hero-wave-ribbon-lines" }, svg);
+    const flowPath = element("path", {id:"crgf-wave-ribbon-flow", fill:"none", stroke:"none"}, defs);
+    const flowText = element("text", {"class":"hero-wave-ribbon-text"}, svg);
+    const textPath = element("textPath", {"href":"#crgf-wave-ribbon-flow"}, flowText);
+    textPath.setAttributeNS(XNS, "xlink:href", "#crgf-wave-ribbon-flow");
+    const sentence = conf.streamText || "... / SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / SPACE / ...";
+    textPath.textContent = (sentence + "    ").repeat(14);
+    // 仅用于测量单个循环长度，视觉上不会显示。
+    const measure = element("text", {"class":"hero-wave-ribbon-measure","visibility":"hidden"}, svg);
+    measure.textContent = sentence + "    ";
+    const paths = [];
+
+    let width = 0, height = 0, isMobile = false, points = [];
+    let visible = true, pending = 0, previousTick = 0, frameCount = 0, phraseWidth = 360;
+
+    function prepareSize() {
+      const hero = document.getElementById("hero");
+      if (!hero) return;
+      const rect = hero.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.round(rect.width));
+      const nextHeight = Math.max(1, Math.round(rect.height));
+      if (nextWidth === width && nextHeight === height) return;
+
+      width = nextWidth;
+      height = nextHeight;
+      isMobile = width <= 760;
+      svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+      const anchors = isMobile ?
+        [[-.08,.49],[.11,.53],[.28,.55],[.42,.52],[.64,.44],[.82,.44],[1.07,.51]] :
+        [[-.08,.47],[.08,.51],[.21,.56],[.34,.54],[.58,.41],[.72,.31],[.84,.32],[1.07,.46]];
+      points = anchors.map(function (point) { return {x:point[0], y:point[1]*height}; });
+
+      const count = isMobile ? 22 : 38;
+      while (paths.length < count) {
+        const path = element("path", {"class":"hero-wave-ribbon-strand"}, lines);
+        paths.push(path);
+      }
+      paths.forEach(function (path, index) { path.style.display = index < count ? "" : "none"; });
+      const measured = measure.getComputedTextLength();
+      phraseWidth = measured > 10 ? measured : Math.max(100, sentence.length * (isMobile ? 5.5 : 7.0));
+    }
+
+    function centerY(u) {
+      let i=0;
+      while (i < points.length - 2 && u > points[i+1].x) i++;
+      const a=points[i], b=points[i+1];
+      const d=b.x-a.x, v=Math.max(0,Math.min(1,(u-a.x)/d));
+      const prev=points[Math.max(0,i-1)], next=points[Math.min(points.length-1,i+2)];
+      const slopeA = (b.y-prev.y)/(b.x-prev.x)*d;
+      const slopeB = (next.y-a.y)/(next.x-a.x)*d;
+      const v2=v*v, v3=v2*v;
+      return (2*v3-3*v2+1)*a.y + (v3-2*v2+v)*slopeA
+        + (-2*v3+3*v2)*b.y + (v3-v2)*slopeB;
+    }
+
+    function curvePath(index, count, t, displacement) {
+      const step = isMobile ? 11 : 19;
+      const mid = (count-1)/2;
+      const spread = isMobile ? .86 : 1.75;
+      const weight = mid > 0 ? (index-mid)/mid : 0;
+      let result = "";
+      for(let x=0; x<=width+step; x+=step) {
+        const u=x/width;
+        const baseline=centerY(u);
+        const moving = Math.sin(u*5.4+t*.52)* (isMobile ? 6 : 10);
+        const folding = Math.sin(u*10.5-t*.45+index*.21)
+          * weight * (isMobile ? 11 : 24);
+        const ripple = Math.sin(u*19+t*.9+index*.14)
+          * Math.abs(weight) * (isMobile ? 3.5 : 6);
+        const y=baseline + moving + folding + ripple + (index-mid)*spread + displacement;
+        result += (x===0?"M":"L") + x.toFixed(1) + "," + y.toFixed(1);
+      }
+      return result;
+    }
+
+    function paint(now) {
+      pending=0;
+      if (!reduced && !visible) return;
+      if (!reduced && now-previousTick < 40) { pending=window.requestAnimationFrame(paint); return; }
+      previousTick=now;
+      prepareSize();
+      const t=reduced?0:Date.now()/1000;
+      const count=isMobile?22:38;
+      const axis=curvePath((count-1)/2,count,t,0);
+      glow.setAttribute("d",axis);
+      flowPath.setAttribute("d",curvePath((count-1)/2,count,t,isMobile?27:43));
+      for(let i=0;i<count;i++) {
+        paths[i].setAttribute("d",curvePath(i,count,t,0));
+        paths[i].setAttribute("opacity",(0.24+0.48*(1-Math.abs(i-(count-1)/2)/((count-1)/2))).toFixed(3));
+      }
+      const movePixels = (t*(isMobile?14:23))%phraseWidth;
+      textPath.setAttribute("startOffset",(-phraseWidth+movePixels).toFixed(1));
+      if (!reduced && visible) pending=window.requestAnimationFrame(paint);
+      frameCount++;
+    }
+
+    art.appendChild(svg);
+    if (typeof IntersectionObserver !== "undefined" && !reduced) {
+      const observer=new IntersectionObserver(function (entries) {
+        visible=entries[0]?.isIntersecting ?? true;
+        if (visible && !pending) pending=window.requestAnimationFrame(paint);
+        if (!visible && pending) { window.cancelAnimationFrame(pending); pending=0; }
+      }, {threshold:0});
+      observer.observe(document.getElementById("hero"));
+    }
+    document.addEventListener("visibilitychange",function () {
+      if (!reduced && !document.hidden && visible && !pending) {
+        pending=window.requestAnimationFrame(paint);
+      }
+    });
+    window.addEventListener("resize",function () {
+      prepareSize();
+      if (reduced) paint(0);
+    }, {passive:true});
+    paint(0);
+  }
+
   function renderHero() {
     const art = document.getElementById("hero-art");
     const root = document.getElementById("hero-content");
     const conf = data.hero;
     if (!art || !root || !conf) return;
+    createHeroWave(art, conf);
 
     // 两块大灰字叠层共享同一组原序词语，按错位的行阶组成视觉骨架。
     // 真实主信息独立置于上层，叠层文字仅用于视觉陪衬。

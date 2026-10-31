@@ -2193,3 +2193,60 @@ a.faq-form-link:active .button-label { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .bg-orb { animation: none !important; }
 }
+
+
+/* 主视觉第四轮：光学右对齐及横贯屏幕的空间波动条带。 */
+
+/* 字体自带右侧留白加上letter-spacing，导致“間”看起来比地点偏左。
+ * 只对主标题做视觉补偿，不移动地点、不改变右下信息块的布局边界。
+ */
+.hero-topic { transform: translateX(.078em); transform-origin: right center; }
+
+/* 多条纤细波形沿中央曲线展开，青蓝→紫→粉渐变；主信息层始终盖在波带上。 */
+.hero-wave-ribbon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.hero-wave-ribbon-glow {
+  fill: none;
+  stroke: url(#crgf-wave-ribbon-gradient);
+  stroke-width: 66;
+  stroke-linecap: round;
+  opacity: .085;
+  filter: blur(25px);
+}
+.hero-wave-ribbon-strand {
+  fill: none;
+  stroke: url(#crgf-wave-ribbon-gradient);
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.hero-wave-ribbon-text,
+.hero-wave-ribbon-measure {
+  font-family: ui-monospace, "Consolas", "SFMono-Regular", "Menlo", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .07em;
+  fill: rgba(146,239,254,.66);
+}
+.hero-wave-ribbon-text {
+  paint-order: stroke fill;
+  stroke: rgba(5,16,31,.32);
+  stroke-width: 1px;
+}
+.hero-wave-ribbon-measure { opacity: 0; }
+@media (max-width:760px) {
+  .hero-topic { transform: translateX(.022em); }
+  .hero-wave-ribbon-glow { stroke-width: 39; filter: blur(18px); opacity:.07; }
+  .hero-wave-ribbon-strand { stroke-width: 1.05; }
+  .hero-wave-ribbon-text,
+  .hero-wave-ribbon-measure { font-size: 9px; letter-spacing:.035em; }
+}

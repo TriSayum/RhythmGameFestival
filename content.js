@@ -165,7 +165,8 @@ window.FESTIVAL_CONTENT = {
       "Game",
       "Festival",
       "2026"
-    ]
+    ],
+    "streamText": "... / SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / SPACE / ..."
   },
   "intro": {
     "paragraphs": [
