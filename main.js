@@ -124,7 +124,19 @@
     const row = make("li", "ongoing-item");
     const hours = make("div", "ongoing-time");
     hours.append(time(item.start), document.createTextNode("—"), time(item.end));
-    row.append(hours, make("h4", "ongoing-title", item.title));
+    const heading = make("h4", "ongoing-title", item.title);
+    // 由program.js提供跳转目标；整个卡片都是原生链接，支持键盘操作。
+    if (item.target && document.getElementById(item.target)) {
+      const link = make("a", "ongoing-link");
+      link.href = "#" + item.target;
+      link.append(hours, heading);
+      row.appendChild(link);
+    } else {
+      // 尚未填写有效目标时保持普通展示，不生成失效链接。
+      const body = make("div", "ongoing-static");
+      body.append(hours, heading);
+      row.appendChild(body);
+    }
     return row;
   }
 
@@ -685,7 +697,7 @@
 
 
   /* 内容入场动效：每个区域只展示一次，后续滚动不会再次淡出。
-   * 以视口底部约15%作为进入位置；大章节拆成内容块分别触发。
+   * 以视口底部约5%作为进入位置；页尾不参与，避免滚动锚定回弹。
    */
   function setupScrollReveal() {
     if (typeof IntersectionObserver === "undefined" ||
@@ -701,8 +713,7 @@
       ".submissions-introduction", ".submissions-track-shell",
       ".submissions-milestones", ".submissions-notes", ".submissions-action",
       ".experience-introduction", ".experience-item",
-      ".faq-introduction", ".faq-action", ".faq-item",
-      ".site-footer"
+      ".faq-introduction", ".faq-action", ".faq-item"
     ];
     const elements = Array.from(document.querySelectorAll(selectors.join(", ")));
     if (!elements.length) return;
@@ -715,7 +726,7 @@
       });
     }, {
       root: null,
-      rootMargin: "0px 0px -15% 0px",
+      rootMargin: "0px 0px -5% 0px",
       threshold: 0.04
     });
 

@@ -1,5 +1,6 @@
 /* 02日程与04茶欢会共用的唯一节目数据。
  * schedule.main：按时间顺序列出主会场节目及子节目。
+ * schedule.ongoing[].target：同期开放卡片跳转的章节ID。
  * schedule.mainHeader / ongoingHeader：02两组黑色标题条中的日期、地点。
  * salon.info：04每场分享标题下复用的日期与地点，场次时间来自节目本身。
  * salon.introduction：04的介绍段落，暂时留空。
@@ -91,12 +92,14 @@ window.FESTIVAL_PROGRAM = {
     "ongoing": [
       {
         "id": "works-exhibition",
+        "target": "submissions",
         "start": "10:00",
         "end": "20:00",
         "title": "创作作品展览"
       },
       {
         "id": "hands-on",
+        "target": "experience",
         "start": "10:00",
         "end": "20:00",
         "title": "现场体验"

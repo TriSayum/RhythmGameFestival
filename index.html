@@ -19,7 +19,9 @@
     <div class="bg-grid"></div>
     <div class="bg-noise"></div>
   </div>
-  <header id="top" class="site-header">
+  <!-- 与粘性页首分离：#top始终指向文档真实顶部。 -->
+  <span id="top" class="top-anchor" aria-hidden="true"></span>
+  <header class="site-header">
     <a id="site-brand" class="site-brand" href="#top" aria-label="返回页首"></a>
     <nav id="site-nav" class="site-nav" aria-label="页面导航"></nav>
   </header>
