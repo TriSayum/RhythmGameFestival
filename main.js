@@ -798,15 +798,19 @@
 
   /* 首屏文字构图与编码装饰使用普通DOM和CSS。 */
 
-  /* 首屏与正文分界处的透明双编码条。
-   * 尺寸仅在初始载入、字体就绪、屏幕宽度变化时测量。
-   * 滚动帧只读取scrollY并更新两个transform，没有缓动及布局读取。
+  /* 首屏与正文分界处的双编码条。
+   * 手机端优先采用浏览器原生滚动时间轴，以合成器驱动位移，避免JS滚动回调缺帧。
+   * 不支持该特性的浏览器及桌面端仍使用逐帧合并的scrollY位移；两端均保持10%滚动倍率。
    */
   function setupHeroEncodingTicker() {
     const root = document.getElementById("hero-encoding-ticker");
     if (!root || !data.hero) return;
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+    const mobileQuery = window.matchMedia?.("(max-width: 760px)");
+    const supportsNativeScroll = !reducedMotion && typeof CSS !== "undefined" &&
+      CSS.supports("animation-timeline: scroll(root block)") &&
+      CSS.supports("animation-range: 0% 100%");
     const text = data.hero.streamText || "SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / ";
     const entries = [];
 
@@ -822,9 +826,13 @@
     });
 
     let measuredWidth = 0;
+    let measuredHeight = 0;
     let positionPending = false;
+    let measurePending = false;
+    let nativeScrollActive = false;
 
     function setPosition() {
+      if (nativeScrollActive) return;
       const move = reducedMotion ? 0 : Math.max(0, window.scrollY || window.pageYOffset || 0) * .1;
       entries.forEach(function (entry, index) {
         const period = entry.textWidth;
@@ -835,7 +843,7 @@
     }
 
     function schedulePosition() {
-      if (positionPending) return;
+      if (nativeScrollActive || positionPending) return;
       positionPending = true;
       window.requestAnimationFrame(function () {
         positionPending = false;
@@ -845,33 +853,75 @@
 
     function measure() {
       const rootWidth = Math.max(1, root.getBoundingClientRect().width);
+      const page = document.documentElement;
+      const maxScroll = Math.max(0, page.scrollHeight - page.clientHeight);
+      const travel = maxScroll * .1;
+      const useNative = supportsNativeScroll && !!mobileQuery?.matches;
       measuredWidth = rootWidth;
-      entries.forEach(function (entry) {
+      measuredHeight = page.scrollHeight;
+      nativeScrollActive = useNative;
+
+      entries.forEach(function (entry, index) {
         const segment = entry.lane.firstElementChild;
         if (!segment) return;
-        const width = segment.getBoundingClientRect().width;
-        if (!(width > 0)) return;
-        entry.textWidth = width;
-        const required = Math.max(3, Math.ceil(rootWidth / width) + 2);
+        const period = segment.getBoundingClientRect().width;
+        if (!(period > 0)) return;
+        entry.textWidth = period;
+
+        // 原生时间轴不使用取模，而是一次铺足全文档10%位移所需的重复文本，
+        // 这样跨越文本周期时无跳变，也无须在滚动过程中修改DOM。
+        const required = useNative
+          ? Math.max(3, Math.ceil((rootWidth + travel + period * 2) / period) + 1)
+          : Math.max(3, Math.ceil(rootWidth / period) + 2);
         while (entry.lane.children.length < required) {
           entry.lane.appendChild(make("span", "hero-encoding-segment", entry.segmentText));
         }
         while (entry.lane.children.length > required) {
           entry.lane.lastElementChild.remove();
         }
+
+        if (useNative) {
+          const phase = period * .19;
+          const leadingPeriods = Math.ceil(travel / period) + 1;
+          const start = index === 0 ? -phase : -leadingPeriods * period + phase;
+          const end = start + (index === 0 ? -travel : travel);
+          entry.lane.style.setProperty("--encoding-start", start.toFixed(2) + "px");
+          entry.lane.style.setProperty("--encoding-end", end.toFixed(2) + "px");
+        }
       });
-      setPosition();
+
+      root.classList.toggle("is-native-scroll", useNative);
+      if (!useNative) setPosition();
+    }
+
+    function scheduleMeasure() {
+      if (measurePending) return;
+      measurePending = true;
+      window.requestAnimationFrame(function () {
+        measurePending = false;
+        measure();
+      });
     }
 
     measure();
+    // 完整正文在本函数之后渲染，因此下一帧必须按实际页面高度再测量。
+    scheduleMeasure();
     window.addEventListener("scroll", schedulePosition, {passive: true});
     window.addEventListener("resize", function () {
       const width = document.documentElement.clientWidth;
-      if (Math.abs(width - measuredWidth) < 2) return;
-      measure();
+      if (Math.abs(width - measuredWidth) >= 2) scheduleMeasure();
     }, {passive: true});
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(measure);
+    window.addEventListener("load", scheduleMeasure, {once: true});
+    if (document.fonts?.ready) document.fonts.ready.then(scheduleMeasure);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(function () {
+        const height = document.documentElement.scrollHeight;
+        if (nativeScrollActive && Math.abs(height - measuredHeight) >= 2) scheduleMeasure();
+      });
+      const app = document.getElementById("app");
+      const footer = document.getElementById("site-footer");
+      if (app) observer.observe(app);
+      if (footer) observer.observe(footer);
     }
   }
 
