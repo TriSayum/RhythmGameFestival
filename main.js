@@ -1008,6 +1008,196 @@
   }
 
 
+  /* 首屏点阵：随#hero-art自然滚动，鼠标只改变内部方块位置。
+   * 手机及减少动态效果时只绘制静态点阵；无需滚动监听与WebGL。
+   */
+  function setupHeroDotField() {
+    const hero = document.getElementById("hero");
+    const canvas = document.getElementById("hero-dot-field");
+    if (!hero || !canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // 均为CSS像素；可以统一从这里调试点阵外观与排斥手感。
+    const settings = {
+      spacing: 32, dotSize: 2, color: "rgba(190, 232, 249, 0.20)",
+      radius: 140, idlePush: 8, movingPush: 20,
+      maxSpeed: 1.5, directionFactor: 0.15,
+      spring: 0.20, damping: 0.72, maxDpr: 2
+    };
+    const fine = window.matchMedia?.("(hover: hover) and (pointer: fine)");
+    const mobile = window.matchMedia?.("(max-width: 760px)");
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const interactive = () => !!fine?.matches && !mobile?.matches && !reduced?.matches;
+    let width = 0, height = 0, dpr = 0, cols = 0, rows = 0, baseX = 0, baseY = 0;
+    let dots = [], pointer = null, visible = true, frame = 0, lastFrame = 0;
+    const active = new Set();
+
+    function paint() {
+      if (!visible || document.hidden || !width || !height) return;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = settings.color;
+      const half = settings.dotSize / 2;
+      for (const dot of dots) {
+        ctx.fillRect(dot.x - half, dot.y - half, settings.dotSize, settings.dotSize);
+      }
+    }
+    function stop() {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      lastFrame = 0;
+    }
+    function reset() {
+      stop();
+      pointer = null;
+      active.clear();
+      for (const dot of dots) {
+        dot.x = dot.homeX; dot.y = dot.homeY;
+        dot.vx = 0; dot.vy = 0;
+      }
+      paint();
+    }
+    function rebuild() {
+      const bounds = hero.getBoundingClientRect();
+      const w = Math.max(1, Math.round(bounds.width));
+      const h = Math.max(1, Math.round(bounds.height));
+      const ratio = Math.min(settings.maxDpr, window.devicePixelRatio || 1);
+      if (width === w && height === h && dpr === ratio) return;
+      stop();
+      width = w; height = h; dpr = ratio;
+      canvas.width = Math.round(w * ratio);
+      canvas.height = Math.round(h * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      cols = Math.max(1, Math.floor(w / settings.spacing));
+      rows = Math.max(1, Math.floor(h / settings.spacing));
+      baseX = (w - (cols - 1) * settings.spacing) / 2;
+      baseY = (h - (rows - 1) * settings.spacing) / 2;
+      dots = [];
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = baseX + col * settings.spacing;
+          const y = baseY + row * settings.spacing;
+          dots.push({homeX: x, homeY: y, x, y, vx: 0, vy: 0});
+        }
+      }
+      pointer = null;
+      active.clear();
+      paint();
+    }
+    // 仅把力场覆盖到的行列加入更新集合；离开力场的点回位后会移出。
+    function addNearby() {
+      if (!pointer) return;
+      const r = settings.radius, step = settings.spacing;
+      const l = Math.max(0, Math.ceil((pointer.x - r - baseX) / step));
+      const rr = Math.min(cols - 1, Math.floor((pointer.x + r - baseX) / step));
+      const t = Math.max(0, Math.ceil((pointer.y - r - baseY) / step));
+      const b = Math.min(rows - 1, Math.floor((pointer.y + r - baseY) / step));
+      for (let row = t; row <= b; row++) for (let col = l; col <= rr; col++) {
+        const idx = row * cols + col, dot = dots[idx];
+        const dx = dot.homeX - pointer.x, dy = dot.homeY - pointer.y;
+        if (dx * dx + dy * dy < r * r) active.add(idx);
+      }
+    }
+    function schedule() {
+      if (!frame && visible && !document.hidden && interactive()) {
+        frame = requestAnimationFrame(tick);
+      }
+    }
+    function tick(now) {
+      frame = 0;
+      if (!visible || document.hidden || !interactive()) { reset(); return; }
+      const dt = lastFrame ? Math.min(2, Math.max(0.5, (now - lastFrame) / (1000 / 60))) : 1;
+      lastFrame = now;
+      if (pointer) {
+        pointer.speed *= Math.pow(0.8, dt);
+        if (pointer.speed < 0.005) pointer.speed = 0;
+        addNearby();
+      }
+      const speed = pointer ? Math.min(1, pointer.speed / settings.maxSpeed) : 0;
+      const strength = settings.idlePush + (settings.movingPush - settings.idlePush) * speed;
+      const spring = settings.spring * dt, damping = Math.pow(settings.damping, dt);
+      let moving = false;
+      for (const idx of active) {
+        const dot = dots[idx];
+        let tx = dot.homeX, ty = dot.homeY;
+        if (pointer) {
+          const dx = dot.homeX - pointer.x, dy = dot.homeY - pointer.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance < settings.radius) {
+            const u = 1 - distance / settings.radius;
+            const weight = u * u * (3 - 2 * u);
+            const awayX = distance > 0.001 ? dx / distance : -(pointer.dirX || 1);
+            const awayY = distance > 0.001 ? dy / distance : -pointer.dirY;
+            tx += awayX * weight * strength +
+              pointer.dirX * weight * strength * speed * settings.directionFactor;
+            ty += awayY * weight * strength +
+              pointer.dirY * weight * strength * speed * settings.directionFactor;
+          }
+        }
+        dot.vx = (dot.vx + (tx - dot.x) * spring) * damping;
+        dot.vy = (dot.vy + (ty - dot.y) * spring) * damping;
+        dot.x += dot.vx * dt;
+        dot.y += dot.vy * dt;
+        const settled = Math.abs(tx - dot.x) < 0.04 &&
+          Math.abs(ty - dot.y) < 0.04 &&
+          Math.abs(dot.vx) < 0.04 && Math.abs(dot.vy) < 0.04;
+        if (!settled) moving = true;
+        if (settled && tx === dot.homeX && ty === dot.homeY) {
+          dot.x = dot.homeX; dot.y = dot.homeY;
+          dot.vx = 0; dot.vy = 0;
+          active.delete(idx);
+        }
+      }
+      paint();
+      if (moving || (pointer && pointer.speed > 0)) schedule();
+      else lastFrame = 0; // 静止时完全停止逐帧渲染
+    }
+    hero.addEventListener("pointermove", function (event) {
+      if (!interactive() || !visible || event.pointerType === "touch") return;
+      // 此处只读取交互局部坐标，不使用滚动距离修改Canvas的位置。
+      const bounds = hero.getBoundingClientRect();
+      const x = event.clientX - bounds.left, y = event.clientY - bounds.top;
+      const now = performance.now();
+      let speed = 0, dirX = 0, dirY = 0;
+      if (pointer) {
+        const dx = x - pointer.x, dy = y - pointer.y;
+        const distance = Math.hypot(dx, dy);
+        speed = Math.min(settings.maxSpeed * 1.5, distance / Math.max(8, now - pointer.time));
+        dirX = distance > 0.01 ? dx / distance : pointer.dirX;
+        dirY = distance > 0.01 ? dy / distance : pointer.dirY;
+      }
+      pointer = {x, y, time: now, speed, dirX, dirY};
+      addNearby();
+      schedule();
+    }, {passive: true});
+    hero.addEventListener("pointerleave", function () {
+      if (pointer) { pointer = null; schedule(); }
+    });
+    hero.addEventListener("pointercancel", function () {
+      if (pointer) { pointer = null; schedule(); }
+    });
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(rebuild).observe(hero);
+    }
+    window.addEventListener("resize", rebuild, {passive: true});
+    if (typeof IntersectionObserver !== "undefined") {
+      new IntersectionObserver(function (entries) {
+        const inView = entries[0]?.isIntersecting ?? true;
+        if (visible === inView) return;
+        visible = inView;
+        if (inView) paint();
+        else reset();
+      }, {threshold: 0}).observe(hero);
+    }
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) reset();
+      else paint();
+    });
+    [fine, mobile, reduced].forEach(query => query?.addEventListener?.("change", reset));
+    rebuild();
+  }
+
+
   /* 编码组件在渲染结束后自动避让两块主信息。
    * 优先保留设计时指定的大致位置；对实际DOM边界做检测，避免遮挡正文。
    * 布局仅在首屏/字体/窗口尺寸变化后更新，不响应其他章节的高度变化。
@@ -1180,6 +1370,7 @@
   setupStickyHeaderOffset();
   setupInitialHeroHeight();
   renderHero();
+  setupHeroDotField();
   setupHeroFragmentLayout();
   setupHeroEncodingTicker();
   renderHeadings();
