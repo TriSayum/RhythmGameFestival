@@ -840,10 +840,6 @@
       uniform float u_mobile;
       varying float v_x;
       varying float v_strand;
-      float bump(float x, float center, float radius) {
-        float q = (x - center) / radius;
-        return exp(-0.5 * q * q);
-      }
       void main() {
         float x = a_point.x;
         float base = a_point.y;
@@ -851,44 +847,22 @@
         float edge = a_point.w;
         float t = u_time;
         float mobile = u_mobile;
-        float edgeFactor = abs(strand);
-        float right = smoothstep(0.36, 0.96, x);
-
-        // 左侧已有动态：各条曲线拥有不同相位，而非共用一根管状中心线。
-        float breathing = sin(x * 5.4 + t * 0.52) * mix(8.0, 5.2, mobile);
-        float waving = sin(x * 11.2 - t * 0.58 + strand * 2.35)
-          * mix(14.0, 7.8, mobile) * (0.28 + 0.72 * edgeFactor);
-        float flutter = sin(x * 19.0 + t * 0.86 - strand * 3.6)
-          * mix(6.8, 4.0, mobile) * (0.33 + 0.67 * edgeFactor);
-        float centerMotion = breathing + waving + flutter;
-
-        // 右侧整体起伏与两组逐渐移动的局部折叠。
-        centerMotion += right * (
-          sin(x * 8.8 - t * 0.74) * mix(13.0, 7.5, mobile) +
-          sin(x * 16.4 + t * 0.41) * mix(5.5, 3.4, mobile));
-
-        float foldA = right * bump(x, 0.69 + 0.027 * sin(t * 0.19), 0.082);
-        float foldB = right * bump(x, 0.89 + 0.020 * sin(t * 0.23 + 1.4), 0.069);
-
-        // 局部压合/翻面 + 非线性褶皱；离开折叠区域后重新发散。
-        float squeeze = 1.0 - foldA * 1.65 - foldB * 1.42;
-        float fan = 1.0 + (foldA * 0.44 + foldB * 0.55)
-          * sin(x * 12.0 + t * 0.53);
-        float widthOffset = strand * u_halfSpan * squeeze * fan;
-        float pleatA = foldA * mix(36.0, 20.0, mobile)
-          * sin(strand * 4.5 + x * 19.0 - t * 0.61);
-        float pleatB = foldB * mix(29.0, 15.0, mobile)
-          * sin(strand * 6.1 - x * 13.5 + t * 0.49);
-        float spread = right * strand * mix(12.0, 7.0, mobile)
-          * sin(x * 9.0 - t * 0.32);
-
-        float yPx = base * u_size.y + centerMotion
-          + widthOffset + pleatA + pleatB + spread;
-        // 静态四边形在像素空间构成宽度稳定的独立线段。
+        // 和“修正双编码条”历史版一样：每条线的相位由原始序号决定。
+        float index = (strand + 1.0) * 0.5 * mix(23.0, 13.0, mobile);
+        float moving = sin(x * 5.4 + t * 0.52) * mix(10.0, 6.0, mobile);
+        float folding = sin(x * 10.5 - t * 0.45 + index * 0.21)
+          * strand * mix(24.0, 11.0, mobile);
+        float ripple = sin(x * 19.0 + t * 0.9 + index * 0.14)
+          * abs(strand) * mix(6.0, 3.5, mobile);
+        // 唯一的右侧附加效果：将已有线间位移逐渐放大，不增加新波纹。
+        float widening = smoothstep(0.38, 0.98, x);
+        float fan = mix(1.0, mix(2.15, 1.65, mobile), widening);
+        float yPx = base * u_size.y + moving
+          + (strand * u_halfSpan + folding + ripple) * fan;
         yPx += edge * u_stroke * 0.5;
         gl_Position = vec4(x * 2.0 - 1.0, 1.0 - 2.0 * yPx / u_size.y, 0.0, 1.0);
         v_x = x;
-        v_strand = edgeFactor;
+        v_strand = abs(strand);
       }
     `;
     const fragmentSource = `
@@ -904,7 +878,8 @@
         vec3 color = mix(cyan, blue, smoothstep(0.08, 0.50, v_x));
         color = mix(color, violet, smoothstep(0.39, 0.75, v_x));
         color = mix(color, pink, smoothstep(0.71, 1.0, v_x));
-        float alpha = u_opacity * (0.68 + 0.32 * (1.0 - v_strand));
+        color = mix(color, vec3(1.0), 0.13);
+        float alpha = u_opacity * (0.86 + 0.14 * (1.0 - v_strand));
         gl_FragColor = vec4(color, alpha);
       }
     `;
@@ -1015,7 +990,7 @@
       gl.useProgram(program);
       gl.uniform2f(refs.size,w,h);
       gl.uniform1f(refs.mobile,mobile?1:0);
-      gl.uniform1f(refs.halfSpan,half*(mobile?3.35:3.7));
+      gl.uniform1f(refs.halfSpan,half*(mobile?1.65:2.7));
       return true;
     }
     function render() {
@@ -1026,11 +1001,11 @@
       gl.vertexAttribPointer(refs.point, 4, gl.FLOAT, false, 16, 0);
       gl.uniform1f(refs.time, phase);
       // GPU绘制两次：低透明度外晕＋细线主层。每帧无DOM路径重建。
-      gl.uniform1f(refs.stroke, 5.5);
-      gl.uniform1f(refs.opacity, .11);
+      gl.uniform1f(refs.stroke, 6.0);
+      gl.uniform1f(refs.opacity, .16);
       gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
-      gl.uniform1f(refs.stroke, 1.18);
-      gl.uniform1f(refs.opacity, .64);
+      gl.uniform1f(refs.stroke, 1.45);
+      gl.uniform1f(refs.opacity, .92);
       gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
     }
     function stop() {
@@ -1110,13 +1085,10 @@
     if (!hero) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
 
-    /* 便于后续针对实际机型调整的性能与视觉参数。 */
+    /* WebGL不可用时也使用历史版波纹与右侧倍率发散。 */
     const profile = {
-      // 折叠只出现在右侧的两个局部区域；调节twist与pleat即可改变扭曲强度。
-      desktop: {count:24, step:22, spread:3.6, breathing:8, shared:16, detail:6,
-        twistA:3.05, twistB:2.50, pleatA:35, pleatB:23, fine:7},
-      mobile:  {count:14, step:16, spread:3.2, breathing:5, shared:9, detail:3.5,
-        twistA:2.85, twistB:2.35, pleatA:18, pleatB:12, fine:4}
+      desktop: {count:24, step:22, spread:2.7, moving:10, folding:24, ripple:6, fan:2.15},
+      mobile: {count:14, step:16, spread:1.65, moving:6, folding:11, ripple:3.5, fan:1.65}
     };
     const targetFrameMs = 1000 / 60;
     const maxPhaseStep = .040;
@@ -1197,12 +1169,10 @@
         samples.push({
           xText:x.toFixed(1),
           baseline:centerY(u,points),
-          gain:smoothstep(.36,.95,u),
-          u:u,
+          gain:smoothstep(.38,.98,u),
           commonPhase:u*5.4,
-          warpPhase:u*8.8,
-          detailPhase:u*17.0,
-          foldPhase:u*11.4
+          foldPhase:u*10.5,
+          ripplePhase:u*19.0
         });
       }
 
@@ -1215,62 +1185,36 @@
         line.style.display = index < config.count ? "" : "none";
         if (index < config.count) {
           line.setAttribute("opacity",
-            (.34+.39*(1-Math.abs(index-mid)/mid)).toFixed(3));
+            (.50+.45*(1-Math.abs(index-mid)/mid)).toFixed(3));
         }
       });
       return true;
     }
 
-    // 局部折叠场：不是让全部曲线同向变弯，而是在右侧局部使线束
-    // 依次收束、扭转交错、重新展开。左段依然呈平顺的正弦波带。
+    // 恢复各条线不同相位的波纹；仅放大右侧的线间相对位移。
     function draw(time) {
-      const sharedY = new Float32Array(samples.length);
-      const foldOne = new Float32Array(samples.length);
-      const foldTwo = new Float32Array(samples.length);
-      const twistScale = new Float32Array(samples.length);
-      // 两个缓慢漂移的局部扭曲中心，彼此相隔，避免整条变成规则的管子。
-      const centerA = .70 + .025 * Math.sin(time*.17);
-      const centerB = .90 + .018 * Math.sin(time*.23+1.7);
-      for (let j=0;j<samples.length;j++) {
-        const s=samples[j], g=s.gain;
-        const gentle=Math.sin(s.commonPhase+time*.52)*config.breathing;
-        const rightWaves=g*(
-          Math.sin(s.warpPhase-time*.74)*config.shared +
-          Math.sin(s.detailPhase+time*.43)*config.detail);
-        sharedY[j]=s.baseline+gentle+rightWaves;
-
-        // 高斯包络限定扰动区域，平滑权重使左侧没有突兀的分界线。
-        const a=(s.u-centerA)/.085;
-        const b=(s.u-centerB)/.070;
-        foldOne[j]=Math.exp(-.5*a*a)*g;
-        foldTwo[j]=Math.exp(-.5*b*b)*g;
-        // 横截面在折叠中心附近发生翻转，线束会产生真实的交错关系。
-        twistScale[j]=Math.cos(foldOne[j]*config.twistA-foldTwo[j]*config.twistB);
+      const moving=new Float32Array(samples.length);
+      for(let j=0;j<samples.length;j++) {
+        const s=samples[j];
+        moving[j]=s.baseline+Math.sin(s.commonPhase+time*.52)*config.moving;
       }
-
-      const count=config.count, mid=(count-1)/2;
-      function curve(weight,offset) {
+      const mid=(config.count-1)/2;
+      function curve(index) {
+        const weight=(index-mid)/mid;
+        const offset=(index-mid)*config.spread;
         const parts=new Array(samples.length);
         for(let j=0;j<samples.length;j++) {
-          const s=samples[j], g=s.gain;
-          // 同一截面的线条采用不同的相位，形成局部交叠而非整体平移。
-          const creaseA=foldOne[j]*config.pleatA*
-            Math.sin((weight+1)*Math.PI*1.3+s.u*7.0-time*.55);
-          const creaseB=foldTwo[j]*config.pleatB*
-            Math.sin((weight+1)*Math.PI*1.8-s.u*5.5+time*.40);
-          const detail=g*weight*
-            Math.sin(s.foldPhase-time*.84+weight*.75)*config.fine;
-          const y=sharedY[j]+offset*twistScale[j]+creaseA+creaseB+detail;
+          const s=samples[j];
+          const folding=Math.sin(s.foldPhase-time*.45+index*.21)*weight*config.folding;
+          const ripple=Math.sin(s.ripplePhase+time*.9+index*.14)*Math.abs(weight)*config.ripple;
+          const fan=1+s.gain*(config.fan-1);
+          const y=moving[j]+(offset+folding+ripple)*fan;
           parts[j]=(j===0?"M":"L")+s.xText+","+y.toFixed(1);
         }
         return parts.join(" ");
       }
-      // 光晕只跟随中心轨迹，避免局部折叠把光晕扭曲成刺眼亮斑。
-      glow.setAttribute("d",curve(0,0));
-      for(let i=0;i<count;i++){
-        const weight=(i-mid)/mid;
-        paths[i].setAttribute("d",curve(weight,(i-mid)*config.spread));
-      }
+      glow.setAttribute("d",curve(mid));
+      for(let i=0;i<config.count;i++) paths[i].setAttribute("d",curve(i));
     }
 
     function stop() {
