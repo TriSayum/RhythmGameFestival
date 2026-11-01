@@ -281,23 +281,23 @@ a {
   }
 }
 
-/* 01简介：主题字标可以横向铺开，但介绍和阐释正文维持850px阅读宽度。 */
+/* 01简介：主题字标、活动介绍与阐释共同遵循实际可用的阅读宽度。
+ * 由浏览器在正文列内自动计算中心；手机端自然收缩，不另设横向补偿。
+ */
 .intro-content {
   width: 100%;
-  max-width: none;
+  max-width: 850px;
   margin-top: 40px;
   font-size: 16px;
   line-height: 1.95;
 }
-.intro-overview,
-.theme-content > p { max-width: 850px; }
 .intro-content p { margin: 0 0 16px; }
 
 .theme-content { margin-top: 64px; }
 
-/* B2＋B-1：背景SPACE使用紧贴字形边界的SVG外轮廓遮罩。
- * SVG去除了P、A的内部封闭描线，容器以实际绘制范围居中。
- * 两组文字在居中的基础上增加少量左侧光学补偿。
+/* B2＋B-1：SPACE的外轮廓使用真实SVG图片，直接显示而不使用CSS遮罩。
+ * 标题与正文位于同一个850px以内的阅读区域，Grid直接按该区域居中。
+ * 不通过固定像素位移模拟居中，也不需要手机端的水平补偿。
  */
 .theme-heading {
   display: grid;
@@ -325,11 +325,11 @@ a {
 .theme-heading-outline {
   z-index: 0;
   width: min(100%, 720px);
+  height: auto;
   aspect-ratio: 6521 / 1582;
-  background-color: rgba(48, 227, 255, .50);
-  -webkit-mask: url("./assets/hero/space-theme-outline.svg") center / contain no-repeat;
-  mask: url("./assets/hero/space-theme-outline.svg") center / contain no-repeat;
-  transform: translateX(-18px);
+  object-fit: contain;
+  opacity: .68;
+  -webkit-user-drag: none;
 }
 .theme-heading-cn {
   z-index: 1;
@@ -340,7 +340,7 @@ a {
   letter-spacing: .1em;
   color: #f5faff;
   text-shadow: 0 3px 24px rgba(5, 9, 17, .82);
-  transform: translate(-12px, 12%);
+  transform: translateY(12%);
 }
 .theme-conclusion {
   margin-top: 22px !important;
@@ -359,14 +359,9 @@ a {
     min-height: clamp(160px, 47vw, 210px);
     margin-bottom: 30px;
   }
-  .theme-heading-outline {
-    width: min(100%, 355px);
-    background-color: rgba(48, 227, 255, .58);
-    transform: translateX(-6px);
-  }
   .theme-heading-cn {
     font-size: clamp(50px, 14.2vw, 78px);
-    transform: translate(-4px, 10%);
+    transform: translateY(10%);
   }
   .theme-invitation { margin-top: 36px !important; }
 }
@@ -2285,14 +2280,8 @@ a.faq-form-link:active .button-label { transform: none; }
 
 /* 主视觉标题的光学右对齐。 */
 
-/* 改用简体“空间”，撤销原先为繁体“間”设置的大幅右移。
- * 桌面保留轻微视觉补偿，手机端采用自然右对齐。
- */
-.hero-topic { transform: translateX(.02em); transform-origin: right center; }
-
-@media (max-width:760px) {
-  .hero-topic { transform: none; }
-}
+/* 主视觉简体“空间”直接使用文字自身的正常右对齐，不再强行右移。 */
+.hero-topic { transform: none; }
 
 /* 首屏与01之间的全宽双编码文字条：白字、无底、无边框 */
 .hero-encoding-ticker {
