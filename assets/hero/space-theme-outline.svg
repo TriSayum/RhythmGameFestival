@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="45 -1536 6521 1582" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
   <!-- SPACE外轮廓字标：移除P、A字腔的内部描线，保留完整字形外边界。 -->
-  <g transform="scale(1,-1)" fill="none" stroke="#fff" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
+  <g transform="scale(1,-1)" fill="none" stroke="#30e3ff" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
     <path d="M689 -24C1073 -24 1301 153 1301 453C1301 683 1158 814 828 880L697 906C527 941 456 986 456 1067C456 1160 551 1225 687 1225C829 1225 924 1149 934 1026H1267C1258 1331 1039 1514 682 1514C332 1514 96 1327 96 1050C96 833 245 689 536 629L689 598C868 561 945 512 945 427C945 329 844 265 692 265C520 265 415 349 410 492H67C67 163 292 -24 689 -24Z"/>
     <path transform="translate(1283,0)" d="M96 0H456V482H704C1049 482 1267 677 1267 986C1267 1295 1051 1490 706 1490H96Z"/>
     <path transform="translate(2507,0)" d="M5 0H396L487 287H1016L1104 0H1506L991 1490H517Z"/>
