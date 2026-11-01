@@ -125,35 +125,35 @@ window.FESTIVAL_CONTENT = {
     "scheduleLinkLabel": "查看日程",
     "codes": [
       {
-        "label": "UTF-8 / 简",
+        "label": "UTF-8 / CHS",
         "text": "E7 A9 BA E9 97 B4"
       },
       {
-        "label": "UTF-8 / 繁",
+        "label": "UTF-8 / CHT",
         "text": "E7 A9 BA E9 96 93"
       },
       {
-        "label": "URL / 简",
+        "label": "URL / CHS",
         "text": "%E7%A9%BA%E9%97%B4"
       },
       {
-        "label": "URL / 繁",
+        "label": "URL / CHT",
         "text": "%E7%A9%BA%E9%96%93"
       },
       {
-        "label": "BIN / 简",
+        "label": "BIN / CHS",
         "text": "11100111 10101001 10111010 11101001 10010111 10110100"
       },
       {
-        "label": "BIN / 繁",
+        "label": "BIN / CHT",
         "text": "11100111 10101001 10111010 11101001 10010110 10010011"
       },
       {
-        "label": "HEX / SPACE",
+        "label": "HEX / ENU",
         "text": "53 50 41 43 45"
       },
       {
-        "label": "BIN / SPACE",
+        "label": "BIN / ENU",
         "text": "01010011 01010000 01000001 01000011 01000101"
       },
       {
