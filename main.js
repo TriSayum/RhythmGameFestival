@@ -806,12 +806,31 @@
     const elements = Array.from(document.querySelectorAll(selectors.join(", ")));
     if (!elements.length) return;
 
+    // 只绘制到最后一个已渐入的主节点；用offsetTop避免被入场位移动画干扰。
+    function syncTimelineLines() {
+      document.querySelectorAll(".timeline").forEach(function (timeline) {
+        const revealed = timeline.querySelectorAll(".timeline-item.is-revealed");
+        const last = revealed[revealed.length - 1];
+        let length = 0;
+        if (last) {
+          const marker = last.querySelector(".timeline-marker");
+          if (marker) {
+            length = Math.max(0, Math.min(timeline.offsetHeight - 10,
+              last.offsetTop + marker.offsetTop + marker.offsetHeight / 2 - 10));
+          }
+        }
+        timeline.style.setProperty("--timeline-visible-line", length.toFixed(1) + "px");
+      });
+    }
     const observer = new IntersectionObserver(function (entries) {
+      let lineChanged = false;
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
         entry.target.classList.add("is-revealed");
         observer.unobserve(entry.target);
+        if (entry.target.classList.contains("timeline-item")) lineChanged = true;
       });
+      if (lineChanged) syncTimelineLines();
     }, {
       root: null,
       rootMargin: "0px 0px -5% 0px",
@@ -821,6 +840,7 @@
     elements.forEach(function (element) { element.classList.add("reveal-target"); });
     document.documentElement.classList.add("reveal-enabled");
     elements.forEach(function (element) { observer.observe(element); });
+    window.addEventListener("resize", syncTimelineLines, {passive: true});
   }
 
 
@@ -1110,50 +1130,6 @@
   }
 
 
-  /* 手机端主办信息优先位于右上；若与左上信息块相交，则自动避开。
-   * 只读取同一主视觉里的真实元素边界，改变的是内部布局而非滚动补偿。
-   */
-  function setupHeroOrganizerMobileLayout() {
-    const hero = document.getElementById("hero");
-    const primary = hero?.querySelector(".hero-primary");
-    const organizers = hero?.querySelector(".hero-organizers");
-    if (!hero || !primary || !organizers) return;
-    const mobile = window.matchMedia("(max-width: 760px)");
-    let pending = false;
-    function layout() {
-      pending = false;
-      organizers.style.removeProperty("--hero-mobile-organizers-top");
-      if (!mobile.matches) return;
-      const primaryRect = primary.getBoundingClientRect();
-      const organizerRect = organizers.getBoundingClientRect();
-      const heroRect = hero.getBoundingClientRect();
-      const gap = 16;
-      const overlapsX = organizerRect.left < primaryRect.right + gap &&
-        organizerRect.right > primaryRect.left - gap;
-      const overlapsY = organizerRect.top < primaryRect.bottom + gap &&
-        organizerRect.bottom > primaryRect.top - gap;
-      if (overlapsX && overlapsY) {
-        const top = Math.ceil(primaryRect.bottom - heroRect.top + gap);
-        organizers.style.setProperty("--hero-mobile-organizers-top", top + "px");
-      }
-    }
-    function schedule() {
-      if (pending) return;
-      pending = true;
-      window.requestAnimationFrame(layout);
-    }
-    schedule();
-    window.addEventListener("resize", schedule, {passive: true});
-    mobile.addEventListener?.("change", schedule);
-    if (document.fonts?.ready) document.fonts.ready.then(schedule);
-    if (typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(schedule);
-      observer.observe(hero);
-      observer.observe(primary);
-    }
-  }
-
-
   /* 首屏点阵：随#hero-art自然滚动，鼠标只改变内部方块位置。
    * 手机及减少动态效果时只绘制静态点阵；无需滚动监听与WebGL。
    */
@@ -1344,7 +1320,7 @@
   }
 
 
-  /* 编码组件在渲染结束后自动避让两块主信息。
+  /* 小编码避开四组主信息及两组灰字叠层的实际字形盒子。
    * 优先保留设计时指定的大致位置；对实际DOM边界做检测，避免遮挡正文。
    * 布局仅在首屏/字体/窗口尺寸变化后更新，不响应其他章节的高度变化。
    */
@@ -1373,7 +1349,12 @@
 
       // 全部编码均尝试参与布局；仅在确实没有安全位置时隐藏。
       const visibleCount = width <= 760 ? Math.min(5, nodes.length) : nodes.length;
-      const protectedAreas = [primary, secondary, organizers, scheduleSlot].map(function (node) {
+      // 灰色文字允许溢出大信息块容器，必须逐字检测真实位置。
+      // 只保护文字本身而非整片叠层容器，保留更多可用的编码区域。
+      const overlayWords = hero.querySelectorAll(
+        ".hero-primary-overlay .hero-overlay-word, .hero-secondary-overlay .hero-overlay-word"
+      );
+      const protectedAreas = [primary, secondary, organizers, scheduleSlot, ...overlayWords].map(function (node) {
         const rect = node.getBoundingClientRect();
         return {
           left: rect.left - heroBox.left, top: rect.top - heroBox.top,
@@ -1467,7 +1448,10 @@
     window.addEventListener("resize", schedule, {passive:true});
     if (typeof ResizeObserver !== "undefined") {
       const observer = new ResizeObserver(schedule);
-      [hero, primary, secondary, organizers, scheduleSlot].forEach(node => observer.observe(node));
+      [hero, primary, secondary, organizers, scheduleSlot,
+        ...hero.querySelectorAll(".hero-primary-overlay, .hero-secondary-overlay")].forEach(
+          node => observer.observe(node)
+        );
     }
     if (document.fonts?.ready) document.fonts.ready.then(schedule);
   }
@@ -1522,7 +1506,6 @@
   setupInitialHeroHeight();
   renderHero();
   setupHeroTopicInkAlignment();
-  setupHeroOrganizerMobileLayout();
   setupHeroDotField();
   setupHeroFragmentLayout();
   setupHeroEncodingTicker();
