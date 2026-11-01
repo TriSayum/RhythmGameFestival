@@ -2072,18 +2072,18 @@ a.faq-form-link:active .button-label { transform: none; }
 }
 /* 左块：SPACE → CITRUS / RHYTHM ↗ GAME / FESTIVAL → 2026 */
 .hero-primary-overlay .hero-overlay-word--1 { top: 4%; left: 2%; }
-.hero-primary-overlay .hero-overlay-word--2 { top: 16%; left: 38%; font-size: clamp(57px,5.95vw,95px); }
-.hero-primary-overlay .hero-overlay-word--3 { top: 31%; left: 4%; }
-.hero-primary-overlay .hero-overlay-word--4 { top: 41%; left: 48%; font-size: clamp(57px,5.9vw,92px); }
-.hero-primary-overlay .hero-overlay-word--5 { top: 55%; left: 2%; font-size: clamp(57px,5.8vw,94px); }
-.hero-primary-overlay .hero-overlay-word--6 { top: 70%; left: 50%; }
+.hero-primary-overlay .hero-overlay-word--2 { top: 14%; left: 38%; font-size: clamp(57px,5.95vw,95px); }
+.hero-primary-overlay .hero-overlay-word--3 { top: 31%; left: 0%; }
+.hero-primary-overlay .hero-overlay-word--4 { top: 39%; left: 44%; font-size: clamp(57px,5.9vw,92px); }
+.hero-primary-overlay .hero-overlay-word--5 { top: 58%; left: -2%; font-size: clamp(57px,5.8vw,94px); }
+.hero-primary-overlay .hero-overlay-word--6 { top: 64%; left: 50%; }
 /* 右块：同样保持词序，以右侧偏移与半行错高呈现另一种排列。 */
-.hero-secondary-overlay .hero-overlay-word--1 { top: 14%; right: 42%; }
-.hero-secondary-overlay .hero-overlay-word--2 { top: 23%; right: 0%; font-size: clamp(56px,5.9vw,95px); }
-.hero-secondary-overlay .hero-overlay-word--3 { top: 41%; right: 34%; }
-.hero-secondary-overlay .hero-overlay-word--4 { top: 52%; right: 2%; font-size: clamp(58px,5.9vw,94px); }
-.hero-secondary-overlay .hero-overlay-word--5 { top: 72%; right: 34%; font-size: clamp(54px,5.7vw,91px); }
-.hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 1%; }
+.hero-secondary-overlay .hero-overlay-word--1 { top: 16%; right: 42%; }
+.hero-secondary-overlay .hero-overlay-word--2 { top: 24%; right: 0%; font-size: clamp(56px,5.9vw,95px); }
+.hero-secondary-overlay .hero-overlay-word--3 { top: 43%; right: 34%; }
+.hero-secondary-overlay .hero-overlay-word--4 { top: 49%; right: 2%; font-size: clamp(58px,5.9vw,94px); }
+.hero-secondary-overlay .hero-overlay-word--5 { top: 70%; right: 30%; font-size: clamp(54px,5.7vw,91px); }
+.hero-secondary-overlay .hero-overlay-word--6 { top: 74%; right: 1%; }
 .hero-fragments { z-index: 1; }
 .hero-content { z-index: 2; }
 
