@@ -974,9 +974,32 @@
 
     const secondary = make("div", "hero-secondary");
     secondary.appendChild(makeOverlay("hero-secondary-overlay"));
-    secondary.appendChild(make("h2", "hero-topic", conf.topicDisplay));
-    secondary.appendChild(make("p", "hero-venue", program.mainVenue));
-    root.append(primary, secondary);
+    const topic = make("h2", "hero-topic");
+    const topicInk = make("span", "hero-topic-ink", conf.topicDisplay);
+    topic.appendChild(topicInk);
+    const venue = make("p", "hero-venue");
+    const venueInk = make("span", "hero-venue-ink", program.mainVenue);
+    venue.appendChild(venueInk);
+    secondary.append(topic, venue);
+
+    // 右上主办单位：数据来自content.js，桌面端一行、手机端分别换行。
+    const organizers = make("div", "hero-organizers");
+    const names = make("div", "hero-organizers-names");
+    (conf.organizers || []).forEach(function (name, index) {
+      if (index) names.appendChild(make("span", "hero-organizers-separator", "×"));
+      names.appendChild(make("span", "hero-organizer-name", name));
+    });
+    organizers.appendChild(names);
+    organizers.appendChild(make("div", "hero-organizers-label", conf.organizerLabel || "联合主办"));
+
+    // 与CGS同样使用章节锚点；最终占位槽保持静止，只有链接本身上移渐显。
+    const scheduleSlot = make("div", "hero-schedule-slot");
+    const scheduleLink = make("a", "hero-schedule-link");
+    scheduleLink.href = "#schedule";
+    scheduleLink.appendChild(make("span", "hero-schedule-label", conf.scheduleLinkLabel || "查看日程"));
+    scheduleLink.appendChild(make("span", "hero-schedule-arrow", "↓"));
+    scheduleSlot.appendChild(scheduleLink);
+    root.append(primary, organizers, secondary, scheduleSlot);
 
     /* 鼠标靠近时逐渐照亮编码，代替推开位置的排斥互动。
      * 文字完全不移动，因此不会与主信息块产生新的碰撞。
@@ -1015,6 +1038,58 @@
       pointer = null;
       schedule();
     });
+  }
+
+
+  /* “空间”与地点按实际字形右边界对齐，而非靠文字盒子或固定px补偿。
+   * Canvas文字度量只在初始化、字体就绪、布局尺寸变化后运行。
+   * 不监听滚动，不影响主视觉随文档移动的位置。
+   */
+  function setupHeroTopicInkAlignment() {
+    const hero = document.getElementById("hero");
+    const topic = hero?.querySelector(".hero-topic-ink");
+    const venue = hero?.querySelector(".hero-venue-ink");
+    if (!topic || !venue) return;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let pending = false;
+
+    function visibleRight(node) {
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      const value = node.textContent || "";
+      ctx.font = style.fontStyle + " " + style.fontWeight + " " +
+        style.fontSize + " " + style.fontFamily;
+      const metrics = ctx.measureText(value);
+      if (!Number.isFinite(metrics.actualBoundingBoxRight)) return rect.right;
+      const tracking = parseFloat(style.letterSpacing) || 0;
+      return rect.left + metrics.actualBoundingBoxRight +
+        Math.max(0, Array.from(value).length - 1) * tracking;
+    }
+
+    function align() {
+      pending = false;
+      topic.style.setProperty("--hero-topic-ink-offset", "0px");
+      const distance = visibleRight(venue) - visibleRight(topic);
+      if (Number.isFinite(distance)) {
+        topic.style.setProperty("--hero-topic-ink-offset", distance.toFixed(2) + "px");
+      }
+    }
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(align);
+    }
+    schedule();
+    window.addEventListener("resize", schedule, {passive: true});
+    if (document.fonts?.ready) document.fonts.ready.then(schedule);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(schedule);
+      observer.observe(hero);
+      observer.observe(topic);
+      observer.observe(venue);
+    }
   }
 
 
@@ -1217,7 +1292,9 @@
     const group = hero?.querySelector(".hero-fragments");
     const primary = hero?.querySelector(".hero-primary");
     const secondary = hero?.querySelector(".hero-secondary");
-    if (!hero || !group || !primary || !secondary) return;
+    const organizers = hero?.querySelector(".hero-organizers");
+    const scheduleSlot = hero?.querySelector(".hero-schedule-slot");
+    if (!hero || !group || !primary || !secondary || !organizers || !scheduleSlot) return;
 
     const nodes = Array.from(group.children);
     let pending = false;
@@ -1234,8 +1311,8 @@
       if (width <= 0 || height <= 0) return;
 
       // 全部编码均尝试参与布局；仅在确实没有安全位置时隐藏。
-      const visibleCount = nodes.length;
-      const protectedAreas = [primary, secondary].map(function (node) {
+      const visibleCount = width <= 760 ? Math.min(5, nodes.length) : nodes.length;
+      const protectedAreas = [primary, secondary, organizers, scheduleSlot].map(function (node) {
         const rect = node.getBoundingClientRect();
         return {
           left: rect.left - heroBox.left, top: rect.top - heroBox.top,
@@ -1256,7 +1333,10 @@
       });
 
       nodes.forEach(function (node, index) {
-        if (index >= visibleCount) return;
+        if (index >= visibleCount) {
+          node.classList.add("hero-fragment--unplaced");
+          return;
+        }
         const style = window.getComputedStyle(node);
         if (style.display === "none") return;
 
@@ -1326,7 +1406,7 @@
     window.addEventListener("resize", schedule, {passive:true});
     if (typeof ResizeObserver !== "undefined") {
       const observer = new ResizeObserver(schedule);
-      [hero, primary, secondary].forEach(node => observer.observe(node));
+      [hero, primary, secondary, organizers, scheduleSlot].forEach(node => observer.observe(node));
     }
     if (document.fonts?.ready) document.fonts.ready.then(schedule);
   }
@@ -1380,6 +1460,7 @@
   setupStickyHeaderOffset();
   setupInitialHeroHeight();
   renderHero();
+  setupHeroTopicInkAlignment();
   setupHeroDotField();
   setupHeroFragmentLayout();
   setupHeroEncodingTicker();
