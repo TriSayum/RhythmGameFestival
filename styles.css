@@ -1,4 +1,4 @@
-/* 西柚音游节页面布局与全站深色背景；主视觉将在后续独立制作。 */
+/* 西柚音游节页面布局、首屏主视觉与全站深色背景。 */
 
 :root {
   font-family: system-ui, "Microsoft YaHei", "PingFang SC", sans-serif;
@@ -42,10 +42,18 @@ body { position: relative; min-height: 100vh; isolation: isolate; }
 .site-ambient {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: -4;
   pointer-events: none;
   overflow: hidden;
   background: linear-gradient(160deg, var(--bg-base), var(--bg-base-2) 65%, #080b11);
+}
+/* 光球固定于视口，层级位于二维码与页面网格之间。 */
+.site-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
 }
 .bg-gradient {
   position: absolute;
@@ -1465,7 +1473,8 @@ html.reveal-enabled .ongoing-item.reveal-target {
 /* 全屏主视觉，不受1200px正文宽度约束。页首＋主视觉至少占满初始视口。 */
 .site-hero {
   position: relative;
-  isolation: isolate;
+  /* 不创建独立层叠上下文，让直属二维码可位于固定光球之下。 */
+  isolation: auto;
   height: calc(100vh - var(--site-header-height, 88px));
   height: calc(100svh - var(--site-header-height, 88px));
   min-height: 550px;
@@ -2197,44 +2206,15 @@ a.faq-form-link:active .button-label { transform: none; }
 }
 
 
-/* 主视觉第四轮：光学右对齐及横贯屏幕的空间波动条带。 */
+/* 主视觉标题的光学右对齐。 */
 
 /* 字体自带右侧留白加上letter-spacing，导致“間”看起来比地点偏左。
  * 只对主标题做视觉补偿，不移动地点、不改变右下信息块的布局边界。
  */
 .hero-topic { transform: translateX(.078em); transform-origin: right center; }
 
-/* 多条纤细波形沿中央曲线展开，青蓝→紫→粉渐变；主信息层始终盖在波带上。 */
-.hero-wave-ribbon {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  overflow: visible;
-  -webkit-user-select: none;
-  user-select: none;
-}
-.hero-wave-ribbon-glow {
-  fill: none;
-  stroke: url(#crgf-wave-ribbon-gradient);
-  stroke-width: 66;
-  stroke-linecap: round;
-  opacity: .085;
-  filter: blur(25px);
-}
-.hero-wave-ribbon-strand {
-  fill: none;
-  stroke: url(#crgf-wave-ribbon-gradient);
-  stroke-width: 1.35;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
 @media (max-width:760px) {
   .hero-topic { transform: translateX(.022em); }
-  .hero-wave-ribbon-glow { stroke-width: 39; filter: blur(18px); opacity:.07; }
-  .hero-wave-ribbon-strand { stroke-width: 1.05; }
 }
 
 /* 首屏与01之间的全宽双编码文字条：白字、无底、无边框 */
@@ -2289,35 +2269,22 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-encoding-lane { will-change: auto; }
 }
 
-/* 高刷新率波带：WebGL画布覆盖旧SVG对应区域，不参与鼠标命中及正文排版。 */
-.hero-wave-gpu {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* 首屏中央的空间二维码：仅高于氛围底色；同层光球z=1，因此始终压在二维码上。
- * 本体使用透明SVG，无事件、无选中及无图片拖拽；随首屏正常滚出视口。
+/* 二维码是首屏真实子元素：随主视觉自然滚动，不需要JS同步。
+ * 层级：固定渐变(-4) < 二维码(-3) < 固定光球(-2) < 页面网格(-1) < 主视觉信息。
+ * 半透明、不可交互，保留原尺寸和移动端透明度。
  */
-.site-ambient .hero-qr-mark {
+.site-hero > .hero-qr-mark {
   position: absolute;
-  z-index: 0;
+  z-index: -3;
   left: 50%;
-  top: calc(50% + 45px);
+  top: 50%;
   display: block;
   width: min(54vw, 66vh, 1440px);
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
   opacity: .04;
-  transform: translate3d(-50%, calc(-50% - var(--hero-qr-scroll, 0px)), 0);
-  will-change: transform;
+  transform: translate3d(-50%, -50%, 0);
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
@@ -2325,7 +2292,7 @@ a.faq-form-link:active .button-label { transform: none; }
   -webkit-touch-callout: none;
 }
 @media (max-width: 760px) {
-  .site-ambient .hero-qr-mark {
+  .site-hero > .hero-qr-mark {
     width: min(82vw, 58vh, 720px);
     opacity: .03;
   }
