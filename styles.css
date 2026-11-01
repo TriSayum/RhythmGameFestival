@@ -2265,7 +2265,7 @@ a.faq-form-link:active .button-label { transform: none; }
   z-index: 1;
   width: 100%;
   overflow: hidden;
-  margin-top: 16px;
+  margin-top: 36px;
   padding-block: 3px 5px;
   background: transparent;
   -webkit-user-select: none;
@@ -2300,7 +2300,7 @@ a.faq-form-link:active .button-label { transform: none; }
   line-height: 1;
 }
 @media (max-width: 760px) {
-  .hero-encoding-ticker { margin-top: 12px; padding-block: 2px 4px; }
+  .hero-encoding-ticker { margin-top: 28px; padding-block: 2px 4px; }
   .hero-encoding-row { height: 31px; }
   .hero-encoding-segment {
     padding-right: 0;
