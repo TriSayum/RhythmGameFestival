@@ -2301,3 +2301,32 @@ a.faq-form-link:active .button-label { transform: none; }
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* 首屏中央的空间二维码：仅高于氛围底色；同层光球z=1，因此始终压在二维码上。
+ * 本体使用透明SVG，无事件、无选中及无图片拖拽；随首屏正常滚出视口。
+ */
+.site-ambient .hero-qr-mark {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: calc(50% + 45px);
+  display: block;
+  width: min(54vw, 66vh, 620px);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  opacity: .12;
+  transform: translate3d(-50%, calc(-50% - var(--hero-qr-scroll, 0px)), 0);
+  will-change: transform;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+@media (max-width: 760px) {
+  .site-ambient .hero-qr-mark {
+    width: min(82vw, 58vh, 420px);
+    opacity: .10;
+  }
+}

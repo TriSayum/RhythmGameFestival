@@ -1556,6 +1556,35 @@
   }
 
 
+
+  /* 让固定氛围层中的二维码与文档中的首屏同步滚动。
+   * DOM顺序与层级：渐变 < 二维码 < 光球；站点网格与全部主视觉内容也在其上。
+   * 滚动时只更新transform变量，不重新测量布局。
+   */
+  function setupHeroQrBackdrop() {
+    const qr = document.getElementById("hero-qr-mark");
+    const hero = document.getElementById("hero");
+    if (!qr || !hero) return;
+    function scrollPosition() {
+      const scroll = Math.max(0, window.scrollY || window.pageYOffset || 0);
+      qr.style.setProperty("--hero-qr-scroll", scroll + "px");
+    }
+    function alignWithHero() {
+      const rect = hero.getBoundingClientRect();
+      const scroll = Math.max(0, window.scrollY || window.pageYOffset || 0);
+      const centerInDocument = rect.top + scroll + rect.height / 2;
+      qr.style.top = centerInDocument.toFixed(1) + "px";
+      scrollPosition();
+    }
+    alignWithHero();
+    window.addEventListener("scroll", scrollPosition, {passive: true});
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(alignWithHero).observe(hero);
+    } else {
+      window.addEventListener("resize", alignWithHero, {passive: true});
+    }
+  }
+
   /* 初次加载时确定首屏高度，之后浏览器工具栏的伸缩不会改动主视觉。
    * 只有横竖屏切换或实际窗口宽度变化才重新计算。
    */
@@ -1602,6 +1631,7 @@
   setupMobileNavigation();
   setupStickyHeaderOffset();
   setupInitialHeroHeight();
+  setupHeroQrBackdrop();
   renderHero();
   setupHeroFragmentLayout();
   setupHeroEncodingTicker();
