@@ -102,14 +102,13 @@
     const body = make("div", "theme-content");
     body.setAttribute("aria-labelledby", "theme-heading");
 
-    // 主题字标：巨大的空心英文在后、实心中文居中覆盖。
-    // 两层文字仍属于同一个标题，英文装饰层不重复进入无障碍朗读。
+    // 背景SPACE使用独立的外轮廓SVG，前景中文保持真实文本。
+    // 装饰层不可选中；通过标题自身的aria-label提供可访问名称。
     const displayName = theme.displayName || theme.name;
     const heading = make("h3", "theme-heading");
     heading.id = "theme-heading";
     heading.setAttribute("aria-label", displayName + " / " + theme.nameEn);
-    const outline = make("span", "theme-heading-outline", theme.nameEn);
-    outline.lang = "en";
+    const outline = make("span", "theme-heading-outline");
     outline.setAttribute("aria-hidden", "true");
     const foreground = make("span", "theme-heading-cn", displayName);
     foreground.setAttribute("aria-hidden", "true");
