@@ -997,7 +997,6 @@
     const scheduleLink = make("a", "hero-schedule-link");
     scheduleLink.href = "#schedule";
     scheduleLink.appendChild(make("span", "hero-schedule-label", conf.scheduleLinkLabel || "查看日程"));
-    scheduleLink.appendChild(make("span", "hero-schedule-arrow", "↓"));
     scheduleSlot.appendChild(scheduleLink);
     root.append(primary, organizers, secondary, scheduleSlot);
 
