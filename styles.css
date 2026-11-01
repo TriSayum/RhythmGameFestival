@@ -150,9 +150,27 @@ a {
 
 .site-brand {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   text-decoration: none;
+}
+.site-brand-logo {
+  display: block;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.site-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
 }
 
 .site-brand-cn {
@@ -650,7 +668,8 @@ a {
 .tournament-rules-body { padding: 0 0 6px; font-size: 14px; line-height: 1.8; }
 .tournament-rules-body p { margin: 0 0 10px; }
 .tournament-pending { color: #777; }
-.tournament-registration { margin-top: 58px; }
+/* 只有赛事报名节点需要与05一样宽；介绍和赛制说明继续保持850px阅读宽度。 */
+.tournament-registration { margin-top: 58px; max-width: none; }
 .tournament-registration-description {
   margin: 0;
   max-width: 850px;
@@ -2584,12 +2603,13 @@ a.faq-form-link:active .button-label { transform: none; }
   .experience-postscript { margin-top: 27px; }
 }
 
-/* 05恢复原来的三列网格，不修改其节点位置。
- * 03以05的第1项(0)、第2项(3)、第3项(6)为坐标基准，
- * 将四项放在0/2/4/6。将05三列间距分成三等份，
- * 03只扩展一个虚拟间隙宽度，不改变最后一项的实际横坐标。
+/* 03、05对齐根因：旧.tournament-block最大宽度850px，05却使用完整章节宽度。
+ * 已单独解除03报名区的850px限制；05的三列网格及间距保持完全原样。
+ * 05列首起点：0、(W+G)/3、2(W+G)/3。
+ * 03取四个等分起点：0、2(W+G)/9、4(W+G)/9、6(W+G)/9；
+ * 这里W是两章节相同的可用宽度，G是05原本的列间距。
  */
-@media (min-width: 681px) {
+@media (min-width: 1061px) {
   .tournament-milestones {
     --milestone-baseline-gap: clamp(16px, 3vw, 36px);
     display: grid;
@@ -2602,8 +2622,30 @@ a.faq-form-link:active .button-label { transform: none; }
   .tournament-milestones > .submissions-milestone:nth-child(3) { grid-column: 5 / span 2; }
   .tournament-milestones > .submissions-milestone:nth-child(4) { grid-column: 7 / span 3; }
 }
-@media (min-width: 681px) and (max-width: 760px) {
-  .tournament-milestones { --milestone-baseline-gap: 18px; }
+/* 中等屏幕日期宽度不足以排四列，保留两列布局以免文字互相覆盖。 */
+@media (min-width: 681px) and (max-width: 1060px) {
+  .tournament-milestones {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(16px, 3vw, 36px);
+  }
+}
+/* 页首标识始终透明，尺寸只影响渲染盒子，不影响源矢量清晰度。 */
+@media (max-width: 760px) {
+  .site-brand { gap: 9px; }
+  .site-brand-logo {
+    flex-basis: 30px;
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (max-width: 360px) {
+  .site-brand { gap: 7px; }
+  .site-brand-logo {
+    flex-basis: 26px;
+    width: 26px;
+    height: 26px;
+  }
 }
 /* DJ设备第一段保留醒目的介绍；第二段恢复为集章说明使用的正文格式。 */
 .experience-item--equipment .experience-item-description {
