@@ -810,7 +810,301 @@
    * 只在真正变更尺寸时缓存基础采样；每帧只更新SVG纵坐标。
    * 不影响独立的双编码条与主视觉信息块。
    */
+  /* 波带使用WebGL顶点着色器独立形变；静态采样坐标只在尺寸改变时上传。
+   * 每帧只更新动画时间并发起两个绘制调用，不再重建SVG path。
+   * 若WebGL不可用则回退至原有SVG实现，避免导致整段主视觉消失。
+   */
   function createHeroWave(art, conf) {
+    const hero = document.getElementById("hero");
+    if (!hero) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+    const canvas = document.createElement("canvas");
+    canvas.className = "hero-wave-gpu";
+    canvas.setAttribute("aria-hidden", "true");
+    const gl = canvas.getContext("webgl", {
+      alpha: true, premultipliedAlpha: false, antialias: false,
+      depth: false, stencil: false, preserveDrawingBuffer: false,
+      powerPreference: "high-performance"
+    });
+    if (!gl) {
+      createHeroWaveSvgFallback(art, conf);
+      return;
+    }
+
+    const vertexSource = `
+      attribute vec4 a_point;
+      uniform vec2 u_size;
+      uniform float u_time;
+      uniform float u_halfSpan;
+      uniform float u_stroke;
+      uniform float u_mobile;
+      varying float v_x;
+      varying float v_strand;
+      float bump(float x, float center, float radius) {
+        float q = (x - center) / radius;
+        return exp(-0.5 * q * q);
+      }
+      void main() {
+        float x = a_point.x;
+        float base = a_point.y;
+        float strand = a_point.z;
+        float edge = a_point.w;
+        float t = u_time;
+        float mobile = u_mobile;
+        float edgeFactor = abs(strand);
+        float right = smoothstep(0.36, 0.96, x);
+
+        // 左侧已有动态：各条曲线拥有不同相位，而非共用一根管状中心线。
+        float breathing = sin(x * 5.4 + t * 0.52) * mix(8.0, 5.2, mobile);
+        float waving = sin(x * 11.2 - t * 0.58 + strand * 2.35)
+          * mix(14.0, 7.8, mobile) * (0.28 + 0.72 * edgeFactor);
+        float flutter = sin(x * 19.0 + t * 0.86 - strand * 3.6)
+          * mix(6.8, 4.0, mobile) * (0.33 + 0.67 * edgeFactor);
+        float centerMotion = breathing + waving + flutter;
+
+        // 右侧整体起伏与两组逐渐移动的局部折叠。
+        centerMotion += right * (
+          sin(x * 8.8 - t * 0.74) * mix(13.0, 7.5, mobile) +
+          sin(x * 16.4 + t * 0.41) * mix(5.5, 3.4, mobile));
+
+        float foldA = right * bump(x, 0.69 + 0.027 * sin(t * 0.19), 0.082);
+        float foldB = right * bump(x, 0.89 + 0.020 * sin(t * 0.23 + 1.4), 0.069);
+
+        // 局部压合/翻面 + 非线性褶皱；离开折叠区域后重新发散。
+        float squeeze = 1.0 - foldA * 1.65 - foldB * 1.42;
+        float fan = 1.0 + (foldA * 0.44 + foldB * 0.55)
+          * sin(x * 12.0 + t * 0.53);
+        float widthOffset = strand * u_halfSpan * squeeze * fan;
+        float pleatA = foldA * mix(36.0, 20.0, mobile)
+          * sin(strand * 4.5 + x * 19.0 - t * 0.61);
+        float pleatB = foldB * mix(29.0, 15.0, mobile)
+          * sin(strand * 6.1 - x * 13.5 + t * 0.49);
+        float spread = right * strand * mix(12.0, 7.0, mobile)
+          * sin(x * 9.0 - t * 0.32);
+
+        float yPx = base * u_size.y + centerMotion
+          + widthOffset + pleatA + pleatB + spread;
+        // 静态四边形在像素空间构成宽度稳定的独立线段。
+        yPx += edge * u_stroke * 0.5;
+        gl_Position = vec4(x * 2.0 - 1.0, 1.0 - 2.0 * yPx / u_size.y, 0.0, 1.0);
+        v_x = x;
+        v_strand = edgeFactor;
+      }
+    `;
+    const fragmentSource = `
+      precision mediump float;
+      uniform float u_opacity;
+      varying float v_x;
+      varying float v_strand;
+      void main() {
+        vec3 cyan = vec3(0.31, 0.96, 0.93);
+        vec3 blue = vec3(0.52, 0.68, 0.99);
+        vec3 violet = vec3(0.78, 0.44, 0.94);
+        vec3 pink = vec3(0.98, 0.41, 0.76);
+        vec3 color = mix(cyan, blue, smoothstep(0.08, 0.50, v_x));
+        color = mix(color, violet, smoothstep(0.39, 0.75, v_x));
+        color = mix(color, pink, smoothstep(0.71, 1.0, v_x));
+        float alpha = u_opacity * (0.68 + 0.32 * (1.0 - v_strand));
+        gl_FragColor = vec4(color, alpha);
+      }
+    `;
+
+    let program = null, vertexBuffer = null, refs = null, vertexCount = 0;
+    let width = 0, height = 0, resolutionScale = 1;
+    let visible = true, frameId = 0, lastFrame = 0, phase = 0;
+    let lost = false;
+
+    function compile(type, sourceText) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, sourceText);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const log = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error(log || "WebGL着色器编译失败");
+      }
+      return shader;
+    }
+    function initializeGL() {
+      const vs = compile(gl.VERTEX_SHADER, vertexSource);
+      const fs = compile(gl.FRAGMENT_SHADER, fragmentSource);
+      const p = gl.createProgram();
+      gl.attachShader(p, vs);
+      gl.attachShader(p, fs);
+      gl.linkProgram(p);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+        const log = gl.getProgramInfoLog(p);
+        gl.deleteProgram(p);
+        throw new Error(log || "WebGL程序链接失败");
+      }
+      program = p;
+      vertexBuffer = gl.createBuffer();
+      refs = {
+        point: gl.getAttribLocation(p, "a_point"),
+        size: gl.getUniformLocation(p, "u_size"),
+        time: gl.getUniformLocation(p, "u_time"),
+        halfSpan: gl.getUniformLocation(p, "u_halfSpan"),
+        stroke: gl.getUniformLocation(p, "u_stroke"),
+        mobile: gl.getUniformLocation(p, "u_mobile"),
+        opacity: gl.getUniformLocation(p, "u_opacity")
+      };
+      gl.useProgram(program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.enableVertexAttribArray(refs.point);
+      gl.vertexAttribPointer(refs.point, 4, gl.FLOAT, false, 16, 0);
+      gl.disable(gl.DEPTH_TEST);
+      gl.disable(gl.CULL_FACE);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 0);
+    }
+    function baseCurve(u, mobile) {
+      // 与原版中心轨迹相同的控制点，不重新设计整体走势。
+      const anchors = mobile ?
+        [[-.08,.49],[.11,.53],[.28,.55],[.42,.52],[.64,.44],[.82,.44],[1.07,.51]] :
+        [[-.08,.47],[.08,.51],[.21,.56],[.34,.54],[.58,.41],[.72,.31],[.84,.32],[1.07,.46]];
+      let i = 0;
+      while (i < anchors.length - 2 && u > anchors[i+1][0]) i++;
+      const a=anchors[i], b=anchors[i+1];
+      const prev=anchors[Math.max(0,i-1)], next=anchors[Math.min(anchors.length-1,i+2)];
+      const d=b[0]-a[0], t=Math.max(0,Math.min(1,(u-a[0])/d)), t2=t*t, t3=t2*t;
+      const da=(b[1]-prev[1])/(b[0]-prev[0])*d;
+      const db=(next[1]-a[1])/(next[0]-a[0])*d;
+      return (2*t3-3*t2+1)*a[1] + (t3-2*t2+t)*da
+        + (-2*t3+3*t2)*b[1] + (t3-t2)*db;
+    }
+    function rebuild() {
+      const bounds = hero.getBoundingClientRect();
+      const w=Math.max(1,Math.round(bounds.width)), h=Math.max(1,Math.round(bounds.height));
+      const scale=Math.min(1.5, window.devicePixelRatio || 1);
+      if (w===width && h===height && scale===resolutionScale) return false;
+      width=w; height=h; resolutionScale=scale;
+      const mobile=w<=760;
+      // 限制像素填充成本；在高刷屏幕上优先保证动画流畅。
+      canvas.width=Math.round(w*scale);
+      canvas.height=Math.round(h*scale);
+      gl.viewport(0,0,canvas.width,canvas.height);
+      const strands=mobile?14:24, step=mobile?15:20;
+      const segments=Math.max(2,Math.ceil(w/step)), half=(strands-1)/2;
+      const stops=new Array(segments+1);
+      for(let i=0;i<=segments;i++) {
+        const u=i/segments;
+        stops[i]=[u,baseCurve(u,mobile)];
+      }
+      const buffer = new Float32Array(strands*segments*6*4);
+      let k=0;
+      function vertex(sample,weight,edge) {
+        buffer[k++]=sample[0];
+        buffer[k++]=sample[1];
+        buffer[k++]=weight;
+        buffer[k++]=edge;
+      }
+      for (let j=0;j<strands;j++) {
+        const v=(j-half)/half;
+        for(let i=0;i<segments;i++) {
+          const a=stops[i],b=stops[i+1];
+          vertex(a,v,-1);vertex(a,v,1);vertex(b,v,-1);
+          vertex(a,v,1);vertex(b,v,1);vertex(b,v,-1);
+        }
+      }
+      vertexCount=buffer.length/4;
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
+      gl.useProgram(program);
+      gl.uniform2f(refs.size,w,h);
+      gl.uniform1f(refs.mobile,mobile?1:0);
+      gl.uniform1f(refs.halfSpan,half*(mobile?3.35:3.7));
+      return true;
+    }
+    function render() {
+      if (lost || !program || !vertexCount) return;
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.vertexAttribPointer(refs.point, 4, gl.FLOAT, false, 16, 0);
+      gl.uniform1f(refs.time, phase);
+      // GPU绘制两次：低透明度外晕＋细线主层。每帧无DOM路径重建。
+      gl.uniform1f(refs.stroke, 5.5);
+      gl.uniform1f(refs.opacity, .11);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+      gl.uniform1f(refs.stroke, 1.18);
+      gl.uniform1f(refs.opacity, .64);
+      gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
+    }
+    function stop() {
+      if(frameId) window.cancelAnimationFrame(frameId);
+      frameId=0;
+      lastFrame=0;
+    }
+    function schedule() {
+      if (!reduced && !lost && visible && !document.hidden && !frameId) {
+        frameId=window.requestAnimationFrame(tick);
+      }
+    }
+    function tick(now) {
+      frameId=0;
+      if (lost || reduced || !visible || document.hidden) {lastFrame=0;return;}
+      // 不限帧：屏幕支持240Hz时允许跟随刷新；暂停后不补算时间。
+      if (lastFrame) phase+=Math.min(.04,Math.max(0,(now-lastFrame)/1000));
+      lastFrame=now;
+      render();
+      schedule();
+    }
+    function resized() {
+      if (lost) return;
+      if (rebuild()) render();
+    }
+
+    canvas.addEventListener("webglcontextlost",function (e) {
+      e.preventDefault();
+      lost=true;
+      stop();
+    });
+    canvas.addEventListener("webglcontextrestored",function () {
+      try {
+        lost=false;
+        initializeGL();
+        width=0;height=0;
+        rebuild();render();schedule();
+      } catch (err) {
+        console.warn("CRGF波带WebGL恢复失败",err);
+        lost=true;
+      }
+    });
+
+    try {
+      initializeGL();
+      art.appendChild(canvas);
+      rebuild();
+      render();
+    } catch (err) {
+      console.warn("CRGF波带WebGL初始化失败，回退SVG",err);
+      if (canvas.parentNode) canvas.remove();
+      createHeroWaveSvgFallback(art,conf);
+      return;
+    }
+    if(typeof IntersectionObserver!=="undefined" && !reduced) {
+      const observer=new IntersectionObserver(function(entries){
+        visible=entries[0]?.isIntersecting??true;
+        if (visible) schedule();
+        else stop();
+      },{threshold:0});
+      observer.observe(hero);
+    }
+    document.addEventListener("visibilitychange",function(){
+      if(document.hidden) stop();
+      else schedule();
+    });
+    window.addEventListener("resize",resized,{passive:true});
+    if(typeof ResizeObserver!=="undefined") {
+      new ResizeObserver(resized).observe(hero);
+    }
+    schedule();
+  }
+
+  function createHeroWaveSvgFallback(art, conf) {
     const NS = "http://www.w3.org/2000/svg";
     const hero = document.getElementById("hero");
     if (!hero) return;

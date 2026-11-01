@@ -2288,3 +2288,16 @@ a.faq-form-link:active .button-label { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero-encoding-lane { will-change: auto; }
 }
+
+/* 高刷新率波带：WebGL画布覆盖旧SVG对应区域，不参与鼠标命中及正文排版。 */
+.hero-wave-gpu {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
