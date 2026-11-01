@@ -2172,20 +2172,12 @@ a.faq-form-link:active .button-label { transform: none; }
     width: min(420px, 98vw);
     height: clamp(205px, 57vw, 295px);
   }
-  .hero-secondary-overlay .hero-overlay-word {
-    font-size: clamp(35px, 9.5vw, 52px);
-  }
-  .hero-secondary-overlay .hero-overlay-word--2,
-  .hero-secondary-overlay .hero-overlay-word--4,
-  .hero-secondary-overlay .hero-overlay-word--5 {
-    font-size: clamp(33px, 9vw, 50px);
-  }
-  .hero-secondary-overlay .hero-overlay-word--1 { top: 10%; right: 40%; }
-  .hero-secondary-overlay .hero-overlay-word--2 { top: 23%; right: 4%; }
-  .hero-secondary-overlay .hero-overlay-word--3 { top: 40%; right: 31%; }
-  .hero-secondary-overlay .hero-overlay-word--4 { top: 52%; right: 5%; }
-  .hero-secondary-overlay .hero-overlay-word--5 { top: 69%; right: 27%; }
-  .hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 7%; }
+  .hero-secondary-overlay .hero-overlay-word--1 { top: 15%; right: 35%; }
+  .hero-secondary-overlay .hero-overlay-word--2 { top: 23%; right: 3%; }
+  .hero-secondary-overlay .hero-overlay-word--3 { top: 45%; right: 31%; }
+  .hero-secondary-overlay .hero-overlay-word--4 { top: 52%; right: 4%; }
+  .hero-secondary-overlay .hero-overlay-word--5 { top: 74%; right: 27%; }
+  .hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 6%; }
 }
 
 /* 三个大范围光团互相漫射；运动幅度减小，变成缓慢游动的环境光，
