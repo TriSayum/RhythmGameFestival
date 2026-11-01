@@ -438,7 +438,7 @@ a {
   list-style: none;
   margin: 20px 0 0 4px;
   padding: 0 0 0 20px;
-  border-left: 1px solid #ddd;
+  /* 连接线改由每个子节点单独绘制，避免在首尾节点之外延伸。 */
 }
 .timeline-child {
   display: grid;
@@ -452,6 +452,7 @@ a {
 .timeline-child::before {
   content: "";
   position: absolute;
+  z-index: 1;
   left: -24px;
   top: 18px;
   width: 7px;
@@ -459,6 +460,19 @@ a {
   border: 1px solid #888;
   border-radius: 50%;
   background: #fff;
+}
+/* 每段从当前圆点中心连到下一圆点中心。最后一个节点不画线；
+ * 子项目换行时以该项目真实高度延长，不会越过首尾节点。
+ */
+.timeline-child:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: -20.5px;
+  top: 21.5px;
+  height: 100%;
+  width: 1px;
+  background: rgba(48, 227, 255, .32);
+  pointer-events: none;
 }
 .timeline-child-time { font-size: 13px; color: #666; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .timeline-child-detail { display: flex; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
@@ -490,6 +504,7 @@ a {
   .timeline-children { margin-top: 12px; padding-left: 16px; }
   .timeline-child { display: block; font-size: 14px; padding: 8px 0 10px; }
   .timeline-child::before { left: -20px; }
+  .timeline-child:not(:last-child)::after { left: -16.5px; }
   .timeline-child-time { display: block; padding-bottom: 3px; }
   .timeline-child-detail { display: block; }
   .timeline-speaker { margin-right: 8px; }
@@ -1086,7 +1101,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible { outline-color: #9
   background: #0c1220;
   border-color: var(--theme-accent);
 }
-.timeline-children { border-left-color: rgba(48, 227, 255, .32); }
+/* 子日程竖线由相邻节点间的独立线段绘制，颜色由上方::after控制。 */
 .timeline-child::before { border-color: var(--theme-accent-soft); }
 /* 03～07：只选择高一级的信息节点点缀主题色，不改变普通正文。 */
 .tournament-group-heading, .salon-talk-title,
@@ -2569,37 +2584,46 @@ a.faq-form-link:active .button-label { transform: none; }
   .experience-postscript { margin-top: 27px; }
 }
 
-/* 03与05的里程碑均让最右侧日期占据同一个右对齐位置。
- * 等格式日期自然等宽，最后一个条目的可见文字右边界因此一致。
+/* 05恢复原来的三列网格，不修改其节点位置。
+ * 03以05的第1项(0)、第2项(3)、第3项(6)为坐标基准，
+ * 将四项放在0/2/4/6。将05三列间距分成三等份，
+ * 03只扩展一个虚拟间隙宽度，不改变最后一项的实际横坐标。
  */
-@media (min-width: 1061px) {
-  .submissions-milestones,
+@media (min-width: 681px) {
   .tournament-milestones {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
+    --milestone-baseline-gap: clamp(16px, 3vw, 36px);
+    display: grid;
+    width: calc(100% + var(--milestone-baseline-gap));
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    column-gap: 0;
   }
-  .submissions-milestone { flex: 0 0 auto; }
+  .tournament-milestones > .submissions-milestone:nth-child(1) { grid-column: 1 / span 2; }
+  .tournament-milestones > .submissions-milestone:nth-child(2) { grid-column: 3 / span 2; }
+  .tournament-milestones > .submissions-milestone:nth-child(3) { grid-column: 5 / span 2; }
+  .tournament-milestones > .submissions-milestone:nth-child(4) { grid-column: 7 / span 3; }
 }
-@media (min-width: 681px) and (max-width: 1060px) {
-  .submissions-milestones {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 28px;
-  }
-  .submissions-milestones:not(.tournament-milestones) > .submissions-milestone:last-child {
-    grid-column: 2;
-  }
+@media (min-width: 681px) and (max-width: 760px) {
+  .tournament-milestones { --milestone-baseline-gap: 18px; }
 }
-/* DJ设备的两段文字与游戏的醒目介绍使用同一视觉层级，而不是灰色小字。 */
+/* DJ设备第一段保留醒目的介绍；第二段恢复为集章说明使用的正文格式。 */
 .experience-item--equipment .experience-item-description {
   font-size: 17px;
   line-height: 1.7;
   font-weight: 500;
   color: var(--text-primary);
 }
+.experience-item--equipment .experience-item-description--body {
+  font-size: 16px;
+  line-height: 1.95;
+  font-weight: 400;
+  color: var(--text-primary);
+}
 @media (max-width: 680px) {
   .experience-item--equipment .experience-item-description { font-size: 16px; }
+  .experience-item--equipment .experience-item-description--body {
+    font-size: 15px;
+    line-height: 1.85;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   html.reveal-enabled .timeline::before { transition: none; }
