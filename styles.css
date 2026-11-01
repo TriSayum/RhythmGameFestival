@@ -1374,6 +1374,12 @@ html.reveal-enabled .reveal-target.is-revealed {
   opacity: 1;
   transform: none;
 }
+/* 时间轴主线仅连接已进入视口的节点，逐段生长而非提前显示全长。 */
+html.reveal-enabled .timeline::before {
+  bottom: auto;
+  height: var(--timeline-visible-line, 0px);
+  transition: height .64s cubic-bezier(.2,.68,.2,1);
+}
 /* 某些卡片的自身悬停动画不会与入场动画争夺transform。 */
 html.reveal-enabled .ongoing-item.reveal-target {
   transition: opacity .82s cubic-bezier(.2,.68,.2,1),
@@ -2491,10 +2497,10 @@ a.faq-form-link:active .button-label { transform: none; }
  */
 @media (max-width: 760px) {
   .hero-organizers {
-    /* 能并排时靠右上；窄屏撞到左上信息块时由JS根据真实边界下移。 */
-    top: var(--hero-mobile-organizers-top, clamp(28px, 5%, 56px));
-    right: 19px;
-    font-size: clamp(16px, 4.55vw, 20px);
+    /* 放在左上信息右侧可用区域，与整块DOM外接矩形不做碰撞下推。 */
+    top: clamp(40px, 6.2%, 62px);
+    right: 13px;
+    font-size: clamp(13px, 4vw, 17px);
     line-height: 1.27;
   }
   .hero-organizers-names {
@@ -2561,4 +2567,40 @@ a.faq-form-link:active .button-label { transform: none; }
   .experience-item--equipment .experience-item-description,
   .experience-postscript { font-size: 15px; line-height: 1.85; }
   .experience-postscript { margin-top: 27px; }
+}
+
+/* 03与05的里程碑均让最右侧日期占据同一个右对齐位置。
+ * 等格式日期自然等宽，最后一个条目的可见文字右边界因此一致。
+ */
+@media (min-width: 1061px) {
+  .submissions-milestones,
+  .tournament-milestones {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  .submissions-milestone { flex: 0 0 auto; }
+}
+@media (min-width: 681px) and (max-width: 1060px) {
+  .submissions-milestones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 28px;
+  }
+  .submissions-milestones:not(.tournament-milestones) > .submissions-milestone:last-child {
+    grid-column: 2;
+  }
+}
+/* DJ设备的两段文字与游戏的醒目介绍使用同一视觉层级，而不是灰色小字。 */
+.experience-item--equipment .experience-item-description {
+  font-size: 17px;
+  line-height: 1.7;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+@media (max-width: 680px) {
+  .experience-item--equipment .experience-item-description { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-enabled .timeline::before { transition: none; }
 }
