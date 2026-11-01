@@ -2044,71 +2044,46 @@ a.faq-form-link:active .button-label { transform: none; }
 }
 .hero-ghost { display: none; }
 
-/* 灰字叠层采用真实行高驱动的五行双列布局。
- * Space/Citrus/Rhythm按各自信息块的内侧基准严格三词对齐；
- * Game放在Rhythm同排的第二列，Festival和2026补足后两行。
- * 列间距由实际最长单词宽度决定，避免灰字彼此覆盖。
+/* 两组同词序词云：部分上下错开小于一行，空间由“有序单词”填充，
+ * 不把六个单词机械排列成六行。
  */
 .hero-word-overlay {
-  display: grid;
-  grid-template-columns: max-content max-content;
-  grid-template-rows: repeat(5, max-content);
-  column-gap: clamp(7px, 1.2vw, 17px);
-  row-gap: clamp(1px, .34vw, 5px);
   position: absolute;
   z-index: 0;
-  width: max-content;
-  height: max-content;
+  width: min(750px, 59vw);
+  height: clamp(290px, 29vw, 435px);
   pointer-events: none;
-  font-family: "Consolas", "Liberation Mono", "Courier New", monospace;
-  font-size: clamp(58px, 6.05vw, 96px);
+  overflow: visible;
+}
+.hero-primary-overlay { left: 6px; top: -42px; }
+.hero-secondary-overlay { right: -8px; bottom: -32px; width: min(705px, 56vw); }
+.hero-overlay-word {
+  position: absolute;
+  display: block;
+  z-index: 0;
+  white-space: nowrap;
+  font-family: "Consolas","Liberation Mono","Courier New",monospace;
+  font-size: clamp(58px,6.1vw,98px);
+  line-height: 1;
   font-weight: 700;
-  line-height: 1.03;
   letter-spacing: -.055em;
   color: rgba(204,216,233,.39);
-}
-.hero-primary-overlay { left: 0; top: clamp(-34px, -2.3vw, -16px); }
-.hero-secondary-overlay { right: 0; bottom: -24px; }
-.hero-overlay-word {
-  position: relative;
-  display: block;
-  white-space: nowrap;
-  font: inherit;
-  line-height: inherit;
-  color: inherit;
   text-shadow: 0 2px 12px rgba(4,10,22,.11);
 }
-/* 左侧：骨架三词统一第一列左边缘，补充词在右列或下一行。 */
-.hero-primary-overlay .hero-overlay-word--1 { grid-column: 1; grid-row: 1; }
-.hero-primary-overlay .hero-overlay-word--2 { grid-column: 1; grid-row: 2; }
-.hero-primary-overlay .hero-overlay-word--3 { grid-column: 1; grid-row: 3; }
-.hero-primary-overlay .hero-overlay-word--4 {
-  grid-column: 2; grid-row: 3; transform: translateY(-.1em);
-}
-.hero-primary-overlay .hero-overlay-word--5 { grid-column: 1; grid-row: 4; }
-.hero-primary-overlay .hero-overlay-word--6 {
-  grid-column: 2; grid-row: 5; transform: translateY(-.12em);
-}
-/* 右侧：骨架三词统一第二列右边缘，补充词在左列或下一行。 */
-.hero-secondary-overlay .hero-overlay-word--1 {
-  grid-column: 2; grid-row: 1; justify-self: end;
-}
-.hero-secondary-overlay .hero-overlay-word--2 {
-  grid-column: 2; grid-row: 2; justify-self: end;
-}
-.hero-secondary-overlay .hero-overlay-word--3 {
-  grid-column: 2; grid-row: 3; justify-self: end;
-}
-.hero-secondary-overlay .hero-overlay-word--4 {
-  grid-column: 1; grid-row: 3; transform: translateY(-.1em);
-}
-.hero-secondary-overlay .hero-overlay-word--5 {
-  grid-column: 2; grid-row: 4; justify-self: end;
-}
-.hero-secondary-overlay .hero-overlay-word--6 {
-  grid-column: 1; grid-row: 5; justify-self: end;
-  transform: translateY(-.12em);
-}
+/* 左块：SPACE → CITRUS / RHYTHM ↗ GAME / FESTIVAL → 2026 */
+.hero-primary-overlay .hero-overlay-word--1 { top: 4%; left: 2%; }
+.hero-primary-overlay .hero-overlay-word--2 { top: 16%; left: 38%; font-size: clamp(57px,5.95vw,95px); }
+.hero-primary-overlay .hero-overlay-word--3 { top: 31%; left: 4%; }
+.hero-primary-overlay .hero-overlay-word--4 { top: 41%; left: 57%; font-size: clamp(57px,5.9vw,92px); }
+.hero-primary-overlay .hero-overlay-word--5 { top: 55%; left: 2%; font-size: clamp(57px,5.8vw,94px); }
+.hero-primary-overlay .hero-overlay-word--6 { top: 70%; left: 59%; }
+/* 右块：同样保持词序，以右侧偏移与半行错高呈现另一种排列。 */
+.hero-secondary-overlay .hero-overlay-word--1 { top: 14%; right: 56%; }
+.hero-secondary-overlay .hero-overlay-word--2 { top: 23%; right: 0%; font-size: clamp(56px,5.9vw,95px); }
+.hero-secondary-overlay .hero-overlay-word--3 { top: 41%; right: 51%; }
+.hero-secondary-overlay .hero-overlay-word--4 { top: 52%; right: 2%; font-size: clamp(58px,5.9vw,94px); }
+.hero-secondary-overlay .hero-overlay-word--5 { top: 72%; right: 49%; font-size: clamp(54px,5.7vw,91px); }
+.hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 1%; }
 .hero-fragments { z-index: 1; }
 .hero-content { z-index: 2; }
 
@@ -2130,19 +2105,32 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-date { font-size: clamp(23px,6.4vw,34px); margin: 9px 0 0 0; }
   .hero-topic { font-size: clamp(86px,25.5vw,135px); letter-spacing: -.005em; }
   .hero-venue { font-size: clamp(21px,5.9vw,31px); }
-  /* 手机仍然保持同一套五行双列语法；只缩小字体和格间距。
-   * 原本逐词设置的百分比偏移全部移除，彻底消除突出与互相覆盖。
-   */
   .hero-word-overlay {
-    font-size: clamp(28px, 8vw, 42px);
-    column-gap: clamp(3px, 1vw, 8px);
-    row-gap: 1px;
+    width: min(340px,87vw);
+    height: clamp(172px,48vw,235px);
+  }
+  .hero-primary-overlay { left: 0; top: -15px; }
+  /* 手机端的Citrus/Game/2026原先向右伸出太多，整体内收。 */
+  .hero-primary-overlay .hero-overlay-word--2 { left: 25%; }
+  .hero-primary-overlay .hero-overlay-word--4 { left: 35%; }
+  .hero-primary-overlay .hero-overlay-word--6 { left: 34%; }
+  .hero-secondary-overlay .hero-overlay-word--1 { top: 14%; right: 56%; }
+  .hero-secondary-overlay .hero-overlay-word--3 { right: 44%; }
+  .hero-secondary-overlay .hero-overlay-word--5 { right: 44%; }
+  .hero-secondary-overlay { right: -5px; bottom: -20px; }
+  .hero-overlay-word {
+    font-size: clamp(28px,8.3vw,43px);
     letter-spacing: -.065em;
     color: rgba(200,213,232,.33);
   }
-  .hero-primary-overlay { left: 0; top: -13px; }
-  .hero-secondary-overlay { right: 0; bottom: 28px; }
-  .hero-overlay-word { font-size: inherit; }
+  .hero-primary-overlay .hero-overlay-word--2,
+  .hero-primary-overlay .hero-overlay-word--4,
+  .hero-primary-overlay .hero-overlay-word--5,
+  .hero-secondary-overlay .hero-overlay-word--2,
+  .hero-secondary-overlay .hero-overlay-word--4,
+  .hero-secondary-overlay .hero-overlay-word--5 {
+    font-size: clamp(28px,8vw,42px);
+  }
   /* WebKit中ui-monospace映射系统SF Mono；Android继续用可用等宽回退。 */
   .hero-title-year, .hero-date, .hero-overlay-word,
   .hero-fragment, .hero-fragment-label, .hero-fragment-text {
