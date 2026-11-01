@@ -804,9 +804,25 @@
    * 横向曲线由若干归一化控制点决定；手机使用较浅的波形，保持中间留白。
    * 仅在首屏可见时刷新SVG路径，并在减少动态效果时停留在静态画面。
    */
+
+  /* 中央空间波带：
+   * 保留原有平滑的起伏轨迹，右侧逐渐加入空间扰动。
+   * 只在真正变更尺寸时缓存基础采样；每帧只更新SVG纵坐标。
+   * 不影响独立的双编码条与主视觉信息块。
+   */
   function createHeroWave(art, conf) {
     const NS = "http://www.w3.org/2000/svg";
+    const hero = document.getElementById("hero");
+    if (!hero) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+
+    /* 便于后续针对实际机型调整的性能与视觉参数。 */
+    const profile = {
+      desktop: {count:24, step:28, spread:3.6, breathing:8, shared:16, detail:6, separate:13, fine:4},
+      mobile:  {count:14, step:18, spread:3.2, breathing:5, shared:9, detail:3.5, separate:7, fine:2.5}
+    };
+    const targetFrameMs = 1000 / 60;
+    const maxPhaseStep = .040;
     const svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "hero-wave-ribbon");
     svg.setAttribute("aria-hidden", "true");
@@ -831,108 +847,177 @@
     ].forEach(function (stop) {
       element("stop", {"offset": stop[0], "stop-color": stop[1]}, gradient);
     });
-    const glow = element("path", { "class": "hero-wave-ribbon-glow" }, svg);
-    const lines = element("g", { "class": "hero-wave-ribbon-lines" }, svg);
+    const glow = element("path", {"class":"hero-wave-ribbon-glow"}, svg);
+    const lines = element("g", {"class":"hero-wave-ribbon-lines"}, svg);
     const paths = [];
+    const samples = [];
 
-    let width = 0, height = 0, isMobile = false, points = [];
-    let visible = true, pending = 0, previousTick = 0;
+    let width = 0, height = 0, config = profile.desktop;
+    let visible = true, frameId = 0, lastDrawAt = 0, phase = 0;
 
-    function prepareSize() {
-      const hero = document.getElementById("hero");
-      if (!hero) return;
-      const rect = hero.getBoundingClientRect();
-      const nextWidth = Math.max(1, Math.round(rect.width));
-      const nextHeight = Math.max(1, Math.round(rect.height));
-      if (nextWidth === width && nextHeight === height) return;
-
-      width = nextWidth;
-      height = nextHeight;
-      isMobile = width <= 760;
-      svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-      const anchors = isMobile ?
-        [[-.08,.49],[.11,.53],[.28,.55],[.42,.52],[.64,.44],[.82,.44],[1.07,.51]] :
-        [[-.08,.47],[.08,.51],[.21,.56],[.34,.54],[.58,.41],[.72,.31],[.84,.32],[1.07,.46]];
-      points = anchors.map(function (point) { return {x:point[0], y:point[1]*height}; });
-
-      const count = isMobile ? 22 : 38;
-      while (paths.length < count) {
-        const path = element("path", {"class":"hero-wave-ribbon-strand"}, lines);
-        paths.push(path);
-      }
-      paths.forEach(function (path, index) { path.style.display = index < count ? "" : "none"; });
+    function smoothstep(a, b, value) {
+      const p = Math.max(0, Math.min(1, (value - a) / (b - a)));
+      return p * p * (3 - 2 * p);
     }
 
-    function centerY(u) {
+    function centerY(u, points) {
       let i=0;
       while (i < points.length - 2 && u > points[i+1].x) i++;
       const a=points[i], b=points[i+1];
       const d=b.x-a.x, v=Math.max(0,Math.min(1,(u-a.x)/d));
       const prev=points[Math.max(0,i-1)], next=points[Math.min(points.length-1,i+2)];
-      const slopeA = (b.y-prev.y)/(b.x-prev.x)*d;
-      const slopeB = (next.y-a.y)/(next.x-a.x)*d;
+      const slopeA=(b.y-prev.y)/(b.x-prev.x)*d;
+      const slopeB=(next.y-a.y)/(next.x-a.x)*d;
       const v2=v*v, v3=v2*v;
       return (2*v3-3*v2+1)*a.y + (v3-2*v2+v)*slopeA
         + (-2*v3+3*v2)*b.y + (v3-v2)*slopeB;
     }
 
-    function curvePath(index, count, t, displacement) {
-      const step = isMobile ? 11 : 19;
-      const mid = (count-1)/2;
-      const spread = isMobile ? .86 : 1.75;
-      const weight = mid > 0 ? (index-mid)/mid : 0;
-      let result = "";
-      for(let x=0; x<=width+step; x+=step) {
-        const u=x/width;
-        const baseline=centerY(u);
-        const moving = Math.sin(u*5.4+t*.52)* (isMobile ? 6 : 10);
-        const folding = Math.sin(u*10.5-t*.45+index*.21)
-          * weight * (isMobile ? 11 : 24);
-        const ripple = Math.sin(u*19+t*.9+index*.14)
-          * Math.abs(weight) * (isMobile ? 3.5 : 6);
-        const y=baseline + moving + folding + ripple + (index-mid)*spread + displacement;
-        result += (x===0?"M":"L") + x.toFixed(1) + "," + y.toFixed(1);
+    function prepareSize() {
+      const bounds = hero.getBoundingClientRect();
+      const nextWidth = Math.max(1, Math.round(bounds.width));
+      const nextHeight = Math.max(1, Math.round(bounds.height));
+      if (nextWidth === width && nextHeight === height) return false;
+      width = nextWidth;
+      height = nextHeight;
+      const mobile = width <= 760;
+      config = mobile ? profile.mobile : profile.desktop;
+      svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+      const anchors = mobile ?
+        [[-.08,.49],[.11,.53],[.28,.55],[.42,.52],[.64,.44],[.82,.44],[1.07,.51]] :
+        [[-.08,.47],[.08,.51],[.21,.56],[.34,.54],[.58,.41],[.72,.31],[.84,.32],[1.07,.46]];
+      const points=anchors.map(function (point) {
+        return {x:point[0], y:point[1]*height};
+      });
+
+      // 预存每个采样点的横坐标字符串、基础曲线及右侧扰动权重。
+      // 注意最后一点恰好到达右边界，不再在屏幕外做冗余计算。
+      samples.length = 0;
+      const sampleCount = Math.max(2, Math.ceil(width / config.step));
+      for (let j=0;j<=sampleCount;j++) {
+        const x=j*width/sampleCount;
+        const u=j/sampleCount;
+        samples.push({
+          xText:x.toFixed(1),
+          baseline:centerY(u,points),
+          gain:smoothstep(.40,.96,u),
+          commonPhase:u*5.4,
+          warpPhase:u*8.8,
+          detailPhase:u*17.0,
+          widthPhase:u*7.4,
+          foldPhase:u*11.4,
+          finePhase:u*22.0
+        });
       }
-      return result;
+
+      while (paths.length < config.count) {
+        const line = element("path", {"class":"hero-wave-ribbon-strand"}, lines);
+        paths.push(line);
+      }
+      const mid=(config.count-1)/2;
+      paths.forEach(function (line,index) {
+        line.style.display = index < config.count ? "" : "none";
+        if (index < config.count) {
+          line.setAttribute("opacity",
+            (.34+.39*(1-Math.abs(index-mid)/mid)).toFixed(3));
+        }
+      });
+      return true;
     }
 
-    function paint(now) {
-      pending=0;
-      if (!reduced && !visible) return;
-      if (!reduced && now-previousTick < 40) { pending=window.requestAnimationFrame(paint); return; }
-      previousTick=now;
-      prepareSize();
-      const t=reduced?0:Date.now()/1000;
-      const count=isMobile?22:38;
-      const axis=curvePath((count-1)/2,count,t,0);
-      glow.setAttribute("d",axis);
-      for(let i=0;i<count;i++) {
-        paths[i].setAttribute("d",curvePath(i,count,t,0));
-        paths[i].setAttribute("opacity",(0.24+0.48*(1-Math.abs(i-(count-1)/2)/((count-1)/2))).toFixed(3));
+    // 每帧共用每个采样点的整体扰动与线束宽度变化。
+    // 各线只需计算少量平滑的相位差，从而保留“被拉伸的空间”的感觉。
+    function draw(time) {
+      const sharedY = new Float32Array(samples.length);
+      const widths = new Float32Array(samples.length);
+      for (let j=0;j<samples.length;j++) {
+        const s=samples[j], g=s.gain;
+        const gentle=Math.sin(s.commonPhase+time*.52)*config.breathing;
+        const rightWaves=g*(
+          Math.sin(s.warpPhase-time*.74)*config.shared +
+          Math.sin(s.detailPhase+time*.43)*config.detail);
+        sharedY[j]=s.baseline+gentle+rightWaves;
+        const expansion=g*(
+          Math.sin(s.widthPhase-time*.48)*.23 +
+          Math.sin(s.detailPhase*.6+time*.31)*.09);
+        widths[j]=1+expansion;
       }
-      if (!reduced && visible) pending=window.requestAnimationFrame(paint);
+
+      const count=config.count, mid=(count-1)/2;
+      function curve(weight,offset) {
+        const parts=new Array(samples.length);
+        for(let j=0;j<samples.length;j++) {
+          const s=samples[j], g=s.gain;
+          const lineDistortion = g*weight*(
+            Math.sin(s.foldPhase-time*.84+weight*.75)*config.separate +
+            Math.sin(s.finePhase+time*.91+weight*1.15)*config.fine);
+          const y=sharedY[j]+offset*widths[j]+lineDistortion;
+          parts[j]=(j===0?"M":"L")+s.xText+","+y.toFixed(1);
+        }
+        return parts.join(" ");
+      }
+      // 外缘扰动随横坐标平滑增强；中心保持连贯的正弦波形。
+      glow.setAttribute("d",curve(0,0));
+      for (let i=0;i<count;i++) {
+        const weight=(i-mid)/mid;
+        paths[i].setAttribute("d",curve(weight,(i-mid)*config.spread));
+      }
+    }
+
+    function stop() {
+      if (frameId) window.cancelAnimationFrame(frameId);
+      frameId=0;
+      // 恢复时以当前相位继续，避免用真实时间补偿后台经历的时间。
+      lastDrawAt=0;
+    }
+    function schedule() {
+      if (!reduced && visible && !document.hidden && !frameId) {
+        frameId=window.requestAnimationFrame(onFrame);
+      }
+    }
+    function onFrame(now) {
+      frameId=0;
+      if (reduced || !visible || document.hidden) {
+        lastDrawAt=0;
+        return;
+      }
+      // 60fps上限：高刷新率屏幕不会无意义地重复生成曲线。
+      if (!lastDrawAt || now-lastDrawAt >= targetFrameMs-.8) {
+        const step = lastDrawAt ? Math.min(maxPhaseStep,Math.max(0,(now-lastDrawAt)/1000)) : 0;
+        phase += step;
+        lastDrawAt=now;
+        draw(phase);
+      }
+      schedule();
     }
 
     art.appendChild(svg);
+    prepareSize();
+    draw(phase);
     if (typeof IntersectionObserver !== "undefined" && !reduced) {
       const observer=new IntersectionObserver(function (entries) {
         visible=entries[0]?.isIntersecting ?? true;
-        if (visible && !pending) pending=window.requestAnimationFrame(paint);
-        if (!visible && pending) { window.cancelAnimationFrame(pending); pending=0; }
+        if (!visible) stop();
+        else schedule();
       }, {threshold:0});
-      observer.observe(document.getElementById("hero"));
+      observer.observe(hero);
     }
     document.addEventListener("visibilitychange",function () {
-      if (!reduced && !document.hidden && visible && !pending) {
-        pending=window.requestAnimationFrame(paint);
-      }
+      if (document.hidden) stop();
+      else schedule();
     });
-    window.addEventListener("resize",function () {
-      prepareSize();
-      if (reduced) paint(0);
-    }, {passive:true});
-    paint(0);
+    // 尺寸检查不再发生在每次绘制中，仅在布局真正改变时执行。
+    function onResize() {
+      if (prepareSize()) draw(phase);
+    }
+    window.addEventListener("resize",onResize,{passive:true});
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(onResize);
+      observer.observe(hero);
+    }
+    schedule();
   }
+
   /* 首屏与正文分界处的透明双编码条。
    * 尺寸仅在初始载入、字体就绪、屏幕宽度变化时测量。
    * 滚动帧只读取scrollY并更新两个transform，没有缓动及布局读取。
