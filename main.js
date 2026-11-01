@@ -818,8 +818,11 @@
 
     /* 便于后续针对实际机型调整的性能与视觉参数。 */
     const profile = {
-      desktop: {count:24, step:28, spread:3.6, breathing:8, shared:16, detail:6, separate:13, fine:4},
-      mobile:  {count:14, step:18, spread:3.2, breathing:5, shared:9, detail:3.5, separate:7, fine:2.5}
+      // 折叠只出现在右侧的两个局部区域；调节twist与pleat即可改变扭曲强度。
+      desktop: {count:24, step:22, spread:3.6, breathing:8, shared:16, detail:6,
+        twistA:3.05, twistB:2.50, pleatA:35, pleatB:23, fine:7},
+      mobile:  {count:14, step:16, spread:3.2, breathing:5, shared:9, detail:3.5,
+        twistA:2.85, twistB:2.35, pleatA:18, pleatB:12, fine:4}
     };
     const targetFrameMs = 1000 / 60;
     const maxPhaseStep = .040;
@@ -900,13 +903,12 @@
         samples.push({
           xText:x.toFixed(1),
           baseline:centerY(u,points),
-          gain:smoothstep(.40,.96,u),
+          gain:smoothstep(.36,.95,u),
+          u:u,
           commonPhase:u*5.4,
           warpPhase:u*8.8,
           detailPhase:u*17.0,
-          widthPhase:u*7.4,
-          foldPhase:u*11.4,
-          finePhase:u*22.0
+          foldPhase:u*11.4
         });
       }
 
@@ -925,11 +927,16 @@
       return true;
     }
 
-    // 每帧共用每个采样点的整体扰动与线束宽度变化。
-    // 各线只需计算少量平滑的相位差，从而保留“被拉伸的空间”的感觉。
+    // 局部折叠场：不是让全部曲线同向变弯，而是在右侧局部使线束
+    // 依次收束、扭转交错、重新展开。左段依然呈平顺的正弦波带。
     function draw(time) {
       const sharedY = new Float32Array(samples.length);
-      const widths = new Float32Array(samples.length);
+      const foldOne = new Float32Array(samples.length);
+      const foldTwo = new Float32Array(samples.length);
+      const twistScale = new Float32Array(samples.length);
+      // 两个缓慢漂移的局部扭曲中心，彼此相隔，避免整条变成规则的管子。
+      const centerA = .70 + .025 * Math.sin(time*.17);
+      const centerB = .90 + .018 * Math.sin(time*.23+1.7);
       for (let j=0;j<samples.length;j++) {
         const s=samples[j], g=s.gain;
         const gentle=Math.sin(s.commonPhase+time*.52)*config.breathing;
@@ -937,10 +944,14 @@
           Math.sin(s.warpPhase-time*.74)*config.shared +
           Math.sin(s.detailPhase+time*.43)*config.detail);
         sharedY[j]=s.baseline+gentle+rightWaves;
-        const expansion=g*(
-          Math.sin(s.widthPhase-time*.48)*.23 +
-          Math.sin(s.detailPhase*.6+time*.31)*.09);
-        widths[j]=1+expansion;
+
+        // 高斯包络限定扰动区域，平滑权重使左侧没有突兀的分界线。
+        const a=(s.u-centerA)/.085;
+        const b=(s.u-centerB)/.070;
+        foldOne[j]=Math.exp(-.5*a*a)*g;
+        foldTwo[j]=Math.exp(-.5*b*b)*g;
+        // 横截面在折叠中心附近发生翻转，线束会产生真实的交错关系。
+        twistScale[j]=Math.cos(foldOne[j]*config.twistA-foldTwo[j]*config.twistB);
       }
 
       const count=config.count, mid=(count-1)/2;
@@ -948,17 +959,21 @@
         const parts=new Array(samples.length);
         for(let j=0;j<samples.length;j++) {
           const s=samples[j], g=s.gain;
-          const lineDistortion = g*weight*(
-            Math.sin(s.foldPhase-time*.84+weight*.75)*config.separate +
-            Math.sin(s.finePhase+time*.91+weight*1.15)*config.fine);
-          const y=sharedY[j]+offset*widths[j]+lineDistortion;
+          // 同一截面的线条采用不同的相位，形成局部交叠而非整体平移。
+          const creaseA=foldOne[j]*config.pleatA*
+            Math.sin((weight+1)*Math.PI*1.3+s.u*7.0-time*.55);
+          const creaseB=foldTwo[j]*config.pleatB*
+            Math.sin((weight+1)*Math.PI*1.8-s.u*5.5+time*.40);
+          const detail=g*weight*
+            Math.sin(s.foldPhase-time*.84+weight*.75)*config.fine;
+          const y=sharedY[j]+offset*twistScale[j]+creaseA+creaseB+detail;
           parts[j]=(j===0?"M":"L")+s.xText+","+y.toFixed(1);
         }
         return parts.join(" ");
       }
-      // 外缘扰动随横坐标平滑增强；中心保持连贯的正弦波形。
+      // 光晕只跟随中心轨迹，避免局部折叠把光晕扭曲成刺眼亮斑。
       glow.setAttribute("d",curve(0,0));
-      for (let i=0;i<count;i++) {
+      for(let i=0;i<count;i++){
         const weight=(i-mid)/mid;
         paths[i].setAttribute("d",curve(weight,(i-mid)*config.spread));
       }
@@ -1045,7 +1060,7 @@
     let positionPending = false;
 
     function setPosition() {
-      const move = reducedMotion ? 0 : Math.max(0, window.scrollY || window.pageYOffset || 0) * .6;
+      const move = reducedMotion ? 0 : Math.max(0, window.scrollY || window.pageYOffset || 0) * .1;
       entries.forEach(function (entry, index) {
         const period = entry.textWidth;
         const phase = (period * .19 + move) % period;
