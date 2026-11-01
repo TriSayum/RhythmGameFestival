@@ -2266,7 +2266,7 @@ a.faq-form-link:active .button-label { transform: none; }
 .hero-encoding-segment {
   flex: 0 0 auto;
   display: inline-block;
-  padding-right: 2.5rem;
+  padding-right: 0;
   white-space: pre;
   color: rgba(255,255,255,.95);
   font-family: "Consolas", ui-monospace, "SFMono-Regular", "Menlo", monospace;
@@ -2279,7 +2279,7 @@ a.faq-form-link:active .button-label { transform: none; }
   .hero-encoding-ticker { padding-block: 2px 4px; }
   .hero-encoding-row { height: 31px; }
   .hero-encoding-segment {
-    padding-right: 1.7rem;
+    padding-right: 0;
     font-family: ui-monospace, "SFMono-Regular", "Menlo", "Monaco", monospace;
     font-size: 16px;
     letter-spacing: .01em;

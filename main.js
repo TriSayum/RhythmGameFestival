@@ -942,8 +942,7 @@
     if (!root || !data.hero) return;
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
-    const text = (data.hero.streamText ||
-      "... / SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / SPACE / ...") + "    ";
+    const text = data.hero.streamText || "SPACE / CITRUS RHYTHM GAME FESTIVAL 2026 / ";
     const entries = [];
 
     ["left", "right"].forEach(function (direction) {
