@@ -120,6 +120,9 @@ window.FESTIVAL_CONTENT = {
     "topicDisplay": "空间",
     "topicEn": "SPACE",
     "signature": "CRGF.2026",
+    "organizers": ["未来媒体协会·音乐部", "TRY动漫社·音游部"],
+    "organizerLabel": "联合主办",
+    "scheduleLinkLabel": "查看日程",
     "codes": [
       {
         "label": "UTF-8 / 简",
