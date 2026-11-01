@@ -295,9 +295,9 @@ a {
 
 .theme-content { margin-top: 64px; }
 
-/* B2＋B-1：背景为完整的空心SPACE，实心“空間”居中重叠。
- * 两层文字使用同一个Grid单元格，跟随布局缩放，无定位脚本。
- * 修改这组参数即可调整字号、描边与上下重叠位置。
+/* B2＋B-1：背景SPACE使用紧贴字形边界的SVG外轮廓遮罩。
+ * SVG去除了P、A的内部封闭描线，容器以实际绘制范围居中。
+ * 两组文字在居中的基础上增加少量左侧光学补偿。
  */
 .theme-heading {
   display: grid;
@@ -308,6 +308,9 @@ a {
   margin: 0 0 40px;
   line-height: 1;
   isolation: isolate;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .theme-heading-outline,
 .theme-heading-cn {
@@ -316,16 +319,17 @@ a {
   white-space: nowrap;
   text-align: center;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .theme-heading-outline {
   z-index: 0;
-  font-family: "Bahnschrift", "Arial Narrow", "Arial", sans-serif;
-  font-size: clamp(108px, 17vw, 210px);
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -.055em;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(183, 204, 229, .35);
+  width: min(100%, 720px);
+  aspect-ratio: 6521 / 1582;
+  background-color: rgba(48, 227, 255, .50);
+  -webkit-mask: url("./assets/hero/space-theme-outline.svg") center / contain no-repeat;
+  mask: url("./assets/hero/space-theme-outline.svg") center / contain no-repeat;
+  transform: translateX(-18px);
 }
 .theme-heading-cn {
   z-index: 1;
@@ -336,10 +340,7 @@ a {
   letter-spacing: .1em;
   color: #f5faff;
   text-shadow: 0 3px 24px rgba(5, 9, 17, .82);
-  transform: translateY(12%);
-}
-@supports not (-webkit-text-stroke: 1px black) {
-  .theme-heading-outline { color: rgba(183, 204, 229, .22); }
+  transform: translate(-12px, 12%);
 }
 .theme-conclusion {
   margin-top: 22px !important;
@@ -359,12 +360,13 @@ a {
     margin-bottom: 30px;
   }
   .theme-heading-outline {
-    font-size: clamp(62px, 19vw, 104px);
-    -webkit-text-stroke-width: 1.15px;
+    width: min(100%, 355px);
+    background-color: rgba(48, 227, 255, .58);
+    transform: translateX(-6px);
   }
   .theme-heading-cn {
     font-size: clamp(50px, 14.2vw, 78px);
-    transform: translateY(10%);
+    transform: translate(-4px, 10%);
   }
   .theme-invitation { margin-top: 36px !important; }
 }
@@ -2283,13 +2285,13 @@ a.faq-form-link:active .button-label { transform: none; }
 
 /* 主视觉标题的光学右对齐。 */
 
-/* 字体自带右侧留白加上letter-spacing，导致“間”看起来比地点偏左。
- * 只对主标题做视觉补偿，不移动地点、不改变右下信息块的布局边界。
+/* 改用简体“空间”，撤销原先为繁体“間”设置的大幅右移。
+ * 桌面保留轻微视觉补偿，手机端采用自然右对齐。
  */
-.hero-topic { transform: translateX(.078em); transform-origin: right center; }
+.hero-topic { transform: translateX(.02em); transform-origin: right center; }
 
 @media (max-width:760px) {
-  .hero-topic { transform: translateX(.022em); }
+  .hero-topic { transform: none; }
 }
 
 /* 首屏与01之间的全宽双编码文字条：白字、无底、无边框 */
