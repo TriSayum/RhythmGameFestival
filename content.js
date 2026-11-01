@@ -37,7 +37,7 @@
  * 左右底部对齐；不包含返回顶部或额外版权信息。
  */
 /* 主视觉字标与真实编码集中于hero；日期使用footer.date，地点统一使用program.mainVenue。
- * 仅首屏与01的大主题字使用繁体“空間”，其他文字沿用简体“空间”。
+ * 首屏与01的主题字统一使用简体“空间”，编码数据仍保留简繁对照。
  */
 window.FESTIVAL_CONTENT = {
   "site": {
@@ -117,7 +117,7 @@ window.FESTIVAL_CONTENT = {
   "hero": {
     "year": "2026",
     "festivalName": "西柚音游节",
-    "topicDisplay": "空間",
+    "topicDisplay": "空间",
     "topicEn": "SPACE",
     "signature": "CRGF.2026",
     "codes": [
@@ -182,7 +182,7 @@ window.FESTIVAL_CONTENT = {
       ],
       "conclusion": "空间可以被看见、被听见、被碰见，也可以由我们共同创造。",
       "invitation": "本届西柚音游节以「空间」为主题，邀请大家从词语本身、游戏、音乐、文化、情绪等不同视角展开探索。不必拘泥于某一种解释，也不必局限于某一种表现形式。",
-      "displayName": "空間"
+      "displayName": "空间"
     }
   },
   "tournament": {
