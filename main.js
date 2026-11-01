@@ -1167,7 +1167,15 @@
     let viewportWidth = document.documentElement.clientWidth;
     function measure() {
       const headerHeight = Math.ceil(header.getBoundingClientRect().height);
-      const height = Math.max(1, Math.ceil(window.innerHeight - headerHeight) + 1);
+      // 扫码内置浏览器的工具栏可能覆盖部分布局视口，首次采用可见高度的保守值。
+      // 高度只在初次载入和屏幕宽度真正变化时测量，不跟随地址栏伸缩。
+      const heights = [
+        window.innerHeight,
+        document.documentElement.clientHeight,
+        window.visualViewport?.height
+      ].filter(function (value) { return Number.isFinite(value) && value > 0; });
+      const viewportHeight = Math.min.apply(Math, heights);
+      const height = Math.max(1, Math.floor(viewportHeight - headerHeight));
       document.documentElement.style.setProperty("--hero-initial-height", height + "px");
     }
     measure();
