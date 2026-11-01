@@ -63,7 +63,7 @@ window.FESTIVAL_PROGRAM = {
           {
             "start": "15:45",
             "end": "16:15",
-            "title": "",
+            "title": "用ai开始你的音游/亚音游制作吧！",
             "id": "talk-yuling",
             "type": "talk",
             "speakerId": "yuling"
@@ -136,7 +136,9 @@ window.FESTIVAL_PROGRAM = {
         "name": "雨令",
         "avatar": "./assets/speakers/yuling_avatar.webp",
         "bio": [
-          "2026网易问剑GameJam节奏游戏作品《艾希礼的献曲》策划&程序"
+          "2026网易问剑GameJam节奏游戏作品《艾希礼的献曲》策划＆程序",
+          "（其实是vibe coding大师）",
+          "亚音游/节奏游戏狂热游玩ing，音游苦手——"
         ]
       }
     }
