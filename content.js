@@ -201,9 +201,9 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "arcade",
         "heading": "街机组",
-        "date": "-",
+        "date": "等待后续通知",
         "period": "",
-        "venue": "-",
+        "venue": "等待后续通知",
         "games": [
           {
             "id": "maimai_dx",
