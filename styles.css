@@ -2491,10 +2491,11 @@ a.faq-form-link:active .button-label { transform: none; }
  */
 @media (max-width: 760px) {
   .hero-organizers {
-    top: clamp(218px, 38%, 302px);
+    /* 能并排时靠右上；窄屏撞到左上信息块时由JS根据真实边界下移。 */
+    top: var(--hero-mobile-organizers-top, clamp(28px, 5%, 56px));
     right: 19px;
-    font-size: clamp(19px, 5.4vw, 24px);
-    line-height: 1.28;
+    font-size: clamp(16px, 4.55vw, 20px);
+    line-height: 1.27;
   }
   .hero-organizers-names {
     flex-direction: column;
@@ -2502,7 +2503,7 @@ a.faq-form-link:active .button-label { transform: none; }
     gap: 1px;
   }
   .hero-organizers-separator { display: none; }
-  .hero-organizers-label { margin-top: 3px; font-size: 1.10em; }
+  .hero-organizers-label { margin-top: 3px; font-size: 1.14em; }
   .hero-secondary { bottom: clamp(122px, 20%, 180px); }
   .hero-schedule-slot { bottom: clamp(12px, 3%, 28px); padding: 10px 8px 0; }
   .hero-schedule-link {
@@ -2521,4 +2522,43 @@ a.faq-form-link:active .button-label { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-schedule-link { transition: none; }
+}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 赛事时间节点／DJ正文／集章段落：复用已有05视觉语言
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* 03四个节点使用05的同一组件，桌面四列、中屏两列、小屏一列。 */
+.tournament-milestones {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0;
+}
+.tournament-registration-description { margin-top: 32px; }
+@media (max-width: 1060px) and (min-width: 681px) {
+  .tournament-milestones { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 28px; }
+}
+@media (max-width: 680px) {
+  .tournament-milestones { grid-template-columns: 1fr; }
+  .tournament-registration-description { margin-top: 24px; font-size: 15px; }
+}
+
+/* 设备的两段介绍均为普通正文，第二段保留自然段落间距。 */
+.experience-item--equipment .experience-item-description {
+  max-width: 850px;
+  font-size: 16px;
+  line-height: 1.95;
+}
+.experience-item--equipment .experience-item-description + .experience-item-description {
+  margin-top: 12px;
+}
+/* 集章说明直接接在最后一件设备之后，不新增标题或边框。 */
+.experience-postscript {
+  max-width: 850px;
+  margin: 34px 0 0;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--text-primary);
+}
+@media (max-width: 680px) {
+  .experience-item--equipment .experience-item-description,
+  .experience-postscript { font-size: 15px; line-height: 1.85; }
+  .experience-postscript { margin-top: 27px; }
 }
