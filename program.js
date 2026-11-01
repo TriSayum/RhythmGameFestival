@@ -55,7 +55,7 @@ window.FESTIVAL_PROGRAM = {
           {
             "start": "13:40",
             "end": "15:40",
-            "title": "学术视角下的音乐游戏·二",
+            "title": "学术视角下的音乐游戏 · 二",
             "id": "talk-cot",
             "type": "talk",
             "speakerId": "cot"
@@ -127,7 +127,7 @@ window.FESTIVAL_PROGRAM = {
         "name": "COT",
         "avatar": "./assets/speakers/cot_avatar.webp",
         "bio": [
-          "2025音乐部分享《学术视角下的音乐游戏》主讲人",
+          "2025音乐部分享《学术视角下的音乐游戏》主讲",
           "2026动院毕设展音游作品《忒伊亚零》全栈作者",
           "音游痴（划掉）不爱打音游（这句也划掉）"
         ]

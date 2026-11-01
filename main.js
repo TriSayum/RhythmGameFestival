@@ -1020,10 +1020,10 @@
 
     // 均为CSS像素；可以统一从这里调试点阵外观与排斥手感。
     const settings = {
-      spacing: 32, dotSize: 2, color: "rgba(190, 232, 249, 0.20)",
-      radius: 140, idlePush: 8, movingPush: 20,
+      spacing: 32, dotSize: 2, color: "rgba(190, 232, 249, 0.40)",
+      radius: 240, idlePush: 8, movingPush: 20,
       maxSpeed: 1.5, directionFactor: 0.15,
-      spring: 0.20, damping: 0.72, maxDpr: 2
+      spring: 0.05, damping: 0.78, maxDpr: 2
     };
     const fine = window.matchMedia?.("(hover: hover) and (pointer: fine)");
     const mobile = window.matchMedia?.("(max-width: 760px)");
