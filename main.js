@@ -576,11 +576,14 @@
 
       const textBlock = make("div", "experience-item-text");
       if (item.name) textBlock.appendChild(make("h3", "experience-item-name", item.name));
-      // 设备的简介与说明均为正文，不使用游戏的醒目summary样式。
+      // 设备的第一段保留较醒目的介绍，第二段采用与集章说明一致的普通正文。
       if (item.summary) {
         textBlock.appendChild(make("p", game ? "experience-item-summary" : "experience-item-description", item.summary));
       }
-      if (item.description) textBlock.appendChild(make("p", "experience-item-description", item.description));
+      if (item.description) {
+        textBlock.appendChild(make("p", game ? "experience-item-description" :
+          "experience-item-description experience-item-description--body", item.description));
+      }
       row.appendChild(textBlock);
 
       if (game && item.image) {
