@@ -101,11 +101,19 @@
     const theme = data.intro.theme;
     const body = make("div", "theme-content");
     body.setAttribute("aria-labelledby", "theme-heading");
-    const heading = make("h3", "theme-heading", theme.displayName || theme.name);
+
+    // 主题字标：巨大的空心英文在后、实心中文居中覆盖。
+    // 两层文字仍属于同一个标题，英文装饰层不重复进入无障碍朗读。
+    const displayName = theme.displayName || theme.name;
+    const heading = make("h3", "theme-heading");
     heading.id = "theme-heading";
-    const en = make("span", "", "/" + theme.nameEn);
-    en.lang = "en";
-    heading.appendChild(en);
+    heading.setAttribute("aria-label", displayName + " / " + theme.nameEn);
+    const outline = make("span", "theme-heading-outline", theme.nameEn);
+    outline.lang = "en";
+    outline.setAttribute("aria-hidden", "true");
+    const foreground = make("span", "theme-heading-cn", displayName);
+    foreground.setAttribute("aria-hidden", "true");
+    heading.append(outline, foreground);
     body.appendChild(heading);
     addParagraphs(body, theme.paragraphs);
     body.appendChild(make("p", "theme-conclusion", theme.conclusion));
