@@ -30,11 +30,21 @@
 
   function renderHeader() {
     const brand = document.getElementById("site-brand");
-    brand.append(
+    // 页首品牌区复用原二维码完整矢量轮廓；透明渐变版可替换为
+    // ./assets/hero/header-logo-white.svg 切换成透明纯白版本。
+    const logo = make("img", "site-brand-logo");
+    logo.src = "./assets/hero/favicon.svg";
+    logo.alt = "";
+    logo.draggable = false;
+    logo.decoding = "async";
+    logo.setAttribute("aria-hidden", "true");
+    const brandText = make("span", "site-brand-text");
+    brandText.append(
       make("span", "site-brand-cn", data.site.name),
       make("span", "site-brand-en", data.site.nameEn)
     );
-    brand.lastElementChild.lang = "en";
+    brandText.lastElementChild.lang = "en";
+    brand.append(logo, brandText);
     brand.setAttribute("aria-label", data.site.name + "，返回页首");
 
     const nav = document.getElementById("site-nav");
