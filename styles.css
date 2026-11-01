@@ -2231,24 +2231,60 @@ a.faq-form-link:active .button-label { transform: none; }
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-.hero-wave-ribbon-text,
-.hero-wave-ribbon-measure {
-  font-family: ui-monospace, "Consolas", "SFMono-Regular", "Menlo", monospace;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .07em;
-  fill: rgba(146,239,254,.66);
-}
-.hero-wave-ribbon-text {
-  paint-order: stroke fill;
-  stroke: rgba(5,16,31,.32);
-  stroke-width: 1px;
-}
-.hero-wave-ribbon-measure { opacity: 0; }
 @media (max-width:760px) {
   .hero-topic { transform: translateX(.022em); }
   .hero-wave-ribbon-glow { stroke-width: 39; filter: blur(18px); opacity:.07; }
   .hero-wave-ribbon-strand { stroke-width: 1.05; }
-  .hero-wave-ribbon-text,
-  .hero-wave-ribbon-measure { font-size: 9px; letter-spacing:.035em; }
+}
+
+/* 首屏与01之间的全宽双编码文字条：白字、无底、无边框 */
+.hero-encoding-ticker {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  overflow: hidden;
+  padding-block: 3px 5px;
+  background: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+.hero-encoding-row {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  overflow: hidden;
+}
+.hero-encoding-lane {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: max-content;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+}
+.hero-encoding-segment {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding-right: 2.5rem;
+  white-space: pre;
+  color: rgba(255,255,255,.95);
+  font-family: "Consolas", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  font-size: clamp(22px, 2vw, 26px);
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+@media (max-width: 760px) {
+  .hero-encoding-ticker { padding-block: 2px 4px; }
+  .hero-encoding-row { height: 31px; }
+  .hero-encoding-segment {
+    padding-right: 1.7rem;
+    font-family: ui-monospace, "SFMono-Regular", "Menlo", "Monaco", monospace;
+    font-size: 16px;
+    letter-spacing: .01em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-encoding-lane { will-change: auto; }
 }
