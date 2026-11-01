@@ -195,16 +195,15 @@ window.FESTIVAL_CONTENT = {
       ]
     },
     "details": {
-      "heading": "赛事详情",
-      "paragraphs": []
+      "paragraphs": ["具体赛制将在后续公布。"]
     },
     "groups": [
       {
         "id": "arcade",
         "heading": "街机组",
-        "date": "11月21日",
-        "period": "下午",
-        "venue": "米莱音游研究所",
+        "date": "-",
+        "period": "",
+        "venue": "-",
         "games": [
           {
             "id": "maimai_dx",
@@ -245,21 +244,26 @@ window.FESTIVAL_CONTENT = {
       }
     ],
     "registration": {
-      "heading": "赛事报名",
-      "description": "",
+      "milestones": [
+        {"id": "open", "label": "报名开放", "date": "2026.11.01"},
+        {"id": "deadline", "label": "报名截止", "date": "2026.11.10"},
+        {"id": "rules", "label": "赛制公布", "date": "2026.11.15"},
+        {"id": "event", "label": "正式比赛", "date": "2026.11.22"}
+      ],
+      "description": "请于报名截止日期前，通过下方「街机组报名」「移动组报名」入口填写腾讯文档问卷，并按对应组别的要求提交信息。",
       "groups": [
         {
           "id": "arcade",
           "label": "街机组报名",
-          "url": "",
-          "enabled": false,
+          "url": "https://docs.qq.com/form/page/DVUhydVVZdGRRakx4",
+          "enabled": true,
           "unavailableLabel": "街机组报名未开放"
         },
         {
           "id": "mobile",
           "label": "移动组报名",
-          "url": "",
-          "enabled": false,
+          "url": "https://docs.qq.com/form/page/DVXpTSUFmQnRLZFpt",
+          "enabled": true,
           "unavailableLabel": "移动组报名未开放"
         }
       ]
@@ -520,11 +524,13 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "turntable",
         "type": "equipment",
-        "visible": false,
-        "name": "碟机",
-        "description": ""
+        "visible": true,
+        "name": "DJ控制器（碟机）",
+        "summary": "由星渊友情提供的双盘DJ控制器",
+        "description": "活动现场将提供一台DJ控制器，供观众自由上手体验。无论是打碟、切换曲目，还是尝试简单的音乐混音，都欢迎大家前来探索。"
       }
-    ]
+    ],
+    "postscript": "活动现场还将设置集章活动。参与各区域活动即可收集印章，集满指定数量后，可兑换西柚音游节专属活动周边。具体规则以现场安排为准。"
   },
   "faq": {
     "introduction": [
