@@ -2149,6 +2149,51 @@ a.faq-form-link:active .button-label { transform: none; }
   }
   .hero-fragment { font-size: 8px; max-width: min(245px,74vw); }
   .hero-fragment:nth-child(n+5) { display: flex; }
+
+  /* 手机端左右两块灰色叠字分别调密度：左上疏开，右下填充更多空间。
+   * 所有调整限定在本媒体查询内，不改动桌面端的文字布局。
+   */
+  .hero-primary-overlay {
+    left: -6px;
+    top: -23px;
+    width: min(315px, 80vw);
+    height: clamp(195px, 55vw, 265px);
+  }
+  .hero-primary-overlay .hero-overlay-word {
+    font-size: clamp(25px, 7.3vw, 39px);
+  }
+  .hero-primary-overlay .hero-overlay-word--2,
+  .hero-primary-overlay .hero-overlay-word--4,
+  .hero-primary-overlay .hero-overlay-word--5 {
+    font-size: clamp(25px, 7.1vw, 38px);
+  }
+  .hero-primary-overlay .hero-overlay-word--1 { top: 1%; }
+  .hero-primary-overlay .hero-overlay-word--2 { top: 17%; }
+  .hero-primary-overlay .hero-overlay-word--3 { top: 35%; }
+  .hero-primary-overlay .hero-overlay-word--4 { top: 48%; }
+  .hero-primary-overlay .hero-overlay-word--5 { top: 67%; }
+  .hero-primary-overlay .hero-overlay-word--6 { top: 82%; }
+
+  .hero-secondary-overlay {
+    right: -20px;
+    bottom: -27px;
+    width: min(420px, 98vw);
+    height: clamp(205px, 57vw, 295px);
+  }
+  .hero-secondary-overlay .hero-overlay-word {
+    font-size: clamp(35px, 9.5vw, 52px);
+  }
+  .hero-secondary-overlay .hero-overlay-word--2,
+  .hero-secondary-overlay .hero-overlay-word--4,
+  .hero-secondary-overlay .hero-overlay-word--5 {
+    font-size: clamp(33px, 9vw, 50px);
+  }
+  .hero-secondary-overlay .hero-overlay-word--1 { top: 10%; right: 45%; }
+  .hero-secondary-overlay .hero-overlay-word--2 { top: 23%; right: -1%; }
+  .hero-secondary-overlay .hero-overlay-word--3 { top: 40%; right: 36%; }
+  .hero-secondary-overlay .hero-overlay-word--4 { top: 52%; right: 0%; }
+  .hero-secondary-overlay .hero-overlay-word--5 { top: 69%; right: 32%; }
+  .hero-secondary-overlay .hero-overlay-word--6 { top: 81%; right: 2%; }
 }
 
 /* 三个大范围光团互相漫射；运动幅度减小，变成缓慢游动的环境光，
@@ -2223,6 +2268,7 @@ a.faq-form-link:active .button-label { transform: none; }
   z-index: 1;
   width: 100%;
   overflow: hidden;
+  margin-top: 16px;
   padding-block: 3px 5px;
   background: transparent;
   -webkit-user-select: none;
@@ -2234,6 +2280,7 @@ a.faq-form-link:active .button-label { transform: none; }
   align-items: center;
   height: 42px;
   overflow: hidden;
+  contain: paint;
 }
 .hero-encoding-lane {
   display: inline-flex;
@@ -2256,13 +2303,29 @@ a.faq-form-link:active .button-label { transform: none; }
   line-height: 1;
 }
 @media (max-width: 760px) {
-  .hero-encoding-ticker { padding-block: 2px 4px; }
+  .hero-encoding-ticker { margin-top: 12px; padding-block: 2px 4px; }
   .hero-encoding-row { height: 31px; }
   .hero-encoding-segment {
     padding-right: 0;
     font-family: ui-monospace, "SFMono-Regular", "Menlo", "Monaco", monospace;
     font-size: 16px;
     letter-spacing: .01em;
+  }
+}
+/* 由原生滚动时间轴在合成层上驱动两行位移，避免手机端滚动事件间歇缺帧。
+ * 仅在浏览器支持并且JS完成范围测量后生效，不改变桌面端与降级方案。
+ */
+@keyframes heroEncodingScroll {
+  from { transform: translate3d(var(--encoding-start, 0px), 0, 0); }
+  to { transform: translate3d(var(--encoding-end, 0px), 0, 0); }
+}
+@supports (animation-timeline: scroll(root block)) {
+  @media (max-width: 760px) {
+    .hero-encoding-ticker.is-native-scroll .hero-encoding-lane {
+      animation: heroEncodingScroll 1s linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0% 100%;
+    }
   }
 }
 @media (prefers-reduced-motion: reduce) {
