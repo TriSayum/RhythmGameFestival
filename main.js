@@ -220,7 +220,20 @@
 
 
 
-  /* 03赛事：两组数据化卡片、独立赛制折叠和独立报名入口。 */
+  /* 03与05共用同一组时间节点结构；可通过额外class调整列数。 */
+  function renderMilestones(entries, extraClass) {
+    const list = make("ol", "submissions-milestones" + (extraClass ? " " + extraClass : ""));
+    (entries || []).forEach(function (item) {
+      const milestone = make("li", "submissions-milestone");
+      const heading = make("div", "submissions-milestone-heading");
+      heading.appendChild(make("span", "submissions-milestone-cn", item.label));
+      milestone.append(heading, make("div", "submissions-milestone-date", item.date));
+      list.appendChild(milestone);
+    });
+    return list;
+  }
+
+  /* 03赛事：两组数据化卡片、保留待公布详情折叠和独立报名入口。 */
   function renderTournament() {
     const content = data.tournament;
     const root = document.getElementById("tournament-content");
@@ -236,7 +249,10 @@
     }
 
     addTextBlock(null, content.introduction.paragraphs, "tournament-introduction");
-    addTextBlock(content.details.heading, content.details.paragraphs, "tournament-common-details");
+    // 赛制待公布时只显示正文，不生成空的“赛事详情”小标题。
+    if (content.details?.paragraphs?.length) {
+      addTextBlock(null, content.details.paragraphs, "tournament-common-details");
+    }
 
     const cards = make("div", "tournament-groups");
     content.groups.forEach(function (group) {
@@ -299,9 +315,12 @@
 
     const registration = content.registration;
     const regBlock = make("div", "tournament-block tournament-registration");
-    regBlock.appendChild(make("h3", "tournament-block-heading", registration.heading));
+    // 复用05时间节点组件，不生成“赛事报名”小标题。
+    if (registration.milestones?.length) {
+      regBlock.appendChild(renderMilestones(registration.milestones, "tournament-milestones"));
+    }
 
-    // 报名条件和注意事项统一在一段正文中说明，不再设置二级小标题。
+    // 报名条件和注意事项统一在时间节点后的正文中说明。
     if (registration.description) {
       regBlock.appendChild(make("p", "tournament-registration-description", registration.description));
     }
@@ -364,9 +383,9 @@
       const subject = make("div", "salon-talk-subject");
       // 左右两栏顶部齐平：左侧标题，右侧讲者。
       // 日期、场次时间和地点放在标题下方，不再重复一个章节总信息栏。
-      if (talk.title) {
-        subject.appendChild(make("h4", "salon-talk-title", talk.title));
-      }
+      // 02仍只展示“雨令”；04的空题目单独显示待公布，不加书名号。
+      subject.appendChild(make("h4", talk.title ? "salon-talk-title" : "salon-talk-title salon-talk-title--pending",
+        talk.title || "分享主题待公布"));
       const metadata = make("div", "salon-talk-meta");
       if (salon.info?.date) {
         metadata.appendChild(make("span", "salon-talk-date", salon.info.date));
@@ -495,15 +514,7 @@
     }
 
     if (config.milestones?.length) {
-      const list = make("ol", "submissions-milestones");
-      config.milestones.forEach(function (item) {
-        const milestone = make("li", "submissions-milestone");
-        const heading = make("div", "submissions-milestone-heading");
-        heading.appendChild(make("span", "submissions-milestone-cn", item.label));
-        milestone.append(heading, make("div", "submissions-milestone-date", item.date));
-        list.appendChild(milestone);
-      });
-      root.appendChild(list);
+      root.appendChild(renderMilestones(config.milestones));
     }
 
     if (config.notes?.length) {
@@ -565,7 +576,10 @@
 
       const textBlock = make("div", "experience-item-text");
       if (item.name) textBlock.appendChild(make("h3", "experience-item-name", item.name));
-      if (game && item.summary) textBlock.appendChild(make("p", "experience-item-summary", item.summary));
+      // 设备的简介与说明均为正文，不使用游戏的醒目summary样式。
+      if (item.summary) {
+        textBlock.appendChild(make("p", game ? "experience-item-summary" : "experience-item-description", item.summary));
+      }
       if (item.description) textBlock.appendChild(make("p", "experience-item-description", item.description));
       row.appendChild(textBlock);
 
@@ -589,6 +603,10 @@
     });
 
     if (list.childElementCount) root.appendChild(list);
+    // 集章说明接在设备介绍后，仅作为段落，不增加小标题。
+    if (experience.postscript) {
+      root.appendChild(make("p", "experience-postscript", experience.postscript));
+    }
   }
 
 
@@ -1092,6 +1110,50 @@
   }
 
 
+  /* 手机端主办信息优先位于右上；若与左上信息块相交，则自动避开。
+   * 只读取同一主视觉里的真实元素边界，改变的是内部布局而非滚动补偿。
+   */
+  function setupHeroOrganizerMobileLayout() {
+    const hero = document.getElementById("hero");
+    const primary = hero?.querySelector(".hero-primary");
+    const organizers = hero?.querySelector(".hero-organizers");
+    if (!hero || !primary || !organizers) return;
+    const mobile = window.matchMedia("(max-width: 760px)");
+    let pending = false;
+    function layout() {
+      pending = false;
+      organizers.style.removeProperty("--hero-mobile-organizers-top");
+      if (!mobile.matches) return;
+      const primaryRect = primary.getBoundingClientRect();
+      const organizerRect = organizers.getBoundingClientRect();
+      const heroRect = hero.getBoundingClientRect();
+      const gap = 16;
+      const overlapsX = organizerRect.left < primaryRect.right + gap &&
+        organizerRect.right > primaryRect.left - gap;
+      const overlapsY = organizerRect.top < primaryRect.bottom + gap &&
+        organizerRect.bottom > primaryRect.top - gap;
+      if (overlapsX && overlapsY) {
+        const top = Math.ceil(primaryRect.bottom - heroRect.top + gap);
+        organizers.style.setProperty("--hero-mobile-organizers-top", top + "px");
+      }
+    }
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(layout);
+    }
+    schedule();
+    window.addEventListener("resize", schedule, {passive: true});
+    mobile.addEventListener?.("change", schedule);
+    if (document.fonts?.ready) document.fonts.ready.then(schedule);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(schedule);
+      observer.observe(hero);
+      observer.observe(primary);
+    }
+  }
+
+
   /* 首屏点阵：随#hero-art自然滚动，鼠标只改变内部方块位置。
    * 手机及减少动态效果时只绘制静态点阵；无需滚动监听与WebGL。
    */
@@ -1460,6 +1522,7 @@
   setupInitialHeroHeight();
   renderHero();
   setupHeroTopicInkAlignment();
+  setupHeroOrganizerMobileLayout();
   setupHeroDotField();
   setupHeroFragmentLayout();
   setupHeroEncodingTicker();
