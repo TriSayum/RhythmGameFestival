@@ -41,7 +41,10 @@
     <!-- 二维码直接属于主视觉，不再通过滚动脚本补偿位置。 -->
     <img id="hero-qr-mark" class="hero-qr-mark" src="./assets/hero/space-qr-decor.svg"
       alt="" aria-hidden="true" draggable="false" decoding="async">
-    <div id="hero-art" class="hero-art" aria-hidden="true"></div>
+    <div id="hero-art" class="hero-art" aria-hidden="true">
+      <!-- 主视觉中的交互方格点阵，随首屏一起滚动。 -->
+      <canvas id="hero-dot-field" class="hero-dot-field" aria-hidden="true"></canvas>
+    </div>
     <div id="hero-content" class="hero-content"></div>
   </section>
 
