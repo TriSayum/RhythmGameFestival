@@ -2381,3 +2381,146 @@ a.faq-form-link:active .button-label { transform: none; }
     opacity: .03;
   }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 主视觉信息扩展：主办信息、日程入口与基于实际字形的右对齐
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* 真实标题与地点的可见边界由main.js测量，禁止旧版硬编码位移。 */
+.hero-topic { transform: none; }
+.hero-topic-ink,
+.hero-venue-ink {
+  display: inline-block;
+  white-space: nowrap;
+}
+.hero-topic-ink {
+  transform: translateX(var(--hero-topic-ink-offset, 0px));
+}
+
+/* 右上联合主办，字号接近左上日期／右下地点，始终右对齐。 */
+.hero-organizers {
+  position: absolute;
+  z-index: 3;
+  top: clamp(35px, 7%, 90px);
+  right: clamp(22px, 5.8vw, 100px);
+  max-width: calc(100% - 40px);
+  text-align: right;
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: clamp(24px, 2.2vw, 39px);
+  font-weight: 750;
+  line-height: 1.28;
+  color: #f5faff;
+  pointer-events: none;
+}
+.hero-organizers-names {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: .28em;
+  white-space: nowrap;
+}
+.hero-organizer-name { display: block; white-space: nowrap; }
+.hero-organizers-separator { color: var(--theme-accent); }
+.hero-organizers-label {
+  margin-top: 6px;
+  color: var(--theme-accent);
+  font-size: .90em;
+  line-height: 1.3;
+}
+/* 中等桌面宽度拆开两个主办单位，保持字号而非一味缩小导致难读。 */
+@media (min-width: 761px) and (max-width: 1280px) {
+  .hero-organizers-names {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .hero-organizers-separator { display: none; }
+}
+
+/* CGS式首屏进入日程入口：固定占位供小编码避让，仅链接本身上移。 */
+.hero-schedule-slot {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: clamp(10px, 2.4%, 24px);
+  transform: translateX(-50%);
+  padding: 16px 14px 2px;
+  white-space: nowrap;
+}
+.hero-schedule-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  min-width: 172px;
+  min-height: 49px;
+  padding: 9px 24px;
+  border: 1px solid rgba(48, 227, 255, .58);
+  background: rgba(10, 25, 39, .80);
+  color: #eafbff;
+  text-decoration: none;
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: .05em;
+  line-height: 1.3;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition: opacity .38s ease, transform .38s cubic-bezier(.2,.7,.2,1),
+              background-color .2s ease, border-color .2s ease;
+}
+.hero-schedule-arrow { color: var(--theme-accent); font-size: 1.25em; }
+.site-hero:hover .hero-schedule-link,
+.hero-schedule-link:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.hero-schedule-link:hover,
+.hero-schedule-link:focus-visible {
+  color: #fff;
+  background: rgba(20, 81, 108, .94);
+  border-color: var(--theme-accent);
+}
+.hero-schedule-link:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 3px;
+}
+
+/* 手机端：联合主办分三行，右下主题块上移，为常显日程入口留空间。
+ * 小编码数量上限由JS统一控制为5，CSS提供无脚本的展示上限。
+ */
+@media (max-width: 760px) {
+  .hero-organizers {
+    top: clamp(205px, 36%, 290px);
+    right: 19px;
+    font-size: clamp(19px, 5.4vw, 24px);
+    line-height: 1.28;
+  }
+  .hero-organizers-names {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1px;
+  }
+  .hero-organizers-separator { display: none; }
+  .hero-organizers-label { margin-top: 3px; font-size: 1em; }
+  .hero-secondary { bottom: clamp(122px, 20%, 180px); }
+  .hero-schedule-slot { bottom: clamp(12px, 3%, 28px); padding: 10px 8px 0; }
+  .hero-schedule-link {
+    min-width: 160px;
+    min-height: 45px;
+    padding: 8px 20px;
+    font-size: 16px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+  .hero-fragment:nth-child(n+6) { display: none !important; }
+}
+@media (hover: none), (pointer: coarse) {
+  .hero-schedule-link { opacity: 1; pointer-events: auto; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-schedule-link { transition: none; }
+}
