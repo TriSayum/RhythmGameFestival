@@ -508,7 +508,7 @@ window.FESTIVAL_CONTENT = {
         "type": "game",
         "visible": true,
         "name": "咕咕节拍",
-        "summary": "2024动院毕设展节奏动作作品",
+        "summary": "2024动院毕设展节奏动作作品、2024机核中传毕设游戏推荐",
         "description": "《咕咕节拍》是一款带有节奏打击元素的动作冒险游戏。在机器人停掉了所有美味薯条的生产线，转而制作那些没用的零件后，英勇的鸽族勇者将会踏上充满挑战的冒险之旅，为了薯条，为了部族，你是他们的希望！勇者啊，前去夺回薯条的控制权吧！",
         "image": "./assets/experience/gugu_beat_poster.webp"
       },
