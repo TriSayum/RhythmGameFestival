@@ -495,13 +495,13 @@ window.FESTIVAL_CONTENT = {
         "image": "./assets/experience/in_falsus_poster.webp"
       },
       {
-        "id": "game-02",
+        "id": "white-noise",
         "type": "game",
-        "visible": false,
-        "name": "",
-        "summary": "",
-        "description": "",
-        "image": ""
+        "visible": true,
+        "name": "白噪",
+        "summary": "2026动院毕设展热门节奏FPS作品",
+        "description": "《白噪》是一款第一人称节奏射击游戏，背景设定于架空的未来科幻宇宙。玩家将化身超级英雄“白噪”，跟随动感的节拍挥拳、射击，收获音乐律动与高速动作的双重快感，以最狂野的方式拯救世界。",
+        "image": "./assets/experience/white_noise_poster.webp"
       },
       {
         "id": "game-03",
