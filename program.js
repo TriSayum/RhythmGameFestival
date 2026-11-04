@@ -10,7 +10,7 @@
  * 02显示所有节目；04只显示正式分享，不显示会前预热。
  */
 window.FESTIVAL_PROGRAM = {
-  "mainVenue": "具体教室待定",
+  "mainVenue": "万东科技文创园15号楼406",
   "schedule": {
     "mainTitle": "主会场",
     "ongoingTitle": "同期开放",
