@@ -623,30 +623,34 @@
   }
 
 
-  /* 07 场地指引：地址复制提示与原生dialog图片查看器。 */
+  /* 07 场地指引：地址框内复制状态与站内原生dialog图片查看器。 */
   function renderVenue() {
     const root = document.getElementById("venue-content");
     const config = program.venueGuide;
     if (!root || !config) return;
 
-    const toast = make("div", "venue-copy-toast");
-    toast.setAttribute("role", "status");
-    toast.setAttribute("aria-live", "polite");
-    document.body.appendChild(toast);
-    let toastTimer = 0;
-    function notify(message) {
-      toast.textContent = message;
-      toast.classList.add("is-visible");
-      window.clearTimeout(toastTimer);
-      toastTimer = window.setTimeout(function () { toast.classList.remove("is-visible"); }, 2400);
-    }
     const address = make("button", "venue-address");
     address.type = "button";
     address.setAttribute("aria-label", "复制园区名称：" + config.copyText);
-    address.append(
+    const addressTop = make("span", "venue-address-top");
+    const copyHint = make("span", "venue-copy-hint", "点击复制到剪贴板");
+    copyHint.setAttribute("role", "status");
+    copyHint.setAttribute("aria-live", "polite");
+    addressTop.append(
       make("span", "venue-address-district", config.district),
-      make("span", "venue-address-place", config.place)
+      copyHint
     );
+    address.append(addressTop, make("span", "venue-address-place", config.place));
+    let resetCopyHintTimer = 0;
+    function notifyCopy(success) {
+      copyHint.textContent = success ? "已复制到剪贴板" : "复制失败，请重试";
+      copyHint.classList.toggle("is-copied", success);
+      window.clearTimeout(resetCopyHintTimer);
+      resetCopyHintTimer = window.setTimeout(function () {
+        copyHint.textContent = "点击复制到剪贴板";
+        copyHint.classList.remove("is-copied");
+      }, 2400);
+    }
     function fallbackCopy(value) {
       const input = make("textarea");
       input.value = value;
@@ -666,7 +670,7 @@
         catch (_) { /* 权限受限时使用回退 */ }
       }
       if (!success) success = fallbackCopy(config.copyText);
-      notify(success ? "已复制到剪贴板" : "复制失败，请手动复制");
+      notifyCopy(success);
     });
     root.appendChild(address);
 
@@ -679,68 +683,40 @@
     fullImage.decoding = "async";
     stage.appendChild(fullImage);
     const controls = make("div", "venue-image-toolbar");
-    const zoom = make("button", "venue-image-action", "放大");
-    zoom.type = "button";
-    zoom.setAttribute("aria-label", "放大图片以查看细节");
     const close = make("button", "venue-image-action venue-image-close", "×");
     close.type = "button";
     close.setAttribute("aria-label", "关闭图片");
-    controls.append(zoom, close);
+    controls.appendChild(close);
     viewer.append(stage, controls);
     document.body.appendChild(viewer);
 
-    let focusBack = null, scrollBack = 0, stylesBack = null;
-    function setZoom(isZoomed) {
-      viewer.classList.toggle("is-zoomed", isZoomed);
-      zoom.textContent = isZoomed ? "还原" : "放大";
-      zoom.setAttribute("aria-label", isZoomed ? "恢复适合窗口的大小" : "放大图片以查看细节");
-      stage.scrollLeft = isZoomed ? Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2) : 0;
-      stage.scrollTop = isZoomed ? Math.max(0, (stage.scrollHeight - stage.clientHeight) / 2) : 0;
-    }
+    let focusBack = null;
+    let originalOverflow = null;
     function showImage(src, alt, trigger) {
       if (viewer.open) return;
       focusBack = trigger;
-      scrollBack = window.scrollY || window.pageYOffset || 0;
-      stylesBack = {
-        htmlOverflow: document.documentElement.style.overflow,
-        bodyOverflow: document.body.style.overflow,
-        bodyPosition: document.body.style.position,
-        bodyTop: document.body.style.top,
-        bodyWidth: document.body.style.width,
-        bodyLeft: document.body.style.left
-      };
+      // 只锁定根元素的滚动，不固定body，也不在关闭时主动滚动页面。
+      // 这样保留当前滚动位置，避免出现先跳到顶部再滚回的动画。
+      originalOverflow = document.documentElement.style.overflow;
       fullImage.src = src;
       fullImage.alt = alt;
-      setZoom(false);
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = -scrollBack + "px";
-      document.body.style.width = "100%";
-      document.body.style.left = "0";
       viewer.showModal();
-      close.focus();
+      close.focus({preventScroll:true});
     }
     viewer.addEventListener("close", function () {
-      if (stylesBack) {
-        document.documentElement.style.overflow = stylesBack.htmlOverflow;
-        document.body.style.overflow = stylesBack.bodyOverflow;
-        document.body.style.position = stylesBack.bodyPosition;
-        document.body.style.top = stylesBack.bodyTop;
-        document.body.style.width = stylesBack.bodyWidth;
-        document.body.style.left = stylesBack.bodyLeft;
-        stylesBack = null;
-        window.scrollTo(0, scrollBack);
+      if (originalOverflow !== null) {
+        document.documentElement.style.overflow = originalOverflow;
+        originalOverflow = null;
       }
-      setZoom(false);
       fullImage.removeAttribute("src");
       if (focusBack?.isConnected) focusBack.focus({preventScroll:true});
       focusBack = null;
     });
     close.addEventListener("click", function () { viewer.close(); });
-    zoom.addEventListener("click", function () { setZoom(!viewer.classList.contains("is-zoomed")); });
-    fullImage.addEventListener("click", function () { setZoom(!viewer.classList.contains("is-zoomed")); });
-    stage.addEventListener("click", function (event) { if (event.target === stage) viewer.close(); });
+    stage.addEventListener("click", function (event) {
+      if (event.target === stage) viewer.close();
+    });
 
     function photo(src, alt, extraClass) {
       const trigger = make("button", "venue-image-link" + (extraClass ? " " + extraClass : ""));
