@@ -67,10 +67,6 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "experience",
         "label": "体验"
-      },
-      {
-        "id": "venue",
-        "label": "场地"
       }
     ],
     "sections": [
@@ -196,6 +192,10 @@ window.FESTIVAL_CONTENT = {
       "conclusion": "空间可以被看见、被听见、被碰见，也可以由我们共同创造。",
       "invitation": "本届西柚音游节以「空间」为主题，邀请大家从词语本身、游戏、音乐、文化、情绪等不同视角展开探索；不必拘泥于某一种解释，也不必局限于某一种表现形式。",
       "displayName": "空间"
+    },
+    "joinGroup": {
+      "label": "加入活动QQ群",
+      "url": "https://qun.qq.com/universal-share/share?ac=1&authKey=7D4HO5dAGPe3WY77Q%2FvxHMurMrIRP9SAiqdgSydICRNtePwQvSdpM30078OEFOoL&busi_data=eyJncm91cENvZGUiOiIxMTI0ODE2MDc3IiwidG9rZW4iOiJkZXVZQ2JJbU5KdGVEMG1sR0VlV3kvN3ZtbHNMemxlQmdURU55dnBreUVFOUNLYnk4UlFNRHJRTVpLZS9wamVPIiwidWluIjoiODcwODg3MTY3In0%3D&data=EH-eOC_3tJuv1uHQFhd0NdwsHaMgXtlGppMaGZhY2o9WDkW3BDVK1cWTELWxqyiKQEM2r_dbd2Id1AEBQFm5Rw&svctype=4&tempid=h5_group_info"
     }
   },
   "tournament": {
