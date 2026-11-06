@@ -836,9 +836,45 @@
       focusBack = null;
     });
     close.addEventListener("click", function () { viewer.close(); });
-    stage.addEventListener("click", function (event) {
-      if (event.target === stage) viewer.close();
-    });
+    // 只允许显式点击关闭按钮，或在图片外完成一次真正的点击来退出。
+    // 禁止Esc的原生cancel，以避免交互过程中意外退出。
+    viewer.addEventListener("cancel", function (event) { event.preventDefault(); });
+
+    // 单纯检查click目标会在“按住图片拖出、松开于空白处”时被误触发：
+    // 浏览器会把这种跨元素的click派发给公共祖先stage。
+    // 因此同时校验同一根指针的按下/松开位置与完整手势位移。
+    let outsidePress = null;
+    function outsideImage(event) {
+      if (event.target !== stage && event.target !== viewer) return false;
+      const box = fullImage.getBoundingClientRect();
+      return event.clientX < box.left || event.clientX >= box.right ||
+             event.clientY < box.top || event.clientY >= box.bottom;
+    }
+    viewer.addEventListener("pointerdown", function (event) {
+      outsidePress = null;
+      if (!viewer.open || !event.isPrimary || event.button !== 0 || !outsideImage(event)) return;
+      outsidePress = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        moved: false
+      };
+    }, true);
+    viewer.addEventListener("pointermove", function (event) {
+      if (!outsidePress || outsidePress.id !== event.pointerId) return;
+      if (Math.hypot(event.clientX - outsidePress.x, event.clientY - outsidePress.y) > 7) {
+        outsidePress.moved = true;
+      }
+    }, true);
+    viewer.addEventListener("pointerup", function (event) {
+      if (!outsidePress || outsidePress.id !== event.pointerId) return;
+      const press = outsidePress;
+      outsidePress = null;
+      if (press.moved || Math.hypot(event.clientX - press.x, event.clientY - press.y) > 7) return;
+      if (outsideImage(event)) viewer.close();
+    }, true);
+    viewer.addEventListener("pointercancel", function () { outsidePress = null; }, true);
+    viewer.addEventListener("close", function () { outsidePress = null; });
     // 鼠标滚轮以光标位置为中心连续缩放；滚动事件不得传给下层网页。
     stage.addEventListener("wheel", function (event) {
       if (!viewer.open || !fitWidth) return;
