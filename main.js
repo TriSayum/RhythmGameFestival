@@ -131,6 +131,30 @@
     body.appendChild(make("p", "theme-conclusion", theme.conclusion));
     body.appendChild(make("p", "theme-invitation", theme.invitation));
     root.appendChild(body);
+    // 01末尾的QQ群入口与投稿、报名按钮共用网站现有的青蓝色悬浮样式。
+    const join = data.intro.joinGroup;
+    if (join?.url) {
+      let href = "";
+      try {
+        const url = new URL(join.url);
+        if (url.protocol === "https:" && url.hostname === "qun.qq.com") href = url.href;
+      } catch (_) { /* 入口无效时不生成链接 */ }
+      if (href) {
+        const area = make("div", "intro-join-action");
+        const link = make("a", "faq-form-link intro-join-link");
+        link.href = href;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        const label = make("span", "button-label");
+        label.append(
+          document.createTextNode(join.label || "加入活动QQ群"),
+          make("strong", "intro-join-arrow", "↗")
+        );
+        link.appendChild(label);
+        area.appendChild(link);
+        root.appendChild(area);
+      }
+    }
   }
 
   function renderChild(item) {
@@ -641,16 +665,47 @@
       copyHint
     );
     address.append(addressTop, make("span", "venue-address-place", config.place));
-    let resetCopyHintTimer = 0;
-    function notifyCopy(success) {
-      copyHint.textContent = success ? "已复制到剪贴板" : "复制失败，请重试";
-      copyHint.classList.toggle("is-copied", success);
-      window.clearTimeout(resetCopyHintTimer);
-      resetCopyHintTimer = window.setTimeout(function () {
-        copyHint.textContent = "点击复制到剪贴板";
-        copyHint.classList.remove("is-copied");
-      }, 2400);
+    let copied = false;
+    let clipboardReadGranted = false;
+    let clipboardProbeRunning = false;
+    function setCopyHint(isCopied, failed) {
+      copied = isCopied;
+      copyHint.textContent = failed ? "复制失败，请重试" :
+        isCopied ? "已复制到剪贴板" : "点击复制到剪贴板";
+      copyHint.classList.toggle("is-copied", isCopied);
     }
+    // 只在授权状态下主动读取系统剪贴板，避免反复弹出授权窗口。
+    // 不支持或未授权的浏览器保留成功状态，不采用倒计时复原。
+    async function checkClipboard() {
+      if (!clipboardReadGranted || !copied || clipboardProbeRunning ||
+          document.visibilityState !== "visible" || !document.hasFocus()) return;
+      if (!navigator.clipboard?.readText) return;
+      clipboardProbeRunning = true;
+      try {
+        const value = await navigator.clipboard.readText();
+        if (value !== config.copyText) setCopyHint(false, false);
+      } catch (_) { /* 读取失败时不据此推断剪贴板已改变 */ }
+      clipboardProbeRunning = false;
+    }
+    if (navigator.permissions?.query) {
+      navigator.permissions.query({name:"clipboard-read"}).then(function (permission) {
+        clipboardReadGranted = permission.state === "granted";
+        permission.addEventListener?.("change", function () {
+          clipboardReadGranted = permission.state === "granted";
+          if (clipboardReadGranted) checkClipboard();
+        });
+        if (clipboardReadGranted) checkClipboard();
+      }).catch(function () { /* 浏览器可能不支持clipboard-read权限查询 */ });
+    }
+    window.setInterval(checkClipboard, 1800);
+    window.addEventListener("focus", checkClipboard);
+    document.addEventListener("visibilitychange", checkClipboard);
+    document.addEventListener("copy", function () {
+      if (!copied) return;
+      // 本页复制其他文字时先标记为失效；复制目标地址会由点击回调立即重置。
+      const selection = String(window.getSelection?.()?.toString() || "");
+      if (selection !== config.copyText) setCopyHint(false, false);
+    });
     function fallbackCopy(value) {
       const input = make("textarea");
       input.value = value;
@@ -670,7 +725,8 @@
         catch (_) { /* 权限受限时使用回退 */ }
       }
       if (!success) success = fallbackCopy(config.copyText);
-      notifyCopy(success);
+      setCopyHint(success, !success);
+      if (success) checkClipboard();
     });
     root.appendChild(address);
 
@@ -690,18 +746,78 @@
     viewer.append(stage, controls);
     document.body.appendChild(viewer);
 
-    let focusBack = null;
-    let originalOverflow = null;
+    let focusBack = null, originalOverflow = null;
+    let fitWidth = 0, fitHeight = 0, zoomNow = 1, zoomTarget = 1;
+    let animationFrame = 0;
+    let zoomAnchorX = 0, zoomAnchorY = 0;
+    const zoomReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const clampZoom = (value) => Math.min(6, Math.max(1, value));
+
+    // 图片的实际宽高参与滚动布局：相比单纯transform，可以真正拖动查看放大区域。
+    function updateZoom(next) {
+      if (!fitWidth || !fitHeight) return;
+      const oldRect = fullImage.getBoundingClientRect();
+      const anchorX = oldRect.width ? (zoomAnchorX - oldRect.left) / oldRect.width : 0.5;
+      const anchorY = oldRect.height ? (zoomAnchorY - oldRect.top) / oldRect.height : 0.5;
+      zoomNow = next;
+      fullImage.style.maxWidth = "none";
+      fullImage.style.maxHeight = "none";
+      fullImage.style.width = fitWidth * zoomNow + "px";
+      fullImage.style.height = fitHeight * zoomNow + "px";
+      const newRect = fullImage.getBoundingClientRect();
+      stage.scrollLeft += newRect.left + anchorX * newRect.width - zoomAnchorX;
+      stage.scrollTop += newRect.top + anchorY * newRect.height - zoomAnchorY;
+      stage.classList.toggle("is-enlarged", zoomNow > 1.01);
+    }
+    function animateZoom() {
+      animationFrame = 0;
+      const delta = zoomTarget - zoomNow;
+      if (Math.abs(delta) < .003 || zoomReducedMotion) {
+        updateZoom(zoomTarget);
+        return;
+      }
+      updateZoom(zoomNow + delta * .23);
+      animationFrame = window.requestAnimationFrame(animateZoom);
+    }
+    function aimZoom(value, x, y) {
+      zoomTarget = clampZoom(value);
+      const box = stage.getBoundingClientRect();
+      zoomAnchorX = Math.min(box.right, Math.max(box.left, x));
+      zoomAnchorY = Math.min(box.bottom, Math.max(box.top, y));
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(animateZoom);
+    }
+    function resetZoom() {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      zoomNow = zoomTarget = 1;
+      stage.scrollLeft = stage.scrollTop = 0;
+      stage.classList.remove("is-enlarged");
+      fullImage.style.width = "";
+      fullImage.style.height = "";
+      fullImage.style.maxWidth = "";
+      fullImage.style.maxHeight = "";
+      if (!viewer.open || !fullImage.naturalWidth || !fullImage.naturalHeight) return;
+      const ratio = Math.min(1, stage.clientWidth / fullImage.naturalWidth,
+        stage.clientHeight / fullImage.naturalHeight);
+      fitWidth = fullImage.naturalWidth * ratio;
+      fitHeight = fullImage.naturalHeight * ratio;
+      const rect = stage.getBoundingClientRect();
+      zoomAnchorX = rect.left + rect.width / 2;
+      zoomAnchorY = rect.top + rect.height / 2;
+      updateZoom(1);
+    }
+    fullImage.addEventListener("load", resetZoom);
     function showImage(src, alt, trigger) {
       if (viewer.open) return;
       focusBack = trigger;
-      // 只锁定根元素的滚动，不固定body，也不在关闭时主动滚动页面。
-      // 这样保留当前滚动位置，避免出现先跳到顶部再滚回的动画。
       originalOverflow = document.documentElement.style.overflow;
       fullImage.src = src;
       fullImage.alt = alt;
       document.documentElement.style.overflow = "hidden";
       viewer.showModal();
+      // 已缓存图片可能在弹窗出现前load；此处统一重新按容器大小计算。
+      resetZoom();
       close.focus({preventScroll:true});
     }
     viewer.addEventListener("close", function () {
@@ -709,7 +825,13 @@
         document.documentElement.style.overflow = originalOverflow;
         originalOverflow = null;
       }
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
       fullImage.removeAttribute("src");
+      fullImage.style.width = fullImage.style.height = "";
+      fullImage.style.maxWidth = fullImage.style.maxHeight = "";
+      fitWidth = fitHeight = 0;
+      zoomNow = zoomTarget = 1;
       if (focusBack?.isConnected) focusBack.focus({preventScroll:true});
       focusBack = null;
     });
@@ -717,6 +839,44 @@
     stage.addEventListener("click", function (event) {
       if (event.target === stage) viewer.close();
     });
+    // 鼠标滚轮以光标位置为中心连续缩放；滚动事件不得传给下层网页。
+    stage.addEventListener("wheel", function (event) {
+      if (!viewer.open || !fitWidth) return;
+      event.preventDefault();
+      const dy = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientHeight : 1);
+      aimZoom(zoomTarget * Math.exp(-dy * .0018), event.clientX, event.clientY);
+    }, {passive:false});
+    // 单击图片在放大与适应窗口间平滑切换；不显示额外控制按钮。
+    let didDrag = false;
+    fullImage.addEventListener("click", function (event) {
+      if (didDrag) { didDrag = false; return; }
+      if (!fitWidth) return;
+      aimZoom(zoomTarget <= 1.05 ? 2.3 : 1, event.clientX, event.clientY);
+    });
+    let drag = null;
+    stage.addEventListener("pointerdown", function (event) {
+      if (event.pointerType !== "mouse" || event.button !== 0 ||
+          event.target !== fullImage || zoomNow <= 1.01) return;
+      drag = {x:event.clientX, y:event.clientY, left:stage.scrollLeft, top:stage.scrollTop, moved:false};
+      stage.setPointerCapture(event.pointerId);
+    });
+    stage.addEventListener("pointermove", function (event) {
+      if (!drag) return;
+      const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+      if (!drag.moved) return;
+      stage.scrollLeft = drag.left - dx;
+      stage.scrollTop = drag.top - dy;
+    });
+    function endDrag() {
+      if (!drag) return;
+      didDrag = drag.moved;
+      drag = null;
+      if (didDrag) window.setTimeout(function () { didDrag = false; }, 0);
+    }
+    stage.addEventListener("pointerup", endDrag);
+    stage.addEventListener("pointercancel", endDrag);
+    window.addEventListener("resize", function () { if (viewer.open) resetZoom(); }, {passive:true});
 
     function photo(src, alt, extraClass) {
       const trigger = make("button", "venue-image-link" + (extraClass ? " " + extraClass : ""));
