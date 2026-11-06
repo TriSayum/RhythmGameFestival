@@ -623,27 +623,30 @@
   }
 
 
-  /* 07常见问题：介绍、问卷链接，以及可隐藏的Q/A问答。 */
-  /* 07场地指引：地址可复制，地图可在独立窗口查看原图；
-   * 三张实景图复用03赛事的原生details展开/收回样式。
-   */
+  /* 07 场地指引：地址复制提示与原生dialog图片查看器。 */
   function renderVenue() {
     const root = document.getElementById("venue-content");
     const config = program.venueGuide;
     if (!root || !config) return;
 
-    const address = make("button", "venue-address", "");
+    const toast = make("div", "venue-copy-toast");
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+    let toastTimer = 0;
+    function notify(message) {
+      toast.textContent = message;
+      toast.classList.add("is-visible");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(function () { toast.classList.remove("is-visible"); }, 2400);
+    }
+    const address = make("button", "venue-address");
     address.type = "button";
-    address.setAttribute("aria-label", "复制地点：万东科技文创园15号楼");
+    address.setAttribute("aria-label", "复制园区名称：" + config.copyText);
     address.append(
       make("span", "venue-address-district", config.district),
-      make("span", "venue-address-place", config.place),
-      make("span", "venue-address-hint", "点击复制园区名称")
+      make("span", "venue-address-place", config.place)
     );
-    const status = make("p", "venue-copy-status");
-    status.setAttribute("role", "status");
-    status.setAttribute("aria-live", "polite");
-
     function fallbackCopy(value) {
       const input = make("textarea");
       input.value = value;
@@ -652,50 +655,116 @@
       document.body.appendChild(input);
       input.select();
       let ok = false;
-      try { ok = document.execCommand("copy"); } catch (_) { /* 老浏览器可能不支持 */ }
+      try { ok = document.execCommand("copy"); } catch (_) { /* 旧浏览器兼容 */ }
       input.remove();
       return ok;
     }
     address.addEventListener("click", async function () {
       let success = false;
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-        try {
-          await navigator.clipboard.writeText(config.copyText);
-          success = true;
-        } catch (_) { /* 权限不允许时回退传统复制方式 */ }
+      if (navigator.clipboard?.writeText) {
+        try { await navigator.clipboard.writeText(config.copyText); success = true; }
+        catch (_) { /* 权限受限时使用回退 */ }
       }
       if (!success) success = fallbackCopy(config.copyText);
-      status.textContent = success ? "已复制：" + config.copyText : "复制失败，请手动选择地址";
+      notify(success ? "已复制到剪贴板" : "复制失败，请手动复制");
     });
-    root.append(address, status);
+    root.appendChild(address);
 
-    function photo(src, alt, className) {
-      const link = make("a", "venue-image-link" + (className ? " " + className : ""));
-      link.href = src;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.setAttribute("aria-label", "查看大图：" + alt);
-      const image = make("img", "venue-image");
-      image.src = src;
-      image.alt = alt;
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.draggable = false;
-      link.appendChild(image);
-      return link;
+    const viewer = make("dialog", "venue-image-dialog");
+    viewer.setAttribute("aria-label", "查看场地图片");
+    const stage = make("div", "venue-image-stage");
+    const fullImage = make("img", "venue-image-full");
+    fullImage.alt = "";
+    fullImage.draggable = false;
+    fullImage.decoding = "async";
+    stage.appendChild(fullImage);
+    const controls = make("div", "venue-image-toolbar");
+    const zoom = make("button", "venue-image-action", "放大");
+    zoom.type = "button";
+    zoom.setAttribute("aria-label", "放大图片以查看细节");
+    const close = make("button", "venue-image-action venue-image-close", "×");
+    close.type = "button";
+    close.setAttribute("aria-label", "关闭图片");
+    controls.append(zoom, close);
+    viewer.append(stage, controls);
+    document.body.appendChild(viewer);
+
+    let focusBack = null, scrollBack = 0, stylesBack = null;
+    function setZoom(isZoomed) {
+      viewer.classList.toggle("is-zoomed", isZoomed);
+      zoom.textContent = isZoomed ? "还原" : "放大";
+      zoom.setAttribute("aria-label", isZoomed ? "恢复适合窗口的大小" : "放大图片以查看细节");
+      stage.scrollLeft = isZoomed ? Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2) : 0;
+      stage.scrollTop = isZoomed ? Math.max(0, (stage.scrollHeight - stage.clientHeight) / 2) : 0;
     }
-
-    if (config.map) root.appendChild(photo(config.map, "活动场地总览地图", "venue-map"));
-
-    const details = make("details", "venue-route-details tournament-group-rules");
-    const toggle = make("summary", "tournament-rules-summary", "查看图片指引");
-    const gallery = make("div", "venue-route-gallery");
-    (config.routes || []).forEach(function (src, index) {
-      gallery.appendChild(photo(src, "路线指引第" + (index + 1) + "步", "venue-route-image"));
+    function showImage(src, alt, trigger) {
+      if (viewer.open) return;
+      focusBack = trigger;
+      scrollBack = window.scrollY || window.pageYOffset || 0;
+      stylesBack = {
+        htmlOverflow: document.documentElement.style.overflow,
+        bodyOverflow: document.body.style.overflow,
+        bodyPosition: document.body.style.position,
+        bodyTop: document.body.style.top,
+        bodyWidth: document.body.style.width,
+        bodyLeft: document.body.style.left
+      };
+      fullImage.src = src;
+      fullImage.alt = alt;
+      setZoom(false);
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = -scrollBack + "px";
+      document.body.style.width = "100%";
+      document.body.style.left = "0";
+      viewer.showModal();
+      close.focus();
+    }
+    viewer.addEventListener("close", function () {
+      if (stylesBack) {
+        document.documentElement.style.overflow = stylesBack.htmlOverflow;
+        document.body.style.overflow = stylesBack.bodyOverflow;
+        document.body.style.position = stylesBack.bodyPosition;
+        document.body.style.top = stylesBack.bodyTop;
+        document.body.style.width = stylesBack.bodyWidth;
+        document.body.style.left = stylesBack.bodyLeft;
+        stylesBack = null;
+        window.scrollTo(0, scrollBack);
+      }
+      setZoom(false);
+      fullImage.removeAttribute("src");
+      if (focusBack?.isConnected) focusBack.focus({preventScroll:true});
+      focusBack = null;
     });
-    details.append(toggle, gallery);
-    root.appendChild(details);
+    close.addEventListener("click", function () { viewer.close(); });
+    zoom.addEventListener("click", function () { setZoom(!viewer.classList.contains("is-zoomed")); });
+    fullImage.addEventListener("click", function () { setZoom(!viewer.classList.contains("is-zoomed")); });
+    stage.addEventListener("click", function (event) { if (event.target === stage) viewer.close(); });
 
+    function photo(src, alt, extraClass) {
+      const trigger = make("button", "venue-image-link" + (extraClass ? " " + extraClass : ""));
+      trigger.type = "button";
+      trigger.setAttribute("aria-label", "查看大图：" + alt);
+      const img = make("img", "venue-image");
+      img.src = src;
+      img.alt = alt;
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.draggable = false;
+      trigger.appendChild(img);
+      trigger.addEventListener("click", function () { showImage(src, alt, trigger); });
+      return trigger;
+    }
+    if (config.map) root.appendChild(photo(config.map, "活动场地总览地图", "venue-map"));
+    const details = make("details", "venue-route-details tournament-group-rules");
+    details.appendChild(make("summary", "tournament-rules-summary", "查看图片指引"));
+    const gallery = make("div", "venue-route-gallery");
+    (config.routes || []).forEach(function (src, i) {
+      gallery.appendChild(photo(src, "路线指引第" + (i+1) + "步", "venue-route-image"));
+    });
+    details.appendChild(gallery);
+    root.appendChild(details);
     if (config.thanks) root.appendChild(make("p", "venue-thanks", config.thanks));
   }
 
