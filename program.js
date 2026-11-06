@@ -11,6 +11,18 @@
  */
 window.FESTIVAL_PROGRAM = {
   "mainVenue": "万东科技文创园15号楼406",
+  "venueGuide": {
+    "district": "北京市朝阳区",
+    "place": "万东科技文创园 · 15号楼406",
+    "copyText": "万东科技文创园15号楼",
+    "map": "./assets/venue/venue-map.webp",
+    "routes": [
+      "./assets/venue/venue-route-01.webp",
+      "./assets/venue/venue-route-02.webp",
+      "./assets/venue/venue-route-03.webp"
+    ],
+    "thanks": "感谢中国传媒大学动画与数字艺术学院李萌老师、北京凡彩数字科技有限公司为本次西柚音游节提供场地支持！"
+  },
   "schedule": {
     "mainTitle": "主会场",
     "ongoingTitle": "同期开放",

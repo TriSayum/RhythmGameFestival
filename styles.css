@@ -2670,3 +2670,80 @@ a.faq-form-link:active .button-label { transform: none; }
 @media (prefers-reduced-motion: reduce) {
   html.reveal-enabled .timeline::before { transition: none; }
 }
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 07 场地指引：复用全站深色、细线与赛事折叠样式
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.venue-content { margin-top: 40px; }
+.venue-address {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: clamp(24px, 3vw, 42px);
+  border: 1px solid rgba(48, 227, 255, .55);
+  background: linear-gradient(110deg, rgba(25, 72, 105, .5), rgba(14, 22, 38, .6));
+  text-align: left;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.venue-address:hover { border-color: var(--theme-accent); }
+.venue-address:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 3px; }
+.venue-address-district {
+  font-size: 15px;
+  color: var(--theme-accent);
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.venue-address-place {
+  font-size: clamp(25px, 3.4vw, 44px);
+  line-height: 1.3;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+.venue-address-hint { margin-top: 3px; font-size: 13px; color: var(--text-muted); }
+.venue-copy-status {
+  margin: 8px 0 0;
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--theme-accent);
+}
+.venue-image-link { display: block; cursor: zoom-in; text-decoration: none; }
+.venue-image-link:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 4px; }
+.venue-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--stroke);
+}
+.venue-map { margin-top: 26px; }
+.venue-route-details {
+  margin-top: 30px;
+  border: 1px solid var(--stroke);
+}
+.venue-route-details > .tournament-rules-summary {
+  padding: 18px 54px 18px 24px;
+  font-size: 15px;
+}
+.venue-route-details > .tournament-rules-summary::after { right: 22px; }
+.venue-route-gallery { display: grid; gap: 20px; padding: 0 24px 24px; }
+.venue-thanks {
+  max-width: 900px;
+  margin: 36px 0 0;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--text-primary);
+}
+@media (max-width: 680px) {
+  .venue-content { margin-top: 30px; }
+  .venue-address { padding: 22px 18px; gap: 6px; }
+  .venue-address-district { font-size: 13px; }
+  .venue-address-place { font-size: clamp(23px, 6vw, 30px); }
+  .venue-map { margin-top: 18px; }
+  .venue-route-details { margin-top: 22px; }
+  .venue-route-details > .tournament-rules-summary { padding-left: 16px; }
+  .venue-route-gallery { padding: 0 12px 12px; gap: 14px; }
+  .venue-thanks { font-size: 15px; line-height: 1.85; margin-top: 30px; }
+}

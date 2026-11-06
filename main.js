@@ -624,6 +624,81 @@
 
 
   /* 07常见问题：介绍、问卷链接，以及可隐藏的Q/A问答。 */
+  /* 07场地指引：地址可复制，地图可在独立窗口查看原图；
+   * 三张实景图复用03赛事的原生details展开/收回样式。
+   */
+  function renderVenue() {
+    const root = document.getElementById("venue-content");
+    const config = program.venueGuide;
+    if (!root || !config) return;
+
+    const address = make("button", "venue-address", "");
+    address.type = "button";
+    address.setAttribute("aria-label", "复制地点：万东科技文创园15号楼");
+    address.append(
+      make("span", "venue-address-district", config.district),
+      make("span", "venue-address-place", config.place),
+      make("span", "venue-address-hint", "点击复制园区名称")
+    );
+    const status = make("p", "venue-copy-status");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    function fallbackCopy(value) {
+      const input = make("textarea");
+      input.value = value;
+      input.setAttribute("readonly", "");
+      input.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0";
+      document.body.appendChild(input);
+      input.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (_) { /* 老浏览器可能不支持 */ }
+      input.remove();
+      return ok;
+    }
+    address.addEventListener("click", async function () {
+      let success = false;
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        try {
+          await navigator.clipboard.writeText(config.copyText);
+          success = true;
+        } catch (_) { /* 权限不允许时回退传统复制方式 */ }
+      }
+      if (!success) success = fallbackCopy(config.copyText);
+      status.textContent = success ? "已复制：" + config.copyText : "复制失败，请手动选择地址";
+    });
+    root.append(address, status);
+
+    function photo(src, alt, className) {
+      const link = make("a", "venue-image-link" + (className ? " " + className : ""));
+      link.href = src;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.setAttribute("aria-label", "查看大图：" + alt);
+      const image = make("img", "venue-image");
+      image.src = src;
+      image.alt = alt;
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.draggable = false;
+      link.appendChild(image);
+      return link;
+    }
+
+    if (config.map) root.appendChild(photo(config.map, "活动场地总览地图", "venue-map"));
+
+    const details = make("details", "venue-route-details tournament-group-rules");
+    const toggle = make("summary", "tournament-rules-summary", "查看图片指引");
+    const gallery = make("div", "venue-route-gallery");
+    (config.routes || []).forEach(function (src, index) {
+      gallery.appendChild(photo(src, "路线指引第" + (index + 1) + "步", "venue-route-image"));
+    });
+    details.append(toggle, gallery);
+    root.appendChild(details);
+
+    if (config.thanks) root.appendChild(make("p", "venue-thanks", config.thanks));
+  }
+
   function renderFaq() {
     const root = document.getElementById("faq-content");
     const faq = data.faq;
@@ -1529,6 +1604,7 @@
   renderSalon();
   renderSubmissions();
   renderExperience();
+  renderVenue();
   renderFaq();
   renderFooter();
   setupBackground();

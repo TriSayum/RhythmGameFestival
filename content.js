@@ -67,6 +67,10 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "experience",
         "label": "体验"
+      },
+      {
+        "id": "venue",
+        "label": "场地"
       }
     ],
     "sections": [
@@ -107,8 +111,14 @@ window.FESTIVAL_CONTENT = {
         "nameEn": "EXPERIENCE"
       },
       {
-        "id": "faq",
+        "id": "venue",
         "number": "07",
+        "name": "场地指引",
+        "nameEn": "VENUE"
+      },
+      {
+        "id": "faq",
+        "number": "08",
         "name": "常见问题",
         "nameEn": "Q&A"
       }
