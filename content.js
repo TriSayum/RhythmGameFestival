@@ -233,7 +233,7 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "mobile",
         "heading": "移动组",
-        "date": "11月22日",
+        "date": "11月29日",
         "period": "上午",
         "games": [
           {
@@ -256,9 +256,9 @@ window.FESTIVAL_CONTENT = {
     "registration": {
       "milestones": [
         {"id": "open", "label": "报名开放", "date": "2026.11.01"},
-        {"id": "deadline", "label": "报名截止", "date": "2026.11.10"},
-        {"id": "rules", "label": "赛制公布", "date": "2026.11.15"},
-        {"id": "event", "label": "正式比赛", "date": "2026.11.22"}
+        {"id": "deadline", "label": "报名截止", "date": "2026.11.17"},
+        {"id": "rules", "label": "赛制公布", "date": "2026.11.22"},
+        {"id": "event", "label": "正式比赛", "date": "2026.11.29"}
       ],
       "description": "请于报名截止日期前，通过下方「街机组报名」「移动组报名」入口填写腾讯文档问卷，并按对应组别的要求提交信息。",
       "groups": [
@@ -468,12 +468,12 @@ window.FESTIVAL_CONTENT = {
       {
         "id": "deadline",
         "label": "投稿截止",
-        "date": "2026.11.20"
+        "date": "2026.11.26"
       },
       {
         "id": "showcase",
         "label": "现场展示",
-        "date": "2026.11.22"
+        "date": "2026.11.29"
       }
     ],
     "notes": [
@@ -563,7 +563,7 @@ window.FESTIVAL_CONTENT = {
     "theme": "空间/SPACE · CRGF 2026",
     "name": "2026 西柚音游节",
     "nameEn": "Citrus Rhythm Game Festival 2026",
-    "date": "2026.11.22",
+    "date": "2026.11.29",
     "credits": [
       "主办：未来媒体协会·音乐部",
       "联合主办：TRY动漫社·音游部",

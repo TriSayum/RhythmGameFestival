@@ -120,10 +120,10 @@ window.FESTIVAL_PROGRAM = {
       }
     ],
     "mainHeader": {
-      "date": "11月22日"
+      "date": "11月29日"
     },
     "ongoingHeader": {
-      "date": "11月22日"
+      "date": "11月29日"
     }
   },
   "salon": {
@@ -132,7 +132,7 @@ window.FESTIVAL_PROGRAM = {
       "今年，音乐部还一并邀请了其他分享者，共同带来这场主题分享茶欢会。现场将准备简单茶点，希望大家能够在轻松的氛围中聆听分享，并一起交流各自的观察与思考。"
     ],
     "info": {
-      "date": "11月22日"
+      "date": "11月29日"
     },
     "speakers": {
       "cot": {
