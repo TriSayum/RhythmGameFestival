@@ -205,15 +205,15 @@ window.FESTIVAL_CONTENT = {
       ]
     },
     "details": {
-      "paragraphs": ["具体赛制将在后续公布。"]
+      "paragraphs": ["具体赛制已在活动QQ群内公布。"]
     },
     "groups": [
       {
         "id": "arcade",
         "heading": "街机组",
-        "date": "等待后续通知",
+        "date": "11月25日、11月28日",
         "period": "",
-        "venue": "等待后续通知",
+        "venue": "米莱音游研究所",
         "games": [
           {
             "id": "maimai_dx",
