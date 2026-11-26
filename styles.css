@@ -2797,19 +2797,36 @@ a.faq-form-link:active .button-label { transform: none; }
   .intro-join-link { max-width: 100%; }
 }
 
-/* 06参展作品：可选参展标识、多行荣誉简介与到场说明；不改变其他作品布局。 */
-.experience-item-badge {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 12px;
-  padding: 2px 8px;
-  border: 1px solid var(--theme-accent);
+/* 06特邀参展：静态独立展商卡片；普通作品仍保留原目录布局。 */
+.experience-item.experience-item--exhibition {
+  border: 1px solid var(--theme-accent-soft);
+  background: linear-gradient(125deg, rgba(48, 227, 255, .065), rgba(17, 37, 58, .26));
+  padding: 24px clamp(20px, 2.4vw, 36px) 30px;
+  margin-bottom: 24px;
+  row-gap: 22px;
+}
+.experience-exhibition-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   color: var(--theme-accent);
-  background: transparent;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.45;
-  white-space: nowrap;
+  line-height: 1.5;
+  letter-spacing: .05em;
+}
+.experience-exhibition-heading::after {
+  content: "";
+  flex: 1;
+  min-width: 12px;
+  height: 1px;
+  background: var(--theme-accent-soft);
+  opacity: .5;
+}
+.experience-item--exhibition .experience-item-description.experience-item-exhibitor-note {
+  padding-top: 16px;
+  border-top: 1px solid var(--theme-accent-soft);
 }
 .experience-item-summary--multiline { white-space: pre-line; }
 .experience-item-description.experience-item-exhibitor-note {
@@ -2818,5 +2835,10 @@ a.faq-form-link:active .button-label { transform: none; }
   font-weight: 700;
 }
 @media (max-width: 760px) {
-  .experience-item-badge { margin-left: 9px; padding: 2px 7px; font-size: 12px; }
+  .experience-item.experience-item--exhibition {
+    padding: 18px 16px 22px;
+    row-gap: 18px;
+    margin-bottom: 18px;
+  }
+  .experience-exhibition-heading { font-size: 12px; gap: 10px; }
 }

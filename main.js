@@ -608,12 +608,13 @@
       const row = make("article", game ? "experience-item experience-item--game" : "experience-item experience-item--equipment");
       if (item.id) row.id = "experience-" + item.id;
 
-      const textBlock = make("div", "experience-item-text");
-      if (item.name) {
-        const name = make("h3", "experience-item-name", item.name);
-        if (item.badge) name.appendChild(make("span", "experience-item-badge", item.badge));
-        textBlock.appendChild(name);
+      const featured = game && !!item.exhibitionHeading;
+      if (featured) {
+        row.classList.add("experience-item--exhibition");
+        row.appendChild(make("div", "experience-exhibition-heading", item.exhibitionHeading));
       }
+      const textBlock = make("div", "experience-item-text");
+      if (item.name) textBlock.appendChild(make("h3", "experience-item-name", item.name));
       // 设备的第一段保留较醒目的介绍，第二段采用与集章说明一致的普通正文。
       if (item.summary) {
         const summary = make("p", game ? "experience-item-summary" : "experience-item-description", item.summary);
