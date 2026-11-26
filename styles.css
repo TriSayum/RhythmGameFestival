@@ -2825,6 +2825,9 @@ a.faq-form-link:active .button-label { transform: none; }
   opacity: .5;
 }
 .experience-item--exhibition .experience-item-description.experience-item-exhibitor-note {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin-top: 0;
   padding-top: 16px;
   border-top: 1px solid var(--theme-accent-soft);
 }

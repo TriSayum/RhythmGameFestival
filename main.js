@@ -625,7 +625,7 @@
         textBlock.appendChild(make("p", game ? "experience-item-description" :
           "experience-item-description experience-item-description--body", item.description));
       }
-      if (game && item.exhibitorNote) {
+      if (game && item.exhibitorNote && !featured) {
         textBlock.appendChild(make("p", "experience-item-description experience-item-exhibitor-note", item.exhibitorNote));
       }
       row.appendChild(textBlock);
@@ -645,6 +645,10 @@
         row.appendChild(artwork);
       } else {
         row.classList.add("experience-item--no-image");
+      }
+      // 特邀参展的到场说明独占底部整行，分隔线跨越文字与海报两列。
+      if (featured && item.exhibitorNote) {
+        row.appendChild(make("p", "experience-item-description experience-item-exhibitor-note", item.exhibitorNote));
       }
       list.appendChild(row);
     });
