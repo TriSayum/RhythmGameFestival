@@ -609,14 +609,23 @@
       if (item.id) row.id = "experience-" + item.id;
 
       const textBlock = make("div", "experience-item-text");
-      if (item.name) textBlock.appendChild(make("h3", "experience-item-name", item.name));
+      if (item.name) {
+        const name = make("h3", "experience-item-name", item.name);
+        if (item.badge) name.appendChild(make("span", "experience-item-badge", item.badge));
+        textBlock.appendChild(name);
+      }
       // 设备的第一段保留较醒目的介绍，第二段采用与集章说明一致的普通正文。
       if (item.summary) {
-        textBlock.appendChild(make("p", game ? "experience-item-summary" : "experience-item-description", item.summary));
+        const summary = make("p", game ? "experience-item-summary" : "experience-item-description", item.summary);
+        if (game && item.summary.includes("\n")) summary.classList.add("experience-item-summary--multiline");
+        textBlock.appendChild(summary);
       }
       if (item.description) {
         textBlock.appendChild(make("p", game ? "experience-item-description" :
           "experience-item-description experience-item-description--body", item.description));
+      }
+      if (game && item.exhibitorNote) {
+        textBlock.appendChild(make("p", "experience-item-description experience-item-exhibitor-note", item.exhibitorNote));
       }
       row.appendChild(textBlock);
 

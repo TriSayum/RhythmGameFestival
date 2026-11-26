@@ -2797,3 +2797,26 @@ a.faq-form-link:active .button-label { transform: none; }
   .intro-join-link { max-width: 100%; }
 }
 
+/* 06参展作品：可选参展标识、多行荣誉简介与到场说明；不改变其他作品布局。 */
+.experience-item-badge {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 12px;
+  padding: 2px 8px;
+  border: 1px solid var(--theme-accent);
+  color: var(--theme-accent);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+.experience-item-summary--multiline { white-space: pre-line; }
+.experience-item-description.experience-item-exhibitor-note {
+  margin-top: 16px;
+  color: var(--theme-accent);
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .experience-item-badge { margin-left: 9px; padding: 2px 7px; font-size: 12px; }
+}
