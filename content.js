@@ -503,7 +503,7 @@ window.FESTIVAL_CONTENT = {
         "exhibitionHeading": "SPECIAL EXHIBITION / 特邀参展",
         "summary": "2026“指尖星图”游戏创新大赛年度星图大奖一等奖\n2026 Big Indie Pitch卓越音频奖\n第六届中国游戏创新大赛最佳创新团队",
         "description": "《节奏旅社》是一款以节奏为核心、带着搞怪和无厘头气质的休闲音乐游戏。游戏采用可爱的卡通风格进行动画演出，操作简单，剧情爆笑，整体风格魔性又欢乐。\n\n试玩Demo提供了多个节奏挑战，带领玩家感受这座奇幻旅社的奇思妙想与动感节拍。游戏不追求以高难度谱面给玩家施压，而是希望玩家在简单的操作中踩准节拍，在搞怪的演出中笑出声来。",
-        "exhibitorNote": "活动当天，游戏制作人也将空降现场，欢迎大家试玩游戏，并与制作人一起交流！",
+        "exhibitorNote": "活动当天，游戏制作团队也将空降现场，欢迎大家试玩游戏，并与制作团队一起交流！",
         "image": "./assets/experience/rhythm_hotel_poster.webp"
       },
       {
