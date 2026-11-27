@@ -1392,8 +1392,8 @@ a.faq-form-link:active::before {
 .site-footer p { line-height: 1.95; }
 .site-footer .footer-theme { line-height: 1.55; }
 .site-footer .footer-left p + p { margin-top: 3px; }
-.site-footer .footer-credit { line-height: 2.3; }
-.site-footer .footer-credit + .footer-credit { margin-top: 3px; }
+.site-footer .footer-credit { line-height: 1.65; }
+.site-footer .footer-credit + .footer-credit { margin-top: 1px; }
 .site-footer { padding-block: 37px 41px; }
 
 /* 进入视口后渐入；页尾始终正常显示，不改变文档滚动锚定。 */
